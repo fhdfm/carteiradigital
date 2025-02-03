@@ -4,6 +4,7 @@ CREATE TABLE escolas (
     id SERIAL PRIMARY KEY,
     uuid UUID UNIQUE DEFAULT uuid_generate_v4(),
     nome VARCHAR(255) NOT NULL,
+    cnpj VARCHAR(14) NOT NULL UNIQUE,
     status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO',
     version INT NOT NULL DEFAULT 1,
     criado_em TIMESTAMP DEFAULT NOW()
