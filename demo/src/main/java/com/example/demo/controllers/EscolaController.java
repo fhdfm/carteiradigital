@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.controllers.spec.EscolaSpecification;
-import com.example.demo.entity.Escola;
+import com.example.demo.dto.EscolaRequest;
+import com.example.demo.dto.EscolaView;
 import com.example.demo.services.EscolaService;
 
 @RestController
@@ -39,8 +40,9 @@ public class EscolaController {
      * }
      */
     @PostMapping
-    public ResponseEntity<String> criarEscola(@RequestBody Escola escola) {
-        service.salvar(escola);
+    public ResponseEntity<String> criarEscola(@RequestBody EscolaRequest request) {
+        
+        service.salvar(request);
         
         return ResponseEntity
             .status(HttpStatus.CREATED)
@@ -59,8 +61,8 @@ public class EscolaController {
      */
     @PutMapping("/{uuid}")
     public ResponseEntity<String> atualizarEscola(@PathVariable("uuid") UUID uuid,
-                                                @RequestBody Escola escola) {
-        service.salvar(uuid, escola);
+                                                @RequestBody EscolaRequest request) {
+        service.salvar(uuid, request);
         
         return ResponseEntity.ok("Escola atualizada com sucesso.");
     }
@@ -70,8 +72,8 @@ public class EscolaController {
      * Exemplo de requisição: GET /api/escolas/{uuid}
      */
     @GetMapping("/{uuid}")
-    public ResponseEntity<Escola> buscarEscolaPorUuid(@PathVariable("uuid") UUID uuid) {
-        Escola escola = service.buscarPorUuid(uuid);
+    public ResponseEntity<EscolaView> buscarEscolaPorUuid(@PathVariable("uuid") UUID uuid) {
+        EscolaView escola = service.buscarPorUuid(uuid);
         return ResponseEntity.ok(escola);
     }
 
@@ -80,8 +82,8 @@ public class EscolaController {
      * Exemplo de requisição: GET /api/escolas?page=0&size=10
      */
     @GetMapping
-    public ResponseEntity<Page<Escola>> listarEscolas(EscolaSpecification specification, Pageable pageable) {
-        Page<Escola> escolas = service.listar(specification, pageable);
+    public ResponseEntity<Page<EscolaView>> listarEscolas(EscolaSpecification specification, Pageable pageable) {
+        Page<EscolaView> escolas = service.listar(specification, pageable);
         return ResponseEntity.ok(escolas);
     }
 
