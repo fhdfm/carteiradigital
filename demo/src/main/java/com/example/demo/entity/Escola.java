@@ -28,6 +28,9 @@ public class Escola {
     @Column(name = "nome", nullable = false)
     private String nome;
 
+    @Column(name = "cnpj", nullable = false, unique = true)
+    private String cnpj;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
@@ -70,4 +73,13 @@ public class Escola {
     public void setStatus(Status status) {
         this.status = status;
     }
+
+    public String getCnpj() {
+        return cnpj;
+    }
+
+    public void setCnpj(String cnpj) {
+        this.cnpj = cnpj;
+    }
+
 }
