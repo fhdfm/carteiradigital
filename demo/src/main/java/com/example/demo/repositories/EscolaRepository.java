@@ -17,6 +17,8 @@ public interface EscolaRepository extends JpaRepository<Escola, Long>, JpaSpecif
 
     Optional<Escola> findByUuid(UUID uuid);
 
-    Page<Escola> findAll(EscolaSpecification specification, Pageable pageable);
+    Optional<Escola> findByCnpj(String cnpj);
+
+    <T> Page<T> findAll(EscolaSpecification specification, Pageable pageable, Class<T> clazz);
         
 }
