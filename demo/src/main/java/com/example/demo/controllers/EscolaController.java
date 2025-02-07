@@ -2,6 +2,7 @@ package com.example.demo.controllers;
 
 import java.util.UUID;
 
+import com.example.demo.config.api.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -40,13 +41,13 @@ public class EscolaController {
      * }
      */
     @PostMapping
-    public ResponseEntity<String> criarEscola(@RequestBody EscolaRequest request) {
+    public ResponseEntity<ApiResponse<String>> criarEscola(@RequestBody EscolaRequest request) {
         
         service.salvar(request);
         
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body("Escola criada com sucesso.");
+            .body(ApiResponse.of("Escola criada com sucesso."));
     }
 
     /**
@@ -60,11 +61,11 @@ public class EscolaController {
      * }
      */
     @PutMapping("/{uuid}")
-    public ResponseEntity<String> atualizarEscola(@PathVariable("uuid") UUID uuid,
-                                                @RequestBody EscolaRequest request) {
+    public ResponseEntity<ApiResponse<String>> atualizarEscola(@PathVariable("uuid") UUID uuid,
+                                                               @RequestBody EscolaRequest request) {
         service.salvar(uuid, request);
         
-        return ResponseEntity.ok("Escola atualizada com sucesso.");
+        return ResponseEntity.ok(ApiResponse.of("Escola atualizada com sucesso."));
     }
 
     /**
@@ -72,9 +73,8 @@ public class EscolaController {
      * Exemplo de requisição: GET /api/escolas/{uuid}
      */
     @GetMapping("/{uuid}")
-    public ResponseEntity<EscolaView> buscarEscolaPorUuid(@PathVariable("uuid") UUID uuid) {
-        EscolaView escola = service.buscarPorUuid(uuid);
-        return ResponseEntity.ok(escola);
+    public ResponseEntity<ApiResponse<EscolaView>> buscarEscolaPorUuid(@PathVariable("uuid") UUID uuid) {
+        return ResponseEntity.ok(ApiResponse.of(service.buscarPorUuid(uuid)));
     }
 
     /**
@@ -82,23 +82,22 @@ public class EscolaController {
      * Exemplo de requisição: GET /api/escolas?page=0&size=10
      */
     @GetMapping
-    public ResponseEntity<Page<EscolaView>> listarEscolas(EscolaSpecification specification, Pageable pageable) {
-        Page<EscolaView> escolas = service.listar(specification, pageable);
-        return ResponseEntity.ok(escolas);
+    public ResponseEntity<ApiResponse<Page<EscolaView>>> listarEscolas(EscolaSpecification specification, Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.of(service.listar(specification, pageable)));
     }
 
     @PutMapping("/{uuid}/inativar")
-    public ResponseEntity<String> inativarEscola(@PathVariable("uuid") UUID uuid) {
+    public ResponseEntity<ApiResponse<String>> inativarEscola(@PathVariable("uuid") UUID uuid) {
         
         service.inativar(uuid);
         
-        return ResponseEntity.ok("Escola inativada com sucesso.");
+        return ResponseEntity.ok(ApiResponse.of("Escola inativada com sucesso."));
     }
 
     @PutMapping("/{uuid}/ativar")
-    public ResponseEntity<String> ativarEscola(@PathVariable("uuid") UUID uuid) {
+    public ResponseEntity<ApiResponse<String>> ativarEscola(@PathVariable("uuid") UUID uuid) {
         service.ativar(uuid);
-        return ResponseEntity.ok("Escola ativada com sucesso.");
+        return ResponseEntity.ok(ApiResponse.of("Escola ativada com sucesso."));
     }    
 
 }
