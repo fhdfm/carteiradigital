@@ -1,6 +1,6 @@
-package com.example.demo.config.api.exception;
+package com.example.demo.config.api.response.exception;
 
-import com.example.demo.config.api.ErrorType;
+import com.example.demo.config.api.response.ErrorType;
 
 public class EscolaException extends RuntimeException {
     private static final long serialVersionUID = 1L;

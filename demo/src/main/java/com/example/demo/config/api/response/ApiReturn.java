@@ -1,9 +1,9 @@
-package com.example.demo.config.api;
+package com.example.demo.config.api.response;
 
-import com.example.demo.config.api.exception.EscolaException;
+import com.example.demo.config.api.response.exception.EscolaException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ApiResponse<T> {
+public class ApiReturn<T> {
     private boolean success;
     private ErrorType errorType;
     private short errorCode;
@@ -13,38 +13,38 @@ public class ApiResponse<T> {
     @JsonProperty("return")
     private T result;
 
-    ApiResponse(T result) {
+    ApiReturn(T result) {
         this.success = true;
         this.result = result;
     }
 
-    ApiResponse(ErrorType errorType, short errorCode, String errorMessage) {
+    ApiReturn(ErrorType errorType, short errorCode, String errorMessage) {
         this.success = false;
         this.errorType = errorType;
         this.errorCode = errorCode;
         this.error = errorMessage;
     }
 
-    ApiResponse(ErrorType errorType, short errorCode, String errorMessage, Throwable internalException) {
+    ApiReturn(ErrorType errorType, short errorCode, String errorMessage, Throwable internalException) {
         this(errorType, errorCode, errorMessage);
         if (internalException != null) {
             this.internalException = internalException.getMessage();
         }
     }
 
-    public static <T> ApiResponse<T> of(T t) {
-        return new ApiResponse<>(t);
+    public static <T> ApiReturn<T> of(T t) {
+        return new ApiReturn<>(t);
     }
 
-    public static ApiResponse<String> of(ErrorType errorType, short errorCode, String errorMessage, Throwable internalException) {
-        return new ApiResponse<>(errorType, errorCode, errorMessage, internalException);
+    public static ApiReturn<String> of(ErrorType errorType, short errorCode, String errorMessage, Throwable internalException) {
+        return new ApiReturn<>(errorType, errorCode, errorMessage, internalException);
     }
 
-    public static ApiResponse<String> ofException(Exception exception) {
+    public static ApiReturn<String> ofException(Exception exception) {
         return of(ErrorType.EXCEPTION, ErrorType.EXCEPTION.getCode(), exception.getMessage(), exception.getCause());
     }
 
-    public static ApiResponse<String> ofEscolaException(EscolaException ex) {
+    public static ApiReturn<String> ofEscolaException(EscolaException ex) {
         return of(ex.getErrorType(), ex.getErrorCode(), ex.getMessage(), ex);
     }
 

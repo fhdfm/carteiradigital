@@ -3,7 +3,7 @@ package com.example.demo.services;
 import java.util.Objects;
 import java.util.UUID;
 
-import com.example.demo.config.api.exception.EscolaException;
+import com.example.demo.config.api.response.exception.EscolaException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,8 +15,6 @@ import com.example.demo.entity.Escola;
 import com.example.demo.entity.enums.Status;
 import com.example.demo.repositories.EscolaRepository;
 import com.example.demo.util.CnpjChecker;
-
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class EscolaService {
@@ -95,6 +93,7 @@ public class EscolaService {
     public Page<EscolaView> listar(EscolaSpecification specification, Pageable pageable) {
 //        return repository.findAll(specification, pageable, EscolaView.class);
 
+        // TODO Resolver
         // Gambiarra pra funcionar enquanto n resolvemos o <T> Page<T> findAll(EscolaSpecification specification, Pageable pageable, Class<T> clazz);
         return repository
                 .findAll(specification, pageable)

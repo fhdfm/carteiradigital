@@ -1,4 +1,4 @@
-package com.example.demo.config.api;
+package com.example.demo.config.api.response;
 
 public enum ErrorType {
     /**

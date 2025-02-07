@@ -21,6 +21,7 @@ public interface EscolaRepository extends JpaRepository<Escola, Long>, JpaSpecif
 
     Optional<Escola> findByCnpj(String cnpj);
 
+    // TODO Resolver erro
 //    <T> Page<T> findAll(EscolaSpecification specification, Pageable pageable, Class<T> clazz);
 
     Page<Escola> findAll(Specification<Escola> specification, Pageable pageable);
