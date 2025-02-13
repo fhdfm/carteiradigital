@@ -6,6 +6,7 @@ import com.example.demo.config.api.response.ApiReturn;
 import com.example.demo.config.api.swagger.EscolaApiOperation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,7 +56,7 @@ public class EscolaController {
                     description = "Corpo da requisição com os dados de uma escola",
                     required = true
             )
-            @RequestBody EscolaRequest request
+            @RequestBody @Valid EscolaRequest request
     ) {
         
         service.salvar(request);
@@ -88,7 +89,7 @@ public class EscolaController {
                     description = "Corpo da requisição com os dados da escola",
                     required = true
             )
-            @RequestBody EscolaRequest request
+            @RequestBody @Valid EscolaRequest request
     ) {
         service.salvar(uuid, request);
         

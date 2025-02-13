@@ -25,19 +25,7 @@ public class EscolaService {
         this.repository = repository;
     }
 
-    private void validate(EscolaRequest request) {
-
-        if (Objects.isNull(request.nome()) || request.nome().length() < 5)
-            throw EscolaException.ofValidation("Nome deve ser preenchido.");
-
-        if (Objects.isNull(request.cnpj()) || request.cnpj().length() < 14)
-            throw EscolaException.ofValidation("CNPJ deve ser preenchido.");
-
-    }
-
     public void salvar(EscolaRequest request) {
-
-        validate(request);
 
         CnpjChecker cnpjChecker = new CnpjChecker(request.cnpj());
         String cnpj = cnpjChecker.parse();
@@ -59,8 +47,6 @@ public class EscolaService {
     }
 
     public void salvar(UUID uuid, EscolaRequest request) {
-
-        validate(request);
 
         CnpjChecker cnpjChecker = new CnpjChecker(request.cnpj());
         String cnpj = cnpjChecker.parse();
@@ -100,7 +86,7 @@ public class EscolaService {
                 .map(escola -> new EscolaView(escola.getUuid(), escola.getNome(), escola.getCnpj(), escola.getStatus()));
 
         if (page.isEmpty()) {
-            throw EscolaException.ofNoContent("Não há retorno para esse filtro");
+            throw EscolaException.ofNoContent("Consulta com filtro informado não possui dados para retorno");
         }
 
         return page;

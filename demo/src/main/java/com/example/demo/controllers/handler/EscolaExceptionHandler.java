@@ -6,6 +6,7 @@ import com.example.demo.config.api.response.exception.NoContentException;
 import com.example.demo.util.LogUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -27,7 +28,15 @@ public class EscolaExceptionHandler {
     public ResponseEntity<ApiReturn<?>> handleNoContentException(NoContentException ex) {
         ApiReturn<?> apiReturn = ApiReturn.ofNoContentException(ex);
         HttpStatus status = HttpStatus.valueOf(ex.getErrorCode());
+
+        LogUtil.log(ex.getClazz(), LogUtil.LogType.INFO, ex);
+
         return new ResponseEntity<>(apiReturn, status);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiReturn<?>> handleValidationException(MethodArgumentNotValidException ex) {
+        return handleEscolaException(EscolaException.ofValidation(ex.getBindingResult().getFieldError().getDefaultMessage()));
     }
 
     @ExceptionHandler(Exception.class)
