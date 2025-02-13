@@ -1,6 +1,7 @@
 package com.example.demo.config.api.response;
 
 import com.example.demo.config.api.response.exception.EscolaException;
+import com.example.demo.config.api.response.exception.NoContentException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ApiReturn<T> {
@@ -32,6 +33,14 @@ public class ApiReturn<T> {
         }
     }
 
+    ApiReturn(boolean sucess, ErrorType errorType, short errorCode, String errorMessage, Throwable internalException) {
+        this(errorType, errorCode, errorMessage);
+        if (internalException != null) {
+            this.internalException = internalException.getMessage();
+        }
+        this.success = sucess;
+    }
+
     public static <T> ApiReturn<T> of(T t) {
         return new ApiReturn<>(t);
     }
@@ -40,12 +49,20 @@ public class ApiReturn<T> {
         return new ApiReturn<>(errorType, errorCode, errorMessage, internalException);
     }
 
+    public static ApiReturn<String> of(ErrorType errorType, short errorCode, String errorMessage, Throwable internalException, boolean sucess) {
+        return new ApiReturn<>(sucess, errorType, errorCode, errorMessage, internalException);
+    }
+
     public static ApiReturn<String> ofException(Exception exception) {
         return of(ErrorType.EXCEPTION, ErrorType.EXCEPTION.getCode(), exception.getMessage(), exception.getCause());
     }
 
     public static ApiReturn<String> ofEscolaException(EscolaException ex) {
         return of(ex.getErrorType(), ex.getErrorCode(), ex.getMessage(), ex);
+    }
+
+    public static ApiReturn<String> ofNoContentException(NoContentException ex) {
+        return of(ex.getErrorType(), ex.getErrorCode(), ex.getMessage(), ex, true);
     }
 
     public boolean isSuccess() {

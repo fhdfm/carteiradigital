@@ -43,6 +43,10 @@ public class EscolaException extends RuntimeException {
         return errorCode;
     }
 
+    public static EscolaException ofNoContent(String message) {
+        return new NoContentException(message);
+    }
+
     public static EscolaException ofValidation(String message) {
         return new ValidationException(message);
     }

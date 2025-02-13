@@ -32,6 +32,21 @@ import java.lang.annotation.Target;
                         )
                 ),
                 @ApiResponse(
+                        responseCode = "204",
+                        description = "Consulta realizada com sucesso, mas sem resultados",
+                        content = @Content(
+                                mediaType = "application/json",
+                                schema = @Schema(implementation = ApiReturn.class),
+                                examples = {
+                                        @ExampleObject(
+                                                name = "Exemplo de retorno",
+                                                summary = "Exemplo de resposta",
+                                                value = "{\"success\": true, \"errorType\": \"NO_CONTENT\", \"errorCode\": 204, \"error\": \"Não há dados para este filtro\", \"internalException\": \"Não há dados para este filtro\", \"return\": null}\n"
+                                        )
+                                }
+                        )
+                ),
+                @ApiResponse(
                         responseCode = "400",
                         description = "Requisição inválida",
                         content = @Content(
