@@ -3,10 +3,12 @@ package com.example.demo.controllers.handler;
 import com.example.demo.config.api.response.ApiReturn;
 import com.example.demo.config.api.response.exception.EscolaException;
 import com.example.demo.config.api.response.exception.NoContentException;
+import com.example.demo.util.LogUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
 
 @RestControllerAdvice
 public class EscolaExceptionHandler {
@@ -15,6 +17,9 @@ public class EscolaExceptionHandler {
     public ResponseEntity<ApiReturn<?>> handleEscolaException(EscolaException ex) {
         ApiReturn<?> apiReturn = ApiReturn.ofEscolaException(ex);
         HttpStatus status = HttpStatus.valueOf(ex.getErrorCode());
+
+        LogUtil.log(ex.getClazz(), LogUtil.LogType.ERROR, ex);
+
         return new ResponseEntity<>(apiReturn, status);
     }
 

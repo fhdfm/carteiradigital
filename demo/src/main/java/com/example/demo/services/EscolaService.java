@@ -95,9 +95,15 @@ public class EscolaService {
 
         // TODO Resolver
         // Gambiarra pra funcionar enquanto n resolvemos o <T> Page<T> findAll(EscolaSpecification specification, Pageable pageable, Class<T> clazz);
-        return repository
+        Page<EscolaView> page = repository
                 .findAll(specification, pageable)
                 .map(escola -> new EscolaView(escola.getUuid(), escola.getNome(), escola.getCnpj(), escola.getStatus()));
+
+        if (page.isEmpty()) {
+            throw EscolaException.ofNoContent("Não há retorno para esse filtro");
+        }
+
+        return page;
     }
 
     public void inativar(UUID uuid) {
