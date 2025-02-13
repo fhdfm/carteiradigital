@@ -2,6 +2,10 @@ package com.example.demo.config.api.response;
 
 public enum ErrorType {
     /**
+     * Consulta realizada mas sem resultados
+     */
+    NO_CONTENT(204),
+    /**
      * Erro de uma validação
      */
     VALIDATION(400),
