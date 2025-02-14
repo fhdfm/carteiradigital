@@ -1,5 +1,7 @@
 package com.example.demo.dto;
 
-public record EscolaRequest(String nome, String cnpj) {
+import com.example.demo.validation.annotations.CNPJ;
+
+public record EscolaRequest(String nome, @CNPJ String cnpj) {
     
 }

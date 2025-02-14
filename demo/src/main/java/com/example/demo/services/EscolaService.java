@@ -13,7 +13,6 @@ import com.example.demo.dto.EscolaView;
 import com.example.demo.entity.Escola;
 import com.example.demo.entity.enums.Status;
 import com.example.demo.repositories.EscolaRepository;
-import com.example.demo.util.CnpjChecker;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -40,10 +39,8 @@ public class EscolaService {
 
         validate(request);
 
-        CnpjChecker cnpjChecker = new CnpjChecker(request.cnpj());
-        String cnpj = cnpjChecker.parse();
-
         String nome = request.nome();
+        String cnpj = request.cnpj();
 
         Escola escola = repository.findByCnpj(
                 cnpj).orElse(null);
@@ -63,9 +60,7 @@ public class EscolaService {
 
         validate(request);
 
-        CnpjChecker cnpjChecker = new CnpjChecker(request.cnpj());
-        String cnpj = cnpjChecker.parse();
-
+        String cnpj = request.cnpj();
         String nome = request.nome();
 
         Escola escola = repository.findByCnpj(
