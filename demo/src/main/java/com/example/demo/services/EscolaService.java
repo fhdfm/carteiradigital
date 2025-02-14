@@ -83,20 +83,12 @@ public class EscolaService {
 
     public EscolaView buscarPorUuid(UUID uuid) {
 
-        Escola escola = repository.findByUuid(uuid)
+        return repository.findByUuidProjected(uuid, EscolaView.class)
             .orElseThrow(() -> new EntityNotFoundException("Escola não encontrada."));
-
-        CnpjChecker cnpjChecker = new CnpjChecker(escola.getCnpj());
-        
-        EscolaView escolaView = new EscolaView(
-            uuid, escola.getNome(), cnpjChecker.format(), escola.getStatus());
-
-        return escolaView;
-
     }
 
     public Page<EscolaView> listar(EscolaSpecification specification, Pageable pageable) {
-        return repository.findAll(specification, pageable, EscolaView.class);
+        return repository.findAllProjected(specification, pageable, EscolaView.class);
     }
 
     public void inativar(UUID uuid) {
