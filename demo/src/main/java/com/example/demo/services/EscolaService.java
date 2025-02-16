@@ -78,7 +78,14 @@ public class EscolaService {
 
     public EscolaView buscarPorUuid(UUID uuid) {
 
-        return repository.findByUuidProjected(uuid, EscolaView.class)
+        return repository.findByUuid(uuid, EscolaView.class)
+            .orElseThrow(() -> new EntityNotFoundException("Escola não encontrada."));
+    }
+
+    // TODO - rever
+    public Escola buscarPorUuidX(UUID uuid) {
+
+        return repository.findByUuid(uuid)
             .orElseThrow(() -> new EntityNotFoundException("Escola não encontrada."));
     }
 

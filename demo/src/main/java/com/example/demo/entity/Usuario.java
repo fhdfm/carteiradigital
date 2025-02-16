@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.example.demo.entity.enums.MetodoAutenticacao;
 import com.example.demo.entity.enums.Perfil;
 import com.example.demo.entity.enums.Status;
+import com.example.demo.security.UsuarioLogado;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,7 +28,7 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "uuid", nullable = false, unique = true)
+    @Column(name = "uuid", nullable = false, unique = true, columnDefinition = "UUID DEFAULT uuid_generate_v4()")
     private UUID uuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,6 +50,7 @@ public class Usuario {
     @Column(name = "telefone", nullable = false)
     private String telefone;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "metodo_autenticacao", nullable = false)
     private MetodoAutenticacao metodoAutenticacao;
 
@@ -65,6 +67,10 @@ public class Usuario {
 
     public Usuario() {
 
+    }
+
+    public UsuarioLogado toUsuarioLogado() {
+        return new UsuarioLogado(this);
     }
 
     public Long getId() {
