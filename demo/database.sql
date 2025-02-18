@@ -1,6 +1,12 @@
+-- ==========================
+-- EXTENSÃO UUID
+-- ==========================
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE escolas (
+-- ==========================
+-- TABELA ESCOLA
+-- ==========================
+CREATE TABLE escola (
     id SERIAL PRIMARY KEY,
     uuid UUID UNIQUE DEFAULT uuid_generate_v4(),
     nome VARCHAR(255) NOT NULL,
@@ -10,13 +16,15 @@ CREATE TABLE escolas (
     criado_em TIMESTAMP DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX idx_escolas_uuid ON escolas(uuid);
+CREATE UNIQUE INDEX idx_escola_uuid ON escola(uuid);
 
-
-CREATE TABLE usuarios (
+-- ==========================
+-- TABELA USUÁRIO
+-- ==========================
+CREATE TABLE usuario (
     id SERIAL PRIMARY KEY,
     uuid UUID UNIQUE DEFAULT uuid_generate_v4(),
-    escola_id INT REFERENCES escolas(id) ON DELETE CASCADE, -- permite NULL por padrão
+    escola_id INT REFERENCES escola(id) ON DELETE CASCADE,
     nome VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     telefone VARCHAR(20) UNIQUE,
@@ -27,20 +35,21 @@ CREATE TABLE usuarios (
     status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO',
     version INT NOT NULL DEFAULT 1,
     criado_em TIMESTAMP DEFAULT NOW(),
-    
-    -- Nova constraint: se perfil for MASTER, escola_id deve ser NULL; caso contrário, deve ser preenchido.
-    CONSTRAINT chk_usuarios_perfil_escola CHECK (
+
+    CONSTRAINT chk_usuario_perfil_escola CHECK (
         (perfil = 'MASTER' AND escola_id IS NULL) OR (perfil <> 'MASTER' AND escola_id IS NOT NULL)
     )
 );
 
+CREATE UNIQUE INDEX idx_usuario_uuid ON usuario(uuid);
+CREATE UNIQUE INDEX idx_usuario_email ON usuario(email);
+CREATE UNIQUE INDEX idx_usuario_telefone ON usuario(telefone);
+CREATE INDEX idx_usuario_cpf ON usuario(cpf);
 
-CREATE UNIQUE INDEX idx_usuarios_uuid ON usuarios(uuid);
-CREATE UNIQUE INDEX idx_usuarios_email ON usuarios(email);
-CREATE UNIQUE INDEX idx_usuarios_telefone ON usuarios(telefone);
-CREATE INDEX idx_usuarios_cpf ON usuarios (cpf);
-
-CREATE TABLE alunos (
+-- ==========================
+-- TABELA ALUNO
+-- ==========================
+CREATE TABLE aluno (
     id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT NOT NULL,
     responsavel_id BIGINT NOT NULL,
@@ -50,66 +59,39 @@ CREATE TABLE alunos (
     version INT NOT NULL DEFAULT 1,
     criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT fk_alunos_usuario
-        FOREIGN KEY (usuario_id)
-        REFERENCES usuarios(id)
-        ON DELETE NO ACTION,   -- Altere conforme desejado (CASCADE, SET NULL, etc.)
-
-    CONSTRAINT fk_alunos_responsavel
-        FOREIGN KEY (responsavel_id)
-        REFERENCES usuarios(id)
-        ON DELETE NO ACTION    -- Altere conforme desejado (CASCADE, SET NULL, etc.)
+    CONSTRAINT fk_aluno_usuario FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE NO ACTION,
+    CONSTRAINT fk_aluno_responsavel FOREIGN KEY (responsavel_id) REFERENCES usuario(id) ON DELETE NO ACTION
 );
 
--- Cria índices
-CREATE INDEX idx_alunos_usuario ON alunos(usuario_id);
-CREATE INDEX idx_alunos_responsavel ON alunos(responsavel_id);
-CREATE INDEX idx_alunos_matricula ON alunos(matricula);
+CREATE INDEX idx_aluno_usuario ON aluno(usuario_id);
+CREATE INDEX idx_aluno_responsavel ON aluno(responsavel_id);
+CREATE INDEX idx_aluno_matricula ON aluno(matricula);
 
-
-CREATE TABLE cartoes_alunos (
+-- ==========================
+-- TABELA CARTÃO_ALUNO
+-- ==========================
+CREATE TABLE cartao_aluno (
     id BIGSERIAL PRIMARY KEY,
     uuid UUID NOT NULL,
     aluno_id BIGINT NOT NULL,
     numero VARCHAR(255) NOT NULL,
-    status VARCHAR(20) (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO' NOT NULL,
+    status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO' NOT NULL,
     version INT NOT NULL DEFAULT 1,
     criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
-    
-    -- Chave estrangeira para 'alunos'
-    CONSTRAINT fk_cartao_aluno
-        FOREIGN KEY (aluno_id)
-        REFERENCES alunos(id)
-        ON DELETE CASCADE,
-    
-    -- 'uuid' único
-    CONSTRAINT uq_cartao_uuid UNIQUE (uuid),
-    
-    -- Restringe 'status' a ATIVO ou INATIVO
-    CONSTRAINT chk_cartao_status CHECK (status IN ('ATIVO', 'INATIVO'))
+
+    CONSTRAINT fk_cartao_aluno FOREIGN KEY (aluno_id) REFERENCES aluno(id) ON DELETE CASCADE,
+    CONSTRAINT uq_cartao_uuid UNIQUE (uuid)
 );
 
--- Índice em 'id' (PK já gera índice internamente, mas criamos explicitamente nomeado)
-CREATE INDEX idx_cartoes_alunos_id
-  ON cartoes_alunos(id);
+CREATE INDEX idx_cartao_aluno_id ON cartao_aluno(id);
+CREATE INDEX idx_cartao_aluno_uuid ON cartao_aluno(uuid);
+CREATE INDEX idx_cartao_aluno_numero ON cartao_aluno(numero);
+CREATE INDEX idx_cartao_aluno_aluno ON cartao_aluno(aluno_id);
 
--- Índice em 'uuid' 
--- (Observação: a UNIQUE constraint já gera um índice único automaticamente,
--- mas, se desejar nomear explicitamente, pode usar um UNIQUE INDEX ou esse índice simples)
-CREATE INDEX idx_cartoes_alunos_uuid
-  ON cartoes_alunos(uuid);
-
--- Índice em 'numero'
-CREATE INDEX idx_cartoes_alunos_numero
-  ON cartoes_alunos(numero);
-
--- Índice em 'aluno_id'
-CREATE INDEX idx_cartoes_alunos_aluno
-  ON cartoes_alunos(aluno_id);
-
-
--- Cria a tabela 'produtos'
-CREATE TABLE produtos (
+-- ==========================
+-- TABELA PRODUTO
+-- ==========================
+CREATE TABLE produto (
     id BIGSERIAL PRIMARY KEY,
     uuid UUID NOT NULL,
     escola_id INT NOT NULL,
@@ -117,38 +99,49 @@ CREATE TABLE produtos (
     foto VARCHAR(255),
     preco DECIMAL(10,2) NOT NULL,
     departamento VARCHAR(50) NOT NULL,
-    quantidade_vendidas BIGINT NOT NULL,
+    quantidade_vendida BIGINT NOT NULL,
     version INT NOT NULL DEFAULT 1,
     criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT fk_produtos_escola
-        FOREIGN KEY (escola_id)
-        REFERENCES escolas(id)
-        ON DELETE CASCADE
+    CONSTRAINT fk_produto_escola FOREIGN KEY (escola_id) REFERENCES escola(id) ON DELETE CASCADE,
+    CONSTRAINT uq_produto_uuid UNIQUE (uuid)
 );
 
--- Torna 'uuid' único
-ALTER TABLE produtos
-  ADD CONSTRAINT uq_produtos_uuid UNIQUE (uuid);
+CREATE INDEX idx_produto_id ON produto(id);
+CREATE INDEX idx_produto_uuid ON produto(uuid);
+CREATE INDEX idx_produto_escola ON produto(escola_id);
+CREATE INDEX idx_produto_departamento ON produto(departamento);
+CREATE INDEX idx_produto_escola_departamento ON produto(escola_id, departamento);
 
--- Índice em 'id' (lembrando que a PK já gera um índice interno, 
--- mas criado aqui para cumprir a requisição de ter um índice específico)
-CREATE INDEX idx_produtos_id 
-  ON produtos(id);
+-- ==========================
+-- TABELA PEDIDO (ATUALIZADA)
+-- ==========================
+CREATE TABLE pedido (
+    id BIGSERIAL PRIMARY KEY,
+    uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
+    escola_id INT NOT NULL REFERENCES escola(id),
+    comprador_id BIGINT NOT NULL REFERENCES aluno(id),
+    vendedor_id INT NOT NULL REFERENCES usuario(id),
+    valor_total NUMERIC(15,2) NOT NULL DEFAULT 0.00,
+    status VARCHAR(20) CHECK (status IN ('ABERTO', 'EM_ANDAMENTO', 'CONCLUIDO', 'CANCELADO')) DEFAULT 'ABERTO' NOT NULL,
+    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em TIMESTAMP NULL,
+    deletado_em TIMESTAMP NULL,
+    version INT NOT NULL DEFAULT 0
+);
 
--- Índice em 'uuid' (também já existe indiretamente pelo UNIQUE, 
--- mas aqui para dar nome ao índice explicitamente)
-CREATE INDEX idx_produtos_uuid
-  ON produtos(uuid);
+-- ==========================
+-- ÍNDICES INDIVIDUAIS
+-- ==========================
+CREATE INDEX idx_pedido_uuid ON pedido (uuid);
+CREATE INDEX idx_pedido_escola_id ON pedido (escola_id);
+CREATE INDEX idx_pedido_comprador_id ON pedido (comprador_id);
+CREATE INDEX idx_pedido_vendedor_id ON pedido (vendedor_id);
 
--- Índice em 'escola_id'
-CREATE INDEX idx_produtos_escola
-  ON produtos(escola_id);
-
--- Índice em 'departamento'
-CREATE INDEX idx_produtos_departamento
-  ON produtos(departamento);
-
--- Índice composto em (escola_id, departamento)
-CREATE INDEX idx_produtos_escola_departamento
-  ON produtos(escola_id, departamento);
+-- ==========================
+-- ÍNDICES COMPOSTOS
+-- ==========================
+CREATE INDEX idx_pedido_escola_criado_em ON pedido (escola_id, criado_em);
+CREATE INDEX idx_pedido_comprador_criado_em ON pedido (comprador_id, criado_em);
+CREATE INDEX idx_pedido_vendedor_criado_em ON pedido (vendedor_id, criado_em);
+CREATE INDEX idx_pedido_escola_status_criado_em ON pedido (escola_id, status, criado_em);

@@ -15,7 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
 @Entity
-@Table(name = "escolas")
+@Table(name = "escola")
 public class Escola {
     
     @Id
