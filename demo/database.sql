@@ -145,3 +145,31 @@ CREATE INDEX idx_pedido_escola_criado_em ON pedido (escola_id, criado_em);
 CREATE INDEX idx_pedido_comprador_criado_em ON pedido (comprador_id, criado_em);
 CREATE INDEX idx_pedido_vendedor_criado_em ON pedido (vendedor_id, criado_em);
 CREATE INDEX idx_pedido_escola_status_criado_em ON pedido (escola_id, status, criado_em);
+
+-- ==========================
+-- TABELA PEDIDO_ITEM
+-- ==========================
+CREATE TABLE pedido_item (
+    id BIGSERIAL PRIMARY KEY,
+    pedido_id BIGINT NOT NULL,
+    produto_id BIGINT NULL, -- Produto opcional
+    descricao_produto VARCHAR(255) NOT NULL, -- Descrição independente do produto
+    quantidade INT NOT NULL,
+    valor_unitario NUMERIC(15,2) NOT NULL,
+    valor_total NUMERIC(15,2) NOT NULL,
+    version INT NOT NULL DEFAULT 0,
+    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- Chave estrangeira com o pedido
+    CONSTRAINT fk_pedido_item_pedido FOREIGN KEY (pedido_id) REFERENCES pedido(id) ON DELETE CASCADE,
+
+    -- Chave estrangeira opcional com o produto
+    CONSTRAINT fk_pedido_item_produto FOREIGN KEY (produto_id) REFERENCES produto(id) ON DELETE SET NULL
+);
+
+-- ==========================
+-- ÍNDICES INDIVIDUAIS
+-- ==========================
+
+-- Índice para busca rápida pelo pedido
+CREATE INDEX idx_pedido_item_pedido_id ON pedido_item(pedido_id);
