@@ -33,25 +33,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(
-                    req -> {
-                        req.requestMatchers("/api/auth/**").permitAll();
-                        req.anyRequest().authenticated();
-                })
-                .sessionManagement(
-                    management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exceptionHandling ->
-                        exceptionHandling.authenticationEntryPoint(((request, response, authException) -> {
-                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
-                        })
-                    )
+            .authorizeHttpRequests(req -> {
+                req.requestMatchers("/api/auth/**").permitAll();
+                req.anyRequest().authenticated();
+            })
+            .sessionManagement(management -> 
+                management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(exceptionHandling ->
+                exceptionHandling
+                    .authenticationEntryPoint((request, response, authException) -> {
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+                    })
                     .accessDeniedHandler((request, response, accessDeniedException) -> {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN, accessDeniedException.getMessage());
                     })
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .authenticationProvider(authenticationProvider);
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .authenticationProvider(authenticationProvider);
         return http.build();
-    }
+    }    
 
 }

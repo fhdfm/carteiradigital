@@ -8,8 +8,6 @@ import java.util.function.Function;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.services.BaseService;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -17,8 +15,10 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Service
-public class JWTService extends BaseService {
+public class JWTService {
  
+    private String SECRET_KEY = "3kX6hN3hP3zRlLZoOTlJt5+HK7Kn6IGBzBs6mvPQJZg=";
+
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
                     .setSubject(userDetails.getUsername())
@@ -41,7 +41,7 @@ public class JWTService extends BaseService {
     }    
 
     private Key getSignKey() {
-        byte[] key = Decoders.BASE64.decode("3kX6hN3hP3zRlLZoOTlJt5+HK7Kn6IGBzBs6mvPQJZg=");
+        byte[] key = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(key);
     }
 
