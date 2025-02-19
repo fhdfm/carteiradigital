@@ -13,6 +13,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.example.demo.security.filter.JwtAuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -38,36 +40,18 @@ public class SecurityConfig {
                 })
                 .sessionManagement(
                     management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling.authenticationEntryPoint(((request, response, authException) -> {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+                        })
+                    )
+                    .accessDeniedHandler((request, response, accessDeniedException) -> {
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN, accessDeniedException.getMessage());
+                    })
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider);
         return http.build();
     }
-
-// @Configuration
-// @EnableWebSecurity
-// public class SecurityConfig {
-
-//     private final AuthenticationProvider authenticationProvider;
-//     private final JwtAuthFilter jwtAuthFilter;
-
-//     @Bean
-//     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//         http.csrf(AbstractHttpConfigurer::disable)
-//             .cors(AbstractHttpConfigurer::disable)
-//             .authorizeHttpRequests(httpRequest -> {
-//                 httpRequest.requestMatchers("/register", "/auth")
-//                            .permitAll();
-//                 httpRequest.requestMatchers(HttpMethod.POST)
-//                            .hasAnyAuthority("ADMIN");
-//                 httpRequest.anyRequest()
-//                            .authenticated();
-//             })
-//             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-//             .authenticationProvider(authenticationProvider);
-
-//         return http.build();
-//     }
-// }
 
 }
