@@ -2,9 +2,11 @@ package com.example.demo.entity;
 
 import java.util.UUID;
 
+import com.example.demo.entity.converters.CnpjConverter;
 import com.example.demo.entity.enums.Status;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -22,12 +24,13 @@ public class Escola {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "uuid", nullable = false, unique = true)
+    @Column(name = "uuid", nullable = false, unique = true, insertable = false, updatable = false, columnDefinition = "UUID DEFAULT uuid_generate_v4()")
     private UUID uuid;
 
     @Column(name = "nome", nullable = false)
     private String nome;
 
+    @Convert(converter = CnpjConverter.class)
     @Column(name = "cnpj", nullable = false, unique = true)
     private String cnpj;
 

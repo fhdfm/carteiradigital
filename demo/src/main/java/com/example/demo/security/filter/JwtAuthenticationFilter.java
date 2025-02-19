@@ -49,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String username = jwtService.extractUsername(jwtToken);
         if (username != null 
-            && jwtService.isTokenValid(jwtToken, null)) {
+            && jwtService.isTokenValid(jwtToken)) {
             
             UsuarioLogado user = (UsuarioLogado) userDetailsService.loadUserByUsername(username);
             

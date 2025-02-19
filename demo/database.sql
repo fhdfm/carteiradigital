@@ -12,7 +12,7 @@ CREATE TABLE escola (
     nome VARCHAR(255) NOT NULL,
     cnpj VARCHAR(14) NOT NULL UNIQUE,
     status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO',
-    version INT NOT NULL DEFAULT 1,
+    version INT NOT NULL DEFAULT 0,
     criado_em TIMESTAMP DEFAULT NOW()
 );
 
@@ -33,7 +33,7 @@ CREATE TABLE usuario (
     cpf VARCHAR(11) UNIQUE,
     perfil VARCHAR(50) CHECK (perfil IN ('MASTER', 'ADMIN', 'RESPONSAVEL', 'ALUNO', 'FUNCIONARIO', 'PDV')) NOT NULL,
     status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO',
-    version INT NOT NULL DEFAULT 1,
+    version INT NOT NULL DEFAULT 0,
     criado_em TIMESTAMP DEFAULT NOW(),
 
     CONSTRAINT chk_usuario_perfil_escola CHECK (
@@ -56,7 +56,7 @@ CREATE TABLE aluno (
     senha VARCHAR(255) NOT NULL,
     matricula VARCHAR(255),
     foto VARCHAR(255),
-    version INT NOT NULL DEFAULT 1,
+    version INT NOT NULL DEFAULT 0,
     criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_aluno_usuario FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE NO ACTION,
@@ -76,7 +76,7 @@ CREATE TABLE cartao_aluno (
     aluno_id BIGINT NOT NULL,
     numero VARCHAR(255) NOT NULL,
     status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO' NOT NULL,
-    version INT NOT NULL DEFAULT 1,
+    version INT NOT NULL DEFAULT 0,
     criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_cartao_aluno FOREIGN KEY (aluno_id) REFERENCES aluno(id) ON DELETE CASCADE,
@@ -100,7 +100,7 @@ CREATE TABLE produto (
     preco DECIMAL(10,2) NOT NULL,
     departamento VARCHAR(50) NOT NULL,
     quantidade_vendida BIGINT NOT NULL,
-    version INT NOT NULL DEFAULT 1,
+    version INT NOT NULL DEFAULT 0,
     criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_produto_escola FOREIGN KEY (escola_id) REFERENCES escola(id) ON DELETE CASCADE,
@@ -120,13 +120,12 @@ CREATE TABLE pedido (
     id BIGSERIAL PRIMARY KEY,
     uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
     escola_id INT NOT NULL REFERENCES escola(id),
-    comprador_id BIGINT NOT NULL REFERENCES aluno(id),
+    comprador_id BIGINT REFERENCES aluno(id),
     vendedor_id INT NOT NULL REFERENCES usuario(id),
     valor_total NUMERIC(15,2) NOT NULL DEFAULT 0.00,
-    status VARCHAR(20) CHECK (status IN ('ABERTO', 'EM_ANDAMENTO', 'CONCLUIDO', 'CANCELADO')) DEFAULT 'ABERTO' NOT NULL,
+    status VARCHAR(20) CHECK (status IN ('ABERTO', 'CONCLUIDO', 'CANCELADO')) DEFAULT 'ABERTO' NOT NULL,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP NULL,
-    deletado_em TIMESTAMP NULL,
     version INT NOT NULL DEFAULT 0
 );
 

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,11 +40,10 @@ public class EscolaController {
      *   ...
      * }
      */
+    @PreAuthorize("hasRole('MASTER')")
     @PostMapping
     public ResponseEntity<String> criarEscola(@RequestBody EscolaRequest request) {
-        
         service.salvar(request);
-        
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body("Escola criada com sucesso.");
@@ -59,11 +59,11 @@ public class EscolaController {
      *   ...
      * }
      */
+    @PreAuthorize("hasRole('MASTER')")
     @PutMapping("/{uuid}")
     public ResponseEntity<String> atualizarEscola(@PathVariable("uuid") UUID uuid,
                                                 @RequestBody EscolaRequest request) {
         service.salvar(uuid, request);
-        
         return ResponseEntity.ok("Escola atualizada com sucesso.");
     }
 
@@ -71,6 +71,7 @@ public class EscolaController {
      * Retorna uma escola pelo UUID.
      * Exemplo de requisição: GET /api/escolas/{uuid}
      */
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
     @GetMapping("/{uuid}")
     public ResponseEntity<EscolaView> buscarEscolaPorUuid(@PathVariable("uuid") UUID uuid) {
         EscolaView escola = service.buscarPorUuid(uuid);
@@ -81,20 +82,21 @@ public class EscolaController {
      * Lista as escolas ativas com paginação.
      * Exemplo de requisição: GET /api/escolas?page=0&size=10
      */
+    @PreAuthorize("hasRole('MASTER')")
     @GetMapping
     public ResponseEntity<Page<EscolaView>> listarEscolas(EscolaSpecification specification, Pageable pageable) {
         Page<EscolaView> escolas = service.listar(specification, pageable);
         return ResponseEntity.ok(escolas);
     }
 
+    @PreAuthorize("hasRole('MASTER')")
     @PutMapping("/{uuid}/inativar")
     public ResponseEntity<String> inativarEscola(@PathVariable("uuid") UUID uuid) {
-        
         service.inativar(uuid);
-        
         return ResponseEntity.ok("Escola inativada com sucesso.");
     }
 
+    @PreAuthorize("hasRole('MASTER')")
     @PutMapping("/{uuid}/ativar")
     public ResponseEntity<String> ativarEscola(@PathVariable("uuid") UUID uuid) {
         service.ativar(uuid);

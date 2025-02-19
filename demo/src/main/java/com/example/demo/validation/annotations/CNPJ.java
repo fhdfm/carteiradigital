@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.hibernate.validator.internal.constraintvalidators.hv.br.CNPJValidator;
+import com.example.demo.validation.impl.CNPJValidator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

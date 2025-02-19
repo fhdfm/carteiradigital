@@ -10,7 +10,7 @@ import com.example.demo.entity.enums.Perfil;
 import com.example.demo.services.UsuarioService;
 
 @SpringBootApplication
-public class DemoApplication {
+public class DemoApplication /*implements CommandLineRunner*/ {
 
 	@Autowired
 	private UsuarioService usuarioService;
@@ -20,7 +20,6 @@ public class DemoApplication {
 	}
 
 	public void run(String... args) {
-
 
 		UsuarioRequest user = new UsuarioRequest(null, 
 				"Harley Diniz", "fhdfm85@gmail.com", 

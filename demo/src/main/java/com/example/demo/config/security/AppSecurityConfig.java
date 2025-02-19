@@ -25,7 +25,7 @@ public class AppSecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> usuarioRepository.findByEmail(username)
+        return username -> usuarioRepository.findByEmailComEscola(username)
                 .map(Usuario::toUsuarioLogado)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }

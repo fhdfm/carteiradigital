@@ -25,7 +25,7 @@ public class Cartao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "uuid", nullable = false, unique = true)
+    @Column(name = "uuid", nullable = false, unique = true, insertable = false, updatable = false, columnDefinition = "UUID DEFAULT uuid_generate_v4()")
     private UUID uuid;
 
     @ManyToOne(fetch = FetchType.LAZY)

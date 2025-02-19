@@ -2,12 +2,14 @@ package com.example.demo.entity;
 
 import java.util.UUID;
 
+import com.example.demo.entity.converters.CpfConverter;
 import com.example.demo.entity.enums.MetodoAutenticacao;
 import com.example.demo.entity.enums.Perfil;
 import com.example.demo.entity.enums.Status;
 import com.example.demo.security.UsuarioLogado;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -28,7 +30,7 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "uuid", nullable = false, unique = true, columnDefinition = "UUID DEFAULT uuid_generate_v4()")
+    @Column(name = "uuid", nullable = false, unique = true, insertable = false, updatable = false, columnDefinition = "UUID DEFAULT uuid_generate_v4()")
     private UUID uuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,6 +46,7 @@ public class Usuario {
     @Column(name = "senha", nullable = false)
     private String senha;
 
+    @Convert(converter = CpfConverter.class)
     @Column(name = "cpf", unique = true)
     private String cpf;
 

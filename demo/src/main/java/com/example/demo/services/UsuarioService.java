@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +15,7 @@ import com.example.demo.dto.UsuarioRequest;
 import com.example.demo.entity.Usuario;
 import com.example.demo.entity.enums.MetodoAutenticacao;
 import com.example.demo.entity.enums.Perfil;
+import com.example.demo.entity.enums.Status;
 import com.example.demo.repositories.UsuarioRepository;
 import com.example.demo.security.UsuarioLogado;
 import com.example.demo.services.security.JWTService;
@@ -22,7 +23,6 @@ import com.example.demo.services.security.JWTService;
 @Service
 public class UsuarioService {
     
-    private final UserDetailsService userDetailsService;
     private final AuthenticationManager authenticationManager;
 
     private final JWTService jwtService;
@@ -33,24 +33,21 @@ public class UsuarioService {
     public UsuarioService(UsuarioRepository repository, 
         PasswordEncoder passwordEncoder, 
         JWTService jwtService, 
-        AuthenticationManager authenticationManager,
-        UserDetailsService userDetailsService) {
+        AuthenticationManager authenticationManager) {
         
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
-        this.userDetailsService = userDetailsService;
 
     }
 
     public JwtAuthenticationResponse signin(LoginRequest request) {
-        
-        UsuarioLogado usuarioLogado =
-            (UsuarioLogado) userDetailsService.loadUserByUsername(request.login());
-        
-        authenticationManager.authenticate(
+                
+        Authentication auth = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.login(), request.password()));
+
+        UsuarioLogado usuarioLogado = (UsuarioLogado) auth.getPrincipal();
         
         String token = jwtService.generateToken(usuarioLogado);
         String refreshToken = jwtService.generateRefreshToken(new HashMap<>(), usuarioLogado);
@@ -62,10 +59,10 @@ public class UsuarioService {
         
         String login = this.jwtService.extractUsername(request.token());
         
-        Usuario user = repository.findByEmail(login).orElseThrow();
+        Usuario user = repository.findByEmailComEscola(login).orElseThrow();
         UsuarioLogado usuarioLogado = user.toUsuarioLogado();
         
-        if (!jwtService.isTokenValid(request.token(), usuarioLogado)) {
+        if (!jwtService.isTokenValid(request.token())) {
             throw new IllegalArgumentException("Invalid token");
         }
 
@@ -82,6 +79,7 @@ public class UsuarioService {
         user.setPerfil(Perfil.MASTER);
         user.setMetodoAutenticacao(MetodoAutenticacao.SENHA);
         user.setCpf(request.cpf());
+        user.setStatus(Status.ATIVO);
         user.setTelefone(request.telefone());
 
         repository.save(user);

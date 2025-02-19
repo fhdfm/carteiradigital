@@ -11,13 +11,16 @@ import com.example.demo.controllers.spec.EscolaSpecification;
 import com.example.demo.dto.EscolaRequest;
 import com.example.demo.dto.EscolaView;
 import com.example.demo.entity.Escola;
+import com.example.demo.entity.enums.Perfil;
 import com.example.demo.entity.enums.Status;
 import com.example.demo.repositories.EscolaRepository;
+import com.example.demo.security.UsuarioLogado;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.ws.rs.ForbiddenException;
 
 @Service
-public class EscolaService {
+public class EscolaService extends BaseService {
     
     private EscolaRepository repository;
 
@@ -54,6 +57,9 @@ public class EscolaService {
         escola.setStatus(Status.ATIVO);
 
         repository.save(escola);
+        repository.flush();
+
+        System.out.println(escola.getUuid());
     }
 
     public void salvar(UUID uuid, EscolaRequest request) {
@@ -78,16 +84,22 @@ public class EscolaService {
 
     public EscolaView buscarPorUuid(UUID uuid) {
 
+        UsuarioLogado usuarioLogado = getUsuarioLogado();
+        if (usuarioLogado.possuiPerfil(Perfil.ADMIN.name())) {
+            if (!uuid.equals(usuarioLogado.getEscolaId()))
+                throw new ForbiddenException("Acesso negado.");
+        }
+
         return repository.findByUuid(uuid, EscolaView.class)
             .orElseThrow(() -> new EntityNotFoundException("Escola não encontrada."));
     }
 
     // TODO - rever
-    public Escola buscarPorUuidX(UUID uuid) {
+    // public Escola buscarPorUuidX(UUID uuid) {
 
-        return repository.findByUuid(uuid)
-            .orElseThrow(() -> new EntityNotFoundException("Escola não encontrada."));
-    }
+    //     return repository.findByUuid(uuid)
+    //         .orElseThrow(() -> new EntityNotFoundException("Escola não encontrada."));
+    // }
 
     public Page<EscolaView> listar(EscolaSpecification specification, Pageable pageable) {
         return repository.findAllProjected(specification, pageable, EscolaView.class);
