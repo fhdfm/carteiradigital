@@ -1,0 +1,38 @@
+package com.example.demo.config;
+
+import java.util.TimeZone;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
+import org.springframework.format.datetime.DateFormatter;
+import org.springframework.format.datetime.DateFormatterRegistrar;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+@EnableWebMvc
+@SuppressWarnings("all")
+public class WebMvcConfig implements WebMvcConfigurer {
+    
+    public void addCorsMapping(CorsRegistry registry) {
+        registry.addMapping("/**")
+            .allowedOrigins("*")
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+    }
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+
+        DateFormatter formatter = new DateFormatter("dd/MM/yyyy");
+        formatter.setTimeZone(TimeZone.getTimeZone("America/Fortaleza"));
+
+        DateFormatterRegistrar registrar = new DateFormatterRegistrar();
+        registrar.setFormatter(formatter);
+        registrar.registerFormatters(registry);
+
+        registry.addConverter(String.class, MultipartFile.class, source -> null);
+    }
+
+}

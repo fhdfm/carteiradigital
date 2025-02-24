@@ -9,9 +9,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.example.demo.entity.Usuario;
-import com.example.demo.entity.enums.Perfil;
-import com.example.demo.entity.enums.Status;
+import com.example.demo.domain.enums.Perfil;
+import com.example.demo.domain.enums.Status;
+import com.example.demo.domain.model.Usuario;
 
 public class UsuarioLogado implements UserDetails {
 

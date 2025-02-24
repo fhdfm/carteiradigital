@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.example.demo.domain.enums.MetodoAutenticacao;
+import com.example.demo.domain.enums.Perfil;
 import com.example.demo.dto.UsuarioRequest;
-import com.example.demo.entity.enums.MetodoAutenticacao;
-import com.example.demo.entity.enums.Perfil;
-import com.example.demo.services.UsuarioService;
+import com.example.demo.service.UsuarioService;
 
 @SpringBootApplication
 public class DemoApplication /*implements CommandLineRunner*/ {
