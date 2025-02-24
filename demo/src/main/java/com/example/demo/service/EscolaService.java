@@ -17,7 +17,7 @@ import com.example.demo.repository.specification.EscolaSpecification;
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
-public class EscolaService extends BaseService {
+public class EscolaService {
     
     private EscolaRepository repository;
 
@@ -25,19 +25,7 @@ public class EscolaService extends BaseService {
         this.repository = repository;
     }
 
-    private void validate(EscolaRequest request) {
-
-        if (Objects.isNull(request.nome()) || request.nome().length() < 5)
-            throw new IllegalArgumentException("Nome deve ser preenchido.");
-
-        if (Objects.isNull(request.cnpj()) || request.cnpj().length() < 14)
-            throw new IllegalArgumentException("CNPJ deve ser preenchido.");
-
-    }
-
     public void salvar(EscolaRequest request) {
-
-        validate(request);
 
         String nome = request.nome();
         String cnpj = request.cnpj();
@@ -54,14 +42,12 @@ public class EscolaService extends BaseService {
         escola.setStatus(Status.ATIVO);
 
         repository.save(escola);
-        repository.flush();
+        //repository.flush();
 
-        System.out.println(escola.getUuid());
+        //System.out.println(escola.getUuid());
     }
 
     public void salvar(UUID uuid, EscolaRequest request) {
-
-        validate(request);
 
         String cnpj = request.cnpj();
         String nome = request.nome();
@@ -84,13 +70,6 @@ public class EscolaService extends BaseService {
         return repository.findByUuid(uuid, EscolaView.class)
             .orElseThrow(() -> new EntityNotFoundException("Escola não encontrada."));
     }
-
-    // TODO - rever
-    // public Escola buscarPorUuidX(UUID uuid) {
-
-    //     return repository.findByUuid(uuid)
-    //         .orElseThrow(() -> new EntityNotFoundException("Escola não encontrada."));
-    // }
 
     public Page<EscolaView> listar(EscolaSpecification specification, Pageable pageable) {
         return repository.findAllProjected(specification, pageable, EscolaView.class);

@@ -8,11 +8,10 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.domain.enums.Perfil;
+import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
 import com.example.demo.security.accesscontrol.annotation.CheckAccess;
 import com.example.demo.security.accesscontrol.policy.AccessPolicy;
@@ -31,8 +30,7 @@ public class CheckAccessAspect {
     @Around("@annotation(com.example.demo.security.accesscontrol.annotation.CheckAccess)")
     public Object enforceAccess(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UsuarioLogado usuarioLogado = (UsuarioLogado) authentication.getPrincipal();
+        UsuarioLogado usuarioLogado = SecurityUtils.getUsuarioLogado();
         
         // Se é usuário MASTER tem acesso irrestrito.
         boolean isMaster = usuarioLogado.possuiPerfil(Perfil.MASTER.name());
