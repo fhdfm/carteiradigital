@@ -66,6 +66,7 @@ CREATE TABLE aluno (
 CREATE INDEX idx_aluno_usuario ON aluno(usuario_id);
 CREATE INDEX idx_aluno_responsavel ON aluno(responsavel_id);
 CREATE INDEX idx_aluno_matricula ON aluno(matricula);
+CREATE INDEX idx_aluno_usuario_responsavel ON aluno(usuario_id, responsavel_id);
 
 -- ==========================
 -- TABELA CARTÃO_ALUNO
@@ -148,7 +149,7 @@ CREATE INDEX idx_pedido_escola_status_criado_em ON pedido (escola_id, status, cr
 -- ==========================
 -- TABELA PEDIDO_ITEM
 -- ==========================
-CREATE TABLE pedido_item (
+CREATE TABLE item_pedido (
     id BIGSERIAL PRIMARY KEY,
     pedido_id BIGINT NOT NULL,
     produto_id BIGINT NULL, -- Produto opcional
@@ -160,10 +161,10 @@ CREATE TABLE pedido_item (
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     -- Chave estrangeira com o pedido
-    CONSTRAINT fk_pedido_item_pedido FOREIGN KEY (pedido_id) REFERENCES pedido(id) ON DELETE CASCADE,
+    CONSTRAINT fk_item_pedido_pedido FOREIGN KEY (pedido_id) REFERENCES pedido(id) ON DELETE CASCADE,
 
     -- Chave estrangeira opcional com o produto
-    CONSTRAINT fk_pedido_item_produto FOREIGN KEY (produto_id) REFERENCES produto(id) ON DELETE SET NULL
+    CONSTRAINT fk_item_pedido_produto FOREIGN KEY (produto_id) REFERENCES produto(id) ON DELETE SET NULL
 );
 
 -- ==========================
@@ -171,4 +172,4 @@ CREATE TABLE pedido_item (
 -- ==========================
 
 -- Índice para busca rápida pelo pedido
-CREATE INDEX idx_pedido_item_pedido_id ON pedido_item(pedido_id);
+CREATE INDEX idx_item_pedido_pedido_id ON item_pedido(pedido_id);

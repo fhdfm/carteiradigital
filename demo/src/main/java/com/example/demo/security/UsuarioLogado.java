@@ -21,6 +21,10 @@ public class UsuarioLogado implements UserDetails {
         this.usuario = usuario;
     }
 
+    public UUID getUuid() {
+        return this.usuario.getUuid();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
@@ -81,7 +85,7 @@ public class UsuarioLogado implements UserDetails {
             .anyMatch(authority -> authority.getAuthority().equals(authorityToCheck));
     }
 
-    public UUID getEscolaId() {
+    public UUID getEscolaUuid() {
         
         if (possuiPerfil(Perfil.MASTER.name()))
             return null;

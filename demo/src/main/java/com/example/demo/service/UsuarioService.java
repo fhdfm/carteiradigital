@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +20,8 @@ import com.example.demo.dto.UsuarioRequest;
 import com.example.demo.repository.UsuarioRepository;
 import com.example.demo.security.JwtService;
 import com.example.demo.security.UsuarioLogado;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class UsuarioService {
@@ -83,6 +86,19 @@ public class UsuarioService {
         user.setTelefone(request.telefone());
 
         repository.save(user);
+    }
+
+    public Usuario findByUuid(UUID uuid) {
+        return this.repository.findByUuid(uuid).orElseThrow(
+                () -> new EntityNotFoundException("Usuário não encontrado"));
+    }
+
+    public <T> T findByUuid(UUID uuid, Class<T> clazz) {
+
+        Object usuario = this.repository.findByUuid(uuid).orElseThrow(
+                () -> new EntityNotFoundException("Usuário não encontrado"));
+
+        return clazz.cast(usuario);
     }
 
 }

@@ -24,17 +24,14 @@ import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "usuario")
-public class Usuario {
+public class Usuario extends BaseEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "uuid", nullable = false, unique = true, insertable = false, updatable = false, columnDefinition = "UUID DEFAULT uuid_generate_v4()")
-    private UUID uuid;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "escola_id")
+    @JoinColumn(name = "escola_id", nullable = false)
     private Escola escola;
 
     @Column(name = "nome", nullable = false)
@@ -84,10 +81,12 @@ public class Usuario {
         this.id = id;
     }
 
+    @Override
     public UUID getUuid() {
         return uuid;
     }
 
+    @Override
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
     }

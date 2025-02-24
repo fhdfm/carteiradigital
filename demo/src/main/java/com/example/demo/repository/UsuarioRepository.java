@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,4 +17,7 @@ public interface UsuarioRepository extends BaseRepository<Usuario, Long> {
     Optional<Usuario> findByEmailComEscola(@Param("email") String email);
     
     Optional<Usuario> findByEmail(String email);
+
+    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.escola WHERE u.uuid = :uuid")
+    Optional<Usuario> findByUuid(@Param("uuid") UUID uuid);
 }

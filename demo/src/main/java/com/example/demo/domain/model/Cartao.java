@@ -19,14 +19,11 @@ import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "cartao_aluno")
-public class Cartao {
+public class Cartao extends BaseEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "uuid", nullable = false, unique = true, insertable = false, updatable = false, columnDefinition = "UUID DEFAULT uuid_generate_v4()")
-    private UUID uuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "aluno_id", nullable = false)
@@ -76,6 +73,16 @@ public class Cartao {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    @Override
+    protected UUID getUuid() {
+        return super.uuid;
+    }
+
+    @Override
+    protected void setUuid(UUID uuid) {
+        super.uuid = uuid;
     }
 
 }

@@ -18,14 +18,11 @@ import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "escola")
-public class Escola {
+public class Escola extends BaseEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "uuid", nullable = false, unique = true, insertable = false, updatable = false, columnDefinition = "UUID DEFAULT uuid_generate_v4()")
-    private UUID uuid;
 
     @Column(name = "nome", nullable = false)
     private String nome;
@@ -53,14 +50,6 @@ public class Escola {
         this.id = id;
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
-
     public String getNome() {
         return nome;
     }
@@ -83,6 +72,16 @@ public class Escola {
 
     public void setCnpj(String cnpj) {
         this.cnpj = cnpj;
+    }
+
+    @Override
+    public UUID getUuid() {
+       return super.uuid;
+    }
+
+    @Override
+    public void setUuid(UUID uuid) {
+        super.uuid = uuid;
     }
 
 }
