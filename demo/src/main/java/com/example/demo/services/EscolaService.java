@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.example.demo.config.api.response.exception.EscolaException;
+import com.example.demo.dto.EscolaParametrosRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -67,8 +68,7 @@ public class EscolaService {
 
     public EscolaView buscarPorUuid(UUID uuid) {
 
-        Escola escola = repository.findByUuid(uuid)
-            .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada."));
+        Escola escola = findByUuid(uuid);
 
         CnpjChecker cnpjChecker = new CnpjChecker(escola.getCnpj());
         
@@ -93,9 +93,9 @@ public class EscolaService {
     }
 
     public void inativar(UUID uuid) {
-        
-        Escola escola = repository.findByUuid(uuid)
-            .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada."));
+
+        Escola escola = findByUuid(uuid);
+
         escola.setStatus(Status.INATIVO);
         
         repository.save(escola);
@@ -103,11 +103,25 @@ public class EscolaService {
 
     public void ativar(UUID uuid) {
         
-        Escola escola = repository.findByUuid(uuid)
-            .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada."));
-            escola.setStatus(Status.ATIVO);
+        Escola escola = findByUuid(uuid);
+
+        escola.setStatus(Status.ATIVO);
         
         repository.save(escola);
+    }
+
+    public void atualizarParametrosEscola(UUID uuid, EscolaParametrosRequest request) {
+
+        Escola escola = findByUuid(uuid);
+
+        escola.setPaymentSecret(request.paymentSecret());
+
+        repository.save(escola);
+    }
+
+    private Escola findByUuid(UUID uuid) {
+        return repository.findByUuid(uuid)
+                .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada."));
     }
 
 }

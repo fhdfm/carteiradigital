@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.example.demo.config.api.response.ApiReturn;
 import com.example.demo.config.api.swagger.EscolaApiOperation;
+import com.example.demo.dto.EscolaParametrosRequest;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -153,6 +154,30 @@ public class EscolaController {
     ) {
         service.ativar(uuid);
         return ResponseEntity.ok(ApiReturn.of("Escola ativada com sucesso."));
-    }    
+    }
+
+    /**
+     * Atualiza os parametros de uma escola existente identificada pelo UUID.
+     * Exemplo de requisição: PUT /api/escolas/params/{uuid}
+     */
+    @EscolaApiOperation(
+            summary = "Atualizar os parametros de uma escola",
+            description = "Atualiza, a partir do seu UUID, os parametros de uma escola persistida com as informações especificadas na requisião."
+    )
+    @PutMapping("params/{uuid}")
+    public ResponseEntity<ApiReturn<String>> atualizarParametrosEscola(
+            @Parameter(description = "UUID da escola a ser buscada", required = true)
+            @PathVariable("uuid") UUID uuid,
+
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Corpo da requisição com os parâmetros a serem salvos da escola",
+                    required = true
+            )
+            @RequestBody @Valid EscolaParametrosRequest request
+    ) {
+        service.atualizarParametrosEscola(uuid, request);
+
+        return ResponseEntity.ok(ApiReturn.of("Escola atualizada com sucesso."));
+    }
 
 }
