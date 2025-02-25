@@ -29,7 +29,7 @@ public class Cartao extends BaseEntity {
     @JoinColumn(name = "aluno_id", nullable = false)
     private Aluno aluno;
 
-    @Column(name = "numero", nullable = false)
+    @Column(name = "numero", nullable = false, unique = true)
     private String numero;
 
     @Enumerated(EnumType.STRING)

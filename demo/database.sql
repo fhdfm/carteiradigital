@@ -50,23 +50,25 @@ CREATE INDEX idx_usuario_cpf ON usuario(cpf);
 -- TABELA ALUNO
 -- ==========================
 CREATE TABLE aluno (
-    id BIGSERIAL PRIMARY KEY,
-    usuario_id BIGINT NOT NULL,
+    id BIGINT PRIMARY KEY,
     responsavel_id BIGINT NOT NULL,
     senha VARCHAR(255) NOT NULL,
     matricula VARCHAR(255),
     foto VARCHAR(255),
-    version INT NOT NULL DEFAULT 0,
-    criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
-
-    CONSTRAINT fk_aluno_usuario FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE NO ACTION,
-    CONSTRAINT fk_aluno_responsavel FOREIGN KEY (responsavel_id) REFERENCES usuario(id) ON DELETE NO ACTION
+    CONSTRAINT fk_aluno_id
+        FOREIGN KEY (id) REFERENCES usuario(id)
+        ON DELETE NO ACTION,
+    CONSTRAINT fk_aluno_responsavel
+        FOREIGN KEY (responsavel_id) REFERENCES usuario(id)
+        ON DELETE NO ACTION
 );
 
-CREATE INDEX idx_aluno_usuario ON aluno(usuario_id);
+-- ÍNDICES (opcionais, conforme suas necessidades de consulta)
 CREATE INDEX idx_aluno_responsavel ON aluno(responsavel_id);
+
+-- Se quiser indexar 'matricula'
 CREATE INDEX idx_aluno_matricula ON aluno(matricula);
-CREATE INDEX idx_aluno_usuario_responsavel ON aluno(usuario_id, responsavel_id);
+
 
 -- ==========================
 -- TABELA CARTÃO_ALUNO
@@ -80,13 +82,21 @@ CREATE TABLE cartao_aluno (
     version INT NOT NULL DEFAULT 0,
     criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT fk_cartao_aluno FOREIGN KEY (aluno_id) REFERENCES aluno(id) ON DELETE CASCADE,
-    CONSTRAINT uq_cartao_uuid UNIQUE (uuid)
+    -- Torna 'numero' único
+    CONSTRAINT uq_cartao_aluno_numero UNIQUE (numero),
+
+    -- Chave estrangeira para a tabela aluno
+    CONSTRAINT fk_cartao_aluno 
+        FOREIGN KEY (aluno_id) REFERENCES aluno(id) ON DELETE CASCADE,
+    
+    -- Constraint de unicidade para o campo uuid
+    CONSTRAINT uq_cartao_aluno_uuid UNIQUE (uuid)
 );
 
-CREATE INDEX idx_cartao_aluno_id ON cartao_aluno(id);
-CREATE INDEX idx_cartao_aluno_uuid ON cartao_aluno(uuid);
-CREATE INDEX idx_cartao_aluno_numero ON cartao_aluno(numero);
+-- Índices (além dos UNIQUE, que geram índices implícitos, 
+-- podemos criar índices adicionais para buscas específicas)
+CREATE INDEX idx_cartao_aluno_id    ON cartao_aluno(id);
+CREATE INDEX idx_cartao_aluno_uuid  ON cartao_aluno(uuid);
 CREATE INDEX idx_cartao_aluno_aluno ON cartao_aluno(aluno_id);
 
 -- ==========================

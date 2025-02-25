@@ -93,6 +93,13 @@ public class UsuarioService {
                 () -> new EntityNotFoundException("Usuário não encontrado"));
     }
 
+    /**
+     * 
+     * @param <T>
+     * @param uuid
+     * @param clazz
+     * @return
+     */
     public <T> T findByUuid(UUID uuid, Class<T> clazz) {
 
         Object usuario = this.repository.findByUuid(uuid).orElseThrow(
