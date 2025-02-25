@@ -29,7 +29,7 @@ CREATE TABLE usuario (
     email VARCHAR(255) UNIQUE NOT NULL,
     telefone VARCHAR(20) UNIQUE,
     metodo_autenticacao VARCHAR(50) CHECK (metodo_autenticacao IN ('SENHA', 'MFA')) DEFAULT 'SENHA',
-    senha VARCHAR(100) NOT NULL,
+    senha VARCHAR(100),
     cpf VARCHAR(11) UNIQUE,
     perfil VARCHAR(50) CHECK (perfil IN ('MASTER', 'ADMIN', 'RESPONSAVEL', 'ALUNO', 'FUNCIONARIO', 'PDV')) NOT NULL,
     status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO',

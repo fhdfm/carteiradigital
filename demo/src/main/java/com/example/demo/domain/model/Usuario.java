@@ -43,14 +43,14 @@ public class Usuario extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "senha", nullable = false)
+    @Column(name = "senha")
     private String senha;
 
     @Convert(converter = CpfConverter.class)
     @Column(name = "cpf", unique = true)
     private String cpf;
 
-    @Column(name = "telefone", nullable = false)
+    @Column(name = "telefone", nullable = false, unique = true)
     private String telefone;
 
     @Enumerated(EnumType.STRING)
