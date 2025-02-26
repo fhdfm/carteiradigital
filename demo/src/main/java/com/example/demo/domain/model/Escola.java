@@ -31,7 +31,7 @@ public class Escola extends BaseEntity {
     @Column(name = "cnpj", nullable = false, unique = true)
     private String cnpj;
 
-    @Column(name = "payment_secret", nullable = false, unique = true)
+    @Column(name = "payment_secret", unique = true)
     private String paymentSecret;
 
     @Enumerated(EnumType.STRING)
