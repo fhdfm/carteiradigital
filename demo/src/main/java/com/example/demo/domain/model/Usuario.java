@@ -43,11 +43,11 @@ public class Usuario extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "senha")
+    @Column(name = "senha", nullable = false)
     private String senha;
 
     @Convert(converter = CpfConverter.class)
-    @Column(name = "cpf", unique = true)
+    @Column(name = "cpf", unique = true, nullable = false)
     private String cpf;
 
     @Column(name = "telefone", nullable = false, unique = true)
@@ -64,6 +64,9 @@ public class Usuario extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
+
+    @Column(name = "primeiro_acesso")
+    private Boolean primeiroAcesso = false;
     
     @Version
     private int version;
@@ -164,6 +167,14 @@ public class Usuario extends BaseEntity {
 
     public void setCpf(String cpf) {
         this.cpf = cpf;
+    }
+
+    public void setPrimeiroAcesso(Boolean primeiroAcesso) {
+        this.primeiroAcesso = primeiroAcesso;
+    }
+
+    public Boolean getPrimeiroAcesso() {
+        return primeiroAcesso;
     }
 
 }

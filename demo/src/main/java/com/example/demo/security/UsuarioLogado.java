@@ -92,5 +92,9 @@ public class UsuarioLogado implements UserDetails {
 
         return this.usuario.getEscola().getUuid();
     }
+
+    public boolean isPrimeiroAcesso() {
+        return this.usuario.getPrimeiroAcesso();
+    }
     
 }

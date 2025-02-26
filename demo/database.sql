@@ -31,9 +31,10 @@ CREATE TABLE usuario (
     telefone VARCHAR(20) UNIQUE,
     metodo_autenticacao VARCHAR(50) CHECK (metodo_autenticacao IN ('SENHA', 'MFA')) DEFAULT 'SENHA',
     senha VARCHAR(100),
-    cpf VARCHAR(11) UNIQUE,
+    cpf VARCHAR(11) UNIQUE NOT NULL,
     perfil VARCHAR(50) CHECK (perfil IN ('MASTER', 'ADMIN', 'RESPONSAVEL', 'ALUNO', 'FUNCIONARIO', 'PDV')) NOT NULL,
     status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO',
+    primeiro_acesso BOOLEAN DEFAULT TRUE NOT NULL,
     version INT NOT NULL DEFAULT 0,
     criado_em TIMESTAMP DEFAULT NOW(),
 
