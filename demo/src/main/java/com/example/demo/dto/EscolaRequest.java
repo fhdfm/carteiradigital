@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.validation.annotation.CNPJ;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -12,11 +13,7 @@ public record EscolaRequest(
         String nome,
         @Schema(description = "CNPJ da escola", example = "00.000.000/0001-00")
         @NotBlank(message = "CNPJ deve ser preenchido")
-        @Pattern(
-                regexp = "\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}",
-                message = "CNPJ deve seguir o padrão 00.000.000/0001-00"
-        )
-        String cnpj
+        @CNPJ String cnpj
 ) {
     
 }
