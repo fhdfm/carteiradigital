@@ -1,5 +1,12 @@
 package com.example.demo.dto;
 
-public record RefreshTokenRequest(String token) {
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+
+public record RefreshTokenRequest(
+        @Schema(description = "Token", example = "token")
+        @NotBlank(message = "Token deve ser enviado")
+        String token
+) {
     
 }
