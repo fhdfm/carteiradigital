@@ -3,6 +3,8 @@ package com.example.demo.service;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.example.demo.config.api.response.exception.EscolaException;
+import com.example.demo.dto.EscolaParametrosRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,12 +16,10 @@ import com.example.demo.dto.projection.EscolaView;
 import com.example.demo.repository.EscolaRepository;
 import com.example.demo.repository.specification.EscolaSpecification;
 
-import jakarta.persistence.EntityNotFoundException;
-
 @Service
 public class EscolaService {
     
-    private EscolaRepository repository;
+    private final EscolaRepository repository;
 
     public EscolaService(EscolaRepository repository) {
         this.repository = repository;
@@ -34,7 +34,7 @@ public class EscolaService {
                 cnpj).orElse(null);
 
         if (Objects.nonNull(escola))
-            throw new IllegalArgumentException("CNPJ já cadastrado.");
+            throw EscolaException.ofValidation("CNPJ já cadastrado.");
 
         escola = new Escola();
         escola.setNome(nome);
@@ -42,9 +42,6 @@ public class EscolaService {
         escola.setStatus(Status.ATIVO);
 
         repository.save(escola);
-        //repository.flush();
-
-        //System.out.println(escola.getUuid());
     }
 
     public void salvar(UUID uuid, EscolaRequest request) {
@@ -55,9 +52,8 @@ public class EscolaService {
         Escola escola = repository.findByCnpj(
             cnpj).orElse(null);
 
-        if (Objects.nonNull(escola))
-            if (!uuid.equals(escola.getUuid()))
-                throw new IllegalArgumentException("CNPJ já cadastrado.");
+        if (Objects.nonNull(escola) && !uuid.equals(escola.getUuid()))
+                throw EscolaException.ofConflict("CNPJ já cadastrado.");
 
         escola.setNome(nome);
         escola.setCnpj(cnpj);
@@ -68,17 +64,23 @@ public class EscolaService {
     public EscolaView buscarPorUuid(UUID uuid) {
 
         return repository.findByUuid(uuid, EscolaView.class)
-            .orElseThrow(() -> new EntityNotFoundException("Escola não encontrada."));
+            .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada."));
     }
 
     public Page<EscolaView> listar(EscolaSpecification specification, Pageable pageable) {
-        return repository.findAllProjected(specification, pageable, EscolaView.class);
+        Page<EscolaView> page =  repository.findAllProjected(specification, pageable, EscolaView.class);
+
+        if (page.isEmpty()) {
+            throw EscolaException.ofNoContent("Consulta com filtro informado não possui dados para retorno");
+        }
+
+        return page;
     }
 
     public void inativar(UUID uuid) {
-        
-        Escola escola = repository.findByUuid(uuid)
-            .orElseThrow(() -> new EntityNotFoundException("Escola não encontrada."));
+
+        Escola escola = findByUuid(uuid);
+
         escola.setStatus(Status.INATIVO);
         
         repository.save(escola);
@@ -86,11 +88,25 @@ public class EscolaService {
 
     public void ativar(UUID uuid) {
         
-        Escola escola = repository.findByUuid(uuid)
-            .orElseThrow(() -> new EntityNotFoundException("Escola não encontrada."));
-            escola.setStatus(Status.ATIVO);
+        Escola escola = findByUuid(uuid);
+
+        escola.setStatus(Status.ATIVO);
         
         repository.save(escola);
+    }
+
+    public void atualizarParametrosEscola(UUID uuid, EscolaParametrosRequest request) {
+
+        Escola escola = findByUuid(uuid);
+
+        escola.setPaymentSecret(request.paymentSecret());
+
+        repository.save(escola);
+    }
+
+    private Escola findByUuid(UUID uuid) {
+        return repository.findByUuid(uuid)
+                .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada."));
     }
 
 }

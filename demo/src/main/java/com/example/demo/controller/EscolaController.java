@@ -2,6 +2,13 @@ package com.example.demo.controller;
 
 import java.util.UUID;
 
+import com.example.demo.config.api.response.ApiReturn;
+import com.example.demo.config.api.swagger.EscolaApiOperation;
+import com.example.demo.dto.EscolaParametrosRequest;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -24,6 +31,7 @@ import com.example.demo.service.EscolaService;
 
 @RestController
 @RequestMapping("/api/escolas")
+@Tag(name = "Escolas", description = "Endpoints para gerenciamento de escolas")
 public class EscolaController {
 
     private final EscolaService service;
@@ -43,12 +51,23 @@ public class EscolaController {
      * }
      */
     @PreAuthorize("hasRole('MASTER')")
+    @EscolaApiOperation(
+            summary = "Criar uma escola",
+            description = "Cria e persiste uma nova escola contendo as informações especificadas na requisião."
+    )
     @PostMapping
-    public ResponseEntity<String> criarEscola(@RequestBody EscolaRequest request) {
+    public ResponseEntity<ApiReturn<String>> criarEscola(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Corpo da requisição com os dados de uma escola",
+                    required = true
+            )
+            @RequestBody @Valid EscolaRequest request
+    ) {
+        
         service.salvar(request);
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body("Escola criada com sucesso.");
+            .body(ApiReturn.of("Escola criada com sucesso."));
     }
 
     /**
@@ -62,11 +81,24 @@ public class EscolaController {
      * }
      */
     @PreAuthorize("hasRole('MASTER')")
+    @EscolaApiOperation(
+            summary = "Atualizar uma escola",
+            description = "Atualiza, a partir do seu UUID, uma escola persistida com as informações especificadas na requisião."
+    )
     @PutMapping("/{uuid}")
-    public ResponseEntity<String> atualizarEscola(@PathVariable("uuid") UUID uuid,
-                                                @RequestBody EscolaRequest request) {
+    public ResponseEntity<ApiReturn<String>> atualizarEscola(
+            @Parameter(description = "UUID da escola a ser buscada", required = true)
+            @PathVariable("uuid") UUID uuid,
+
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Corpo da requisição com os dados da escola",
+                    required = true
+            )
+            @RequestBody @Valid EscolaRequest request
+    ) {
         service.salvar(uuid, request);
-        return ResponseEntity.ok("Escola atualizada com sucesso.");
+        
+        return ResponseEntity.ok(ApiReturn.of("Escola atualizada com sucesso."));
     }
 
     /**
@@ -75,10 +107,16 @@ public class EscolaController {
      */
     @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
     @CheckAccess(entity = EntityNames.ESCOLA)
+    @EscolaApiOperation(
+            summary = "Busca uma escola",
+            description = "Busca, a partir do seu UUID, uma escola persistida."
+    )
     @GetMapping("/{uuid}")
-    public ResponseEntity<EscolaView> buscarEscolaPorUuid(@PathVariable("uuid") UUID uuid) {
-        EscolaView escola = service.buscarPorUuid(uuid);
-        return ResponseEntity.ok(escola);
+    public ResponseEntity<ApiReturn<EscolaView>> buscarEscolaPorUuid(
+            @Parameter(description = "UUID da escola a ser buscada", required = true)
+            @PathVariable("uuid") UUID uuid
+    ) {
+        return ResponseEntity.ok(ApiReturn.of(service.buscarPorUuid(uuid)));
     }
 
     /**
@@ -86,24 +124,69 @@ public class EscolaController {
      * Exemplo de requisição: GET /api/escolas?page=0&size=10
      */
     @PreAuthorize("hasRole('MASTER')")
+    @EscolaApiOperation(
+            summary = "Lista as escolas",
+            description = "Retorna um page contendo escolas de acordo com os filtros especificados."
+    )
     @GetMapping
-    public ResponseEntity<Page<EscolaView>> listarEscolas(EscolaSpecification specification, Pageable pageable) {
-        Page<EscolaView> escolas = service.listar(specification, pageable);
-        return ResponseEntity.ok(escolas);
+    public ResponseEntity<ApiReturn<Page<EscolaView>>> listarEscolas(
+            @ParameterObject EscolaSpecification specification,
+            @ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(ApiReturn.of(service.listar(specification, pageable)));
     }
 
     @PreAuthorize("hasRole('MASTER')")
+    @EscolaApiOperation(
+            summary = "Inativa uma escola",
+            description = "Inativa, a partir do seu UUID, uma escola persistida."
+    )
     @PutMapping("/{uuid}/inativar")
-    public ResponseEntity<String> inativarEscola(@PathVariable("uuid") UUID uuid) {
+    public ResponseEntity<ApiReturn<String>> inativarEscola(
+            @Parameter(description = "UUID da escola a ser inativada", required = true)
+            @PathVariable("uuid") UUID uuid
+    ) {
+        
         service.inativar(uuid);
-        return ResponseEntity.ok("Escola inativada com sucesso.");
+        
+        return ResponseEntity.ok(ApiReturn.of("Escola inativada com sucesso."));
     }
 
     @PreAuthorize("hasRole('MASTER')")
+    @EscolaApiOperation(
+            summary = "Ativa uma escola",
+            description = "Ativa, a partir do seu UUID, uma escola persistida."
+    )
     @PutMapping("/{uuid}/ativar")
-    public ResponseEntity<String> ativarEscola(@PathVariable("uuid") UUID uuid) {
+    public ResponseEntity<ApiReturn<String>> ativarEscola(
+            @Parameter(description = "UUID da escola a ser ativada", required = true)
+            @PathVariable("uuid") UUID uuid
+    ) {
         service.ativar(uuid);
-        return ResponseEntity.ok("Escola ativada com sucesso.");
-    }    
+        return ResponseEntity.ok(ApiReturn.of("Escola ativada com sucesso."));
+    }
+
+    /**
+     * Atualiza os parametros de uma escola existente identificada pelo UUID.
+     * Exemplo de requisição: PUT /api/escolas/params/{uuid}
+     */
+    @EscolaApiOperation(
+            summary = "Atualizar os parametros de uma escola",
+            description = "Atualiza, a partir do seu UUID, os parametros de uma escola persistida com as informações especificadas na requisião."
+    )
+    @PutMapping("params/{uuid}")
+    public ResponseEntity<ApiReturn<String>> atualizarParametrosEscola(
+            @Parameter(description = "UUID da escola a ser buscada", required = true)
+            @PathVariable("uuid") UUID uuid,
+
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Corpo da requisição com os parâmetros a serem salvos da escola",
+                    required = true
+            )
+            @RequestBody @Valid EscolaParametrosRequest request
+    ) {
+        service.atualizarParametrosEscola(uuid, request);
+
+        return ResponseEntity.ok(ApiReturn.of("Escola atualizada com sucesso."));
+    }
 
 }

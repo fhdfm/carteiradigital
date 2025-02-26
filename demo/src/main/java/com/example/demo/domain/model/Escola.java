@@ -31,6 +31,9 @@ public class Escola extends BaseEntity {
     @Column(name = "cnpj", nullable = false, unique = true)
     private String cnpj;
 
+    @Column(name = "payment_secret", nullable = false, unique = true)
+    private String paymentSecret;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
@@ -74,6 +77,13 @@ public class Escola extends BaseEntity {
         this.cnpj = cnpj;
     }
 
+    public String getPaymentSecret() {
+        return paymentSecret;
+    }
+
+    public void setPaymentSecret(String paymentSecret) {
+        this.paymentSecret = paymentSecret;
+    }
     @Override
     public UUID getUuid() {
        return super.uuid;
