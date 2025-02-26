@@ -1,8 +1,9 @@
 package com.example.demo.util;
 
-import com.example.demo.config.api.response.exception.EscolaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.example.demo.exception.escola.EscolaException;
 
 public class LogUtil {
 

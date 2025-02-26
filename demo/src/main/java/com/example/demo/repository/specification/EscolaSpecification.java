@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.example.demo.domain.enums.Status;
 import com.example.demo.domain.model.Escola;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;

@@ -1,14 +1,15 @@
 package com.example.demo.controller.handler;
 
-import com.example.demo.config.api.response.ApiReturn;
-import com.example.demo.config.api.response.exception.EscolaException;
-import com.example.demo.config.api.response.exception.NoContentException;
-import com.example.demo.util.LogUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.exception.escola.NoContentException;
+import com.example.demo.util.ApiReturn;
+import com.example.demo.util.LogUtil;
 
 
 @RestControllerAdvice

@@ -1,6 +1,6 @@
-package com.example.demo.config.api.response.exception;
+package com.example.demo.exception.escola;
 
-import com.example.demo.config.api.response.ErrorType;
+import com.example.demo.util.ErrorType;
 
 public class ValidationException extends EscolaException {
     private static final long serialVersionUID = 1L;

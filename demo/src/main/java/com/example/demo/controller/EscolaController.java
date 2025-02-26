@@ -2,12 +2,6 @@ package com.example.demo.controller;
 
 import java.util.UUID;
 
-import com.example.demo.config.api.response.ApiReturn;
-import com.example.demo.config.api.swagger.EscolaApiOperation;
-import com.example.demo.dto.EscolaParametrosRequest;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,12 +16,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.controller.doc.EscolaApiOperation;
+import com.example.demo.dto.EscolaParametrosRequest;
 import com.example.demo.dto.EscolaRequest;
 import com.example.demo.dto.projection.EscolaView;
 import com.example.demo.repository.specification.EscolaSpecification;
 import com.example.demo.security.accesscontrol.EntityNames;
 import com.example.demo.security.accesscontrol.annotation.CheckAccess;
 import com.example.demo.service.EscolaService;
+import com.example.demo.util.ApiReturn;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/escolas")

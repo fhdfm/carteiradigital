@@ -1,7 +1,7 @@
-package com.example.demo.config.api.response;
+package com.example.demo.util;
 
-import com.example.demo.config.api.response.exception.EscolaException;
-import com.example.demo.config.api.response.exception.NoContentException;
+import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.exception.escola.NoContentException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ApiReturn<T> {

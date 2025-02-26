@@ -1,19 +1,20 @@
 package com.example.demo.controller;
 
-import com.example.demo.config.api.response.ApiReturn;
-import com.example.demo.config.api.swagger.EscolaApiOperation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.controller.doc.EscolaApiOperation;
 import com.example.demo.dto.JwtAuthenticationResponse;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.RefreshTokenRequest;
 import com.example.demo.service.UsuarioService;
+import com.example.demo.util.ApiReturn;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
