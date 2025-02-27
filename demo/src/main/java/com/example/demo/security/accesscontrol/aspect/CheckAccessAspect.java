@@ -11,6 +11,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.domain.enums.Perfil;
+import com.example.demo.exception.escola.EscolaException;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
 import com.example.demo.security.accesscontrol.annotation.CheckAccess;
@@ -58,9 +59,8 @@ public class CheckAccessAspect {
             }
         }
 
-        if (resourceId == null) {
-            throw new IllegalArgumentException("Parâmetro '" + paramName + "' não encontrado no método.");
-        }
+        if (resourceId == null)
+            EscolaException.ofValidation("Parâmetro '" + paramName + "' não encontrado no método.");
 
         AccessPolicy policy = accessPolicyFactory.getPolicy(entity);
 
