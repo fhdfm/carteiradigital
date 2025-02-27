@@ -26,16 +26,17 @@ public class DominioController {
     @PreAuthorize("hasAnyRole('MASTER', 'ADMIN', 'FUNCIONARIO')")
     public ResponseEntity<ApiReturn<Perfil[]>> listarPerfis() {
         
-        UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
         List<Perfil> perfisParaExibicao = Arrays.stream(Perfil.values())
-            .filter(perfil -> podeVisualizar(perfil, currentUser))
+            .filter(perfil -> podeVisualizar(perfil))
             .collect(Collectors.toList());
 
         return ResponseEntity.ok(ApiReturn.of(perfisParaExibicao.toArray(new Perfil[0])));
     }
 
-    private boolean podeVisualizar(Perfil perfil, UsuarioLogado currentUser) {
+    private boolean podeVisualizar(Perfil perfil) {
         
+        UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
+
         boolean isMaster = currentUser.possuiPerfil(Perfil.MASTER);
         if (isMaster)
             return true;
