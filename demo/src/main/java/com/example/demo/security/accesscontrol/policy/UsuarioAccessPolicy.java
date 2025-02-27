@@ -27,7 +27,7 @@ public class UsuarioAccessPolicy implements AccessPolicy {
     @Override
     public boolean hasAccess(UsuarioLogado currentUser, Object resourceId) {
         // Acesso irrestrito para MASTER
-        if (currentUser.possuiPerfil(Perfil.MASTER.name())) {
+        if (currentUser.possuiPerfil(Perfil.MASTER)) {
             return true;
         }
     
@@ -41,11 +41,11 @@ public class UsuarioAccessPolicy implements AccessPolicy {
         }
     
         // Armazenar os perfis em variáveis para melhor legibilidade
-        boolean isAdmin = currentUser.possuiPerfil(Perfil.ADMIN.name());
-        boolean isFuncionario = currentUser.possuiPerfil(Perfil.FUNCIONARIO.name());
-        boolean isPdv = currentUser.possuiPerfil(Perfil.PDV.name());
-        boolean isAluno = currentUser.possuiPerfil(Perfil.ALUNO.name());
-        boolean isResponsavel = currentUser.possuiPerfil(Perfil.RESPONSAVEL.name());
+        boolean isAdmin = currentUser.possuiPerfil(Perfil.ADMIN);
+        boolean isFuncionario = currentUser.possuiPerfil(Perfil.FUNCIONARIO);
+        boolean isPdv = currentUser.possuiPerfil(Perfil.PDV);
+        boolean isAluno = currentUser.possuiPerfil(Perfil.ALUNO);
+        boolean isResponsavel = currentUser.possuiPerfil(Perfil.RESPONSAVEL);
     
         // Se o usuário é ADMIN ou FUNCIONARIO: acesso permitido se as escolas coincidirem
         if (isAdmin || isFuncionario) {

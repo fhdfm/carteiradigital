@@ -79,15 +79,15 @@ public class UsuarioLogado implements UserDetails {
             Status.ATIVO.name());
     }
 
-    public boolean possuiPerfil(String perfil) {
-        String authorityToCheck = "ROLE_" + perfil.toUpperCase();
+    public boolean possuiPerfil(Perfil perfil) {
+        String authorityToCheck = "ROLE_" + perfil.name().toUpperCase();
         return getAuthorities().stream()
             .anyMatch(authority -> authority.getAuthority().equals(authorityToCheck));
     }
 
     public UUID getEscolaUuid() {
         
-        if (possuiPerfil(Perfil.MASTER.name()))
+        if (possuiPerfil(Perfil.MASTER))
             return null;
 
         return this.usuario.getEscola().getUuid();

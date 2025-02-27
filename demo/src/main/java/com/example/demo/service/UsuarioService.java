@@ -120,7 +120,7 @@ public class UsuarioService {
         
         UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
         
-        if (currentUser.possuiPerfil(Perfil.ALUNO.name())) {
+        if (currentUser.possuiPerfil(Perfil.ALUNO)) {
             Boolean alunoPodeTrocarSenha =
                 this.repository.isPrimeiroAcessoResponsavel(currentUser.getUuid());
             if (alunoPodeTrocarSenha != null && !alunoPodeTrocarSenha)

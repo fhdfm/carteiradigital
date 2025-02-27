@@ -33,7 +33,7 @@ public class CheckAccessAspect {
         UsuarioLogado usuarioLogado = SecurityUtils.getUsuarioLogado();
         
         // Se é usuário MASTER tem acesso irrestrito.
-        boolean isMaster = usuarioLogado.possuiPerfil(Perfil.MASTER.name());
+        boolean isMaster = usuarioLogado.possuiPerfil(Perfil.MASTER);
         if (isMaster) return joinPoint.proceed();
 
         // Recupera a anotação e os parâmetros do método

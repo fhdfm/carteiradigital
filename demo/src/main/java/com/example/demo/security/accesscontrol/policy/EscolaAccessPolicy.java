@@ -23,7 +23,7 @@ public class EscolaAccessPolicy implements AccessPolicy {
         }
         
         // Cache dos resultados dos perfis para evitar chamadas duplicadas.
-        boolean isAdmin = usuarioLogado.possuiPerfil(Perfil.ADMIN.name());
+        boolean isAdmin = usuarioLogado.possuiPerfil(Perfil.ADMIN);
         
         // Outros perfis não possuem acesso.
         return isAdmin || resourceId.equals(usuarioLogado.getEscolaUuid());
