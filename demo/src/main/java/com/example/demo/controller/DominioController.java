@@ -1,8 +1,6 @@
 package com.example.demo.controller;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,11 +24,11 @@ public class DominioController {
     @PreAuthorize("hasAnyRole('MASTER', 'ADMIN', 'FUNCIONARIO')")
     public ResponseEntity<ApiReturn<Perfil[]>> listarPerfis() {
         
-        List<Perfil> perfisParaExibicao = Arrays.stream(Perfil.values())
-            .filter(perfil -> podeVisualizar(perfil))
-            .collect(Collectors.toList());
+        Perfil[] perfisParaExibicao = Arrays.stream(Perfil.values())
+            .filter(this::podeVisualizar)
+            .toArray(Perfil[]::new);
 
-        return ResponseEntity.ok(ApiReturn.of(perfisParaExibicao.toArray(new Perfil[0])));
+        return ResponseEntity.ok(ApiReturn.of(perfisParaExibicao));
     }
 
     private boolean podeVisualizar(Perfil perfil) {
