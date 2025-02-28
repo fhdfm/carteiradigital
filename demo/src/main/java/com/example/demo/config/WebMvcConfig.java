@@ -1,38 +1,32 @@
 package com.example.demo.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.format.FormatterRegistry;
-import org.springframework.format.datetime.DateFormatter;
-import org.springframework.format.datetime.DateFormatterRegistrar;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.TimeZone;
-
 @Configuration
-@EnableWebMvc
 @SuppressWarnings("all")
-public class WebMvcConfig implements WebMvcConfigurer {
+public class WebMvcConfig {
     
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT");
-    }
-
-    @Override
-    public void addFormatters(FormatterRegistry registry) {
-
-        DateFormatter formatter = new DateFormatter("dd/MM/yyyy");
-        formatter.setTimeZone(TimeZone.getTimeZone("America/Fortaleza"));
-
-        DateFormatterRegistrar registrar = new DateFormatterRegistrar();
-        registrar.setFormatter(formatter);
-        registrar.registerFormatters(registry);
-
-        registry.addConverter(String.class, MultipartFile.class, source -> null);
+    @Bean
+    public WebMvcConfigurer corsConfig() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("*")
+                        //.allowedOrigins("http://localhost:4200")
+                        .allowedMethods(HttpMethod.GET.name(),
+                                        HttpMethod.POST.name(),
+                                        HttpMethod.DELETE.name(),
+                                        HttpMethod.PUT.name())
+                        .allowedHeaders(HttpHeaders.CONTENT_TYPE,
+                                        HttpHeaders.AUTHORIZATION);
+            }
+        };
     }
 
 }
