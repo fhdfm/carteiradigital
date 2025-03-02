@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.domain.model.Categoria;
+import com.example.demo.domain.model.CategoriaProduto;
 import com.example.demo.service.CategoriaService;
 import com.example.demo.util.ApiReturn;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,10 +26,10 @@ public class CategoriaController {
         this.service = service;
     }
 
-    @PreAuthorize("hasRole('MASTER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
     @PostMapping
-    public ResponseEntity<ApiReturn<String>> criarCategoria(@RequestBody @Valid String request) {
-        service.salvar(null, request);
+    public ResponseEntity<ApiReturn<String>> criarCategoria(@RequestBody @Valid CategoriaProduto categoria) {
+        service.salvar(null, categoria.getNome());
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiReturn.of("Categoria criado com sucesso."));
     }
 
@@ -43,14 +43,14 @@ public class CategoriaController {
 
     @PreAuthorize("!hasRole('ALUNO')")
     @GetMapping("/{uuid}")
-    public ResponseEntity<ApiReturn<Categoria>> buscarCategoriaPorUuid(@PathVariable("uuid") UUID uuid) {
+    public ResponseEntity<ApiReturn<CategoriaProduto>> buscarCategoriaPorUuid(@PathVariable("uuid") UUID uuid) {
         return ResponseEntity.ok(ApiReturn.of(service.buscarPorUuid(uuid)));
     }
 
     @PreAuthorize("!hasRole('ALUNO')")
     @GetMapping
-    public ResponseEntity<ApiReturn<Page<Categoria>>> listarCategorias(@ParameterObject String nome,
-                                                                       @ParameterObject Pageable pageable) {
+    public ResponseEntity<ApiReturn<Page<CategoriaProduto>>> listarCategorias(@ParameterObject String nome,
+                                                                              @ParameterObject Pageable pageable) {
         return ResponseEntity.ok(ApiReturn.of(service.listar(nome, pageable)));
     }
 

@@ -49,7 +49,7 @@ public class Produto extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false)
-    private Categoria categoria;
+    private CategoriaProduto categoria;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -129,11 +129,11 @@ public class Produto extends BaseEntity {
         this.quantidadeVendidas = quantidadeVendidas;
     }
 
-    public Categoria getCategoria() {
+    public CategoriaProduto getCategoria() {
         return categoria;
     }
 
-    public void setCategoria(Categoria categoria) {
+    public void setCategoria(CategoriaProduto categoria) {
         this.categoria = categoria;
     }
 
