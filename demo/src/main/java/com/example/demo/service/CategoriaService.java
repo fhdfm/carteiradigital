@@ -38,7 +38,6 @@ public class CategoriaService {
                 .orElseThrow(() -> EscolaException.ofNotFound("Categoria não encontrado."));
     }
 
-    //    ANALISAR DEPOIS SE DA PRA FAZER DIFERENTE/MELHOR
     public Page<Categoria> listar(String nome, Pageable pageable) {
         Page<Categoria> page;
 

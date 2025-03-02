@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/categoria")
+@RequestMapping("/api/categorias")
 @Tag(name = "Categorias", description = "Endpoints para gerenciamento de categorias")
 public class CategoriaController {
 
