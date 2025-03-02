@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.example.demo.domain.enums.Departamento;
 
+import com.example.demo.domain.enums.Status;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -45,6 +46,15 @@ public class Produto extends BaseEntity {
 
     @Column(name = "quantidade_vendidas", nullable = false)
     private Long quantidadeVendidas;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private Categoria categoria;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status;
+
 
     @Version
     private int version;
@@ -119,4 +129,19 @@ public class Produto extends BaseEntity {
         this.quantidadeVendidas = quantidadeVendidas;
     }
 
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }
