@@ -6,9 +6,35 @@ import com.example.demo.domain.enums.MetodoAutenticacao;
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.validation.annotation.CPF;
 
-public record UsuarioRequest(UUID escola, 
-        String nome, String email, String senha, 
-        @CPF String cpf, String telefone, 
-        MetodoAutenticacao metodoAutenticacao, Perfil perfil) {
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+public record UsuarioRequest(
     
-}
+    @NotNull(message = "Escola ID é obrigatório")
+    UUID escolaId,
+    
+    @NotBlank(message = "O nome é obrigatório")
+    @Size(min = 3, max = 255, message = "O nome deve ter entre 3 e 255 caracteres")
+    String nome,
+    
+    @NotBlank(message = "O email é obrigatório")
+    @Email(message = "Informe um email válido")
+    String email,
+    
+    @NotBlank(message = "O CPF é obrigatório")
+    @CPF(message = "CPF inválido")
+    String cpf,
+    
+    @NotBlank(message = "O telefone é obrigatório")
+    String telefone,
+    
+    @NotNull(message = "O método de autenticação é obrigatório")
+    MetodoAutenticacao metodoAutenticacao,
+    
+    @NotNull(message = "O perfil é obrigatório")
+    Perfil perfil
+
+) { }

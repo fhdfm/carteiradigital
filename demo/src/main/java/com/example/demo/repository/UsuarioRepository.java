@@ -13,8 +13,8 @@ import com.example.demo.domain.model.Usuario;
 public interface UsuarioRepository extends BaseRepository<Usuario, Long> {
  
     /* Utilizado para o login */
-    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.escola WHERE u.email = :email")
-    Optional<Usuario> findByEmailComEscola(@Param("email") String email);
+    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.escola WHERE u.email = :email and u.status = 'ATIVO'")
+    Optional<Usuario> buscarUsuarioAtivoComEscolaPorEmail(@Param("email") String email);
     
     Optional<Usuario> findByEmail(String email);
 
@@ -25,4 +25,12 @@ public interface UsuarioRepository extends BaseRepository<Usuario, Long> {
            "JOIN Aluno a ON u.id = a.responsavel.id " +
            "WHERE a.uuid = :alunoId")
     Boolean isPrimeiroAcessoResponsavel(@Param("alunoId") UUID alunoId);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByEmailAndUuidNot(String email, UUID uuid);
+
+    boolean existsByCpf(String cpf);
+
+    boolean existsByCpfAndUuidNot(String cpf, UUID uuid);
 }

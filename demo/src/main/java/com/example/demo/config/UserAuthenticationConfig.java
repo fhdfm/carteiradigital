@@ -25,7 +25,7 @@ public class UserAuthenticationConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> usuarioRepository.findByEmailComEscola(username)
+        return username -> usuarioRepository.buscarUsuarioAtivoComEscolaPorEmail(username)
                 .map(Usuario::toUsuarioLogado)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }

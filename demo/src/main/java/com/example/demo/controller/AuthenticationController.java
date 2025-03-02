@@ -10,8 +10,7 @@ import com.example.demo.controller.doc.EscolaApiOperation;
 import com.example.demo.dto.JwtAuthenticationResponse;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.RefreshTokenRequest;
-import com.example.demo.dto.TrocarSenhaRequest;
-import com.example.demo.service.UsuarioService;
+import com.example.demo.service.AuthenticationService;
 import com.example.demo.util.ApiReturn;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,9 +21,9 @@ import jakarta.validation.Valid;
 @Tag(name = "Autenticação", description = "Endpoints relacionados a autenticação do usuário")
 public class AuthenticationController {
     
-    private final UsuarioService service;
+    private final AuthenticationService service;
 
-    public AuthenticationController(UsuarioService service) {
+    public AuthenticationController(AuthenticationService service) {
         this.service = service;
     }
 
@@ -45,11 +44,4 @@ public class AuthenticationController {
     public ResponseEntity<ApiReturn<JwtAuthenticationResponse>> signin(@RequestBody @Valid RefreshTokenRequest request) {
         return ResponseEntity.ok(ApiReturn.of(service.refreshToken(request)));
     }
-
-    @PostMapping("/change-password")
-    public ResponseEntity<ApiReturn<String>> changePassword(@RequestBody @Valid TrocarSenhaRequest request) {
-        service.changePassword(request);
-        return ResponseEntity.ok(ApiReturn.of("Senha alterada com sucesso."));
-    }
-
 }

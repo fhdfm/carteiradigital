@@ -16,5 +16,5 @@ public interface AccessPolicy {
      * @param resourceId o identificador do recurso (por exemplo, um UUID)
      * @return true se o usuário tiver acesso; false caso contrário
      */
-    boolean hasAccess(UsuarioLogado user, Object resourceId);
+    boolean hasAccess(UsuarioLogado user, String httpMethod, Object resourceId);
 }

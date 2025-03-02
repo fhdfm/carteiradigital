@@ -44,7 +44,7 @@ public class EscolaSpecification implements Specification<Escola> {
 
         if (Objects.nonNull(cnpj) && !cnpj.isEmpty()) {
             predicates.add(
-                criteria.like(root.get("cnpj"), "%" +cnpj+ "%"));
+                criteria.equal(root.get("cnpj"), cnpj));
         }
 
         if (Objects.nonNull(status)) {

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.controller.doc.EscolaApiOperation;
 import com.example.demo.dto.EscolaParametrosRequest;
 import com.example.demo.dto.EscolaRequest;
-import com.example.demo.dto.projection.EscolaView;
+import com.example.demo.dto.projection.escola.EscolaView;
 import com.example.demo.repository.specification.EscolaSpecification;
 import com.example.demo.security.accesscontrol.EntityNames;
 import com.example.demo.security.accesscontrol.annotation.CheckAccess;

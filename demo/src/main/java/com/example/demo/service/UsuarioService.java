@@ -1,26 +1,25 @@
 package com.example.demo.service;
 
-import java.util.HashMap;
+import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.domain.enums.MetodoAutenticacao;
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.enums.Status;
+import com.example.demo.domain.model.Escola;
 import com.example.demo.domain.model.Usuario;
-import com.example.demo.dto.JwtAuthenticationResponse;
-import com.example.demo.dto.LoginRequest;
-import com.example.demo.dto.RefreshTokenRequest;
 import com.example.demo.dto.TrocarSenhaRequest;
 import com.example.demo.dto.UsuarioRequest;
+import com.example.demo.dto.projection.usuario.UsuarioSummary;
 import com.example.demo.exception.escola.EscolaException;
 import com.example.demo.repository.UsuarioRepository;
-import com.example.demo.security.JwtService;
+import com.example.demo.repository.specification.UsuarioSpecification;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
 
@@ -29,72 +28,104 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class UsuarioService {
     
-    private final AuthenticationManager authenticationManager;
-
-    private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-
     private final UsuarioRepository repository;
+    private final EscolaService escolaService;
 
-    public UsuarioService(UsuarioRepository repository, 
-        PasswordEncoder passwordEncoder, 
-        JwtService jwtService, 
-        AuthenticationManager authenticationManager) {
+    public UsuarioService(UsuarioRepository repository, PasswordEncoder passwordEncoder, 
+        EscolaService escolaService) {
         
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
-
+        this.escolaService = escolaService;
     }
 
-    public JwtAuthenticationResponse signin(LoginRequest request) {
-                
-        Authentication auth = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.login(), request.password()));
+    public UUID create(UsuarioRequest request) {
 
-        UsuarioLogado usuarioLogado = (UsuarioLogado) auth.getPrincipal();
-        
-        String token = jwtService.generateToken(usuarioLogado);
-        String refreshToken = jwtService.generateRefreshToken(new HashMap<>(), usuarioLogado);
-        
-        return new JwtAuthenticationResponse(token, refreshToken);
-    }
+        UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
+        Perfil perfil = request.perfil();
+        validateProfileAssignmentPermission(currentUser, perfil);
 
-    public JwtAuthenticationResponse refreshToken(RefreshTokenRequest request) {
-        
-        String login = this.jwtService.extractUsername(request.token());
-        
-        Usuario user = repository.findByEmailComEscola(login).orElseThrow();
-        UsuarioLogado usuarioLogado = user.toUsuarioLogado();
-        
-        if (!jwtService.isTokenValid(request.token())) {
-            throw new IllegalArgumentException("Invalid token");
-        }
+        String email = request.email().trim();
+        if (this.repository.existsByEmail(email))
+            throw EscolaException.ofValidation(email + " já está cadastrado");
 
-        String token = jwtService.generateToken(usuarioLogado);
-        return new JwtAuthenticationResponse(token, request.token());
-    }
+        String cpf = request.cpf().trim().replaceAll("\\D", "");
+        if (this.repository.existsByCpf(cpf))
+            throw EscolaException.ofValidation(cpf + " já está cadastrado");
 
-    public void create(UsuarioRequest request) {
+        String senha = this.gerarSenhaTemporaria();
+
+        Escola escola = this.getEscola(request.escolaId());
 
         Usuario user = new Usuario();
+        user.setEscola(escola);
         user.setNome(request.nome());
-        user.setEmail(request.email());
-        user.setSenha(passwordEncoder.encode(request.senha()));
-        user.setPerfil(Perfil.MASTER);
-        user.setMetodoAutenticacao(MetodoAutenticacao.SENHA);
-        user.setCpf(request.cpf());
+        user.setEmail(email);
+        user.setPerfil(perfil);
+        user.setMetodoAutenticacao(request.metodoAutenticacao());
+        user.setCpf(cpf);
         user.setStatus(Status.ATIVO);
         user.setTelefone(request.telefone());
         user.setPrimeiroAcesso(true);
+        user.setSenha(passwordEncoder.encode(senha));
+
+        // TODO - Envia e-mail para o usuário.
 
         repository.save(user);
+
+        Usuario newUser = this.repository.findByEmail(email).orElseThrow(() 
+                        -> EscolaException.ofNotFound("Usuário não encontrado."));
+        return newUser.getUuid();
     }
+
+    public void update(UUID uuid, UsuarioRequest request) {
+
+        Usuario user = this.findByUuid(uuid);
+
+        UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
+        Perfil perfil = request.perfil();
+        validateProfileAssignmentPermission(currentUser, perfil);
+
+        String email = request.email().trim();
+        if (this.repository.existsByEmailAndUuidNot(email, uuid))
+            throw EscolaException.ofValidation(email + " já está cadastrado");
+
+        String cpf = request.cpf().trim().replaceAll("\\D", "");
+        if (this.repository.existsByCpfAndUuidNot(cpf, uuid))
+            throw EscolaException.ofValidation(cpf + " já está cadastrado");
+
+        Escola escola = this.getEscola(request.escolaId());
+        
+        user.setEscola(escola);
+        user.setNome(request.nome());
+        user.setEmail(email);
+        user.setPerfil(perfil);
+        user.setMetodoAutenticacao(request.metodoAutenticacao());
+        user.setCpf(cpf);
+        user.setTelefone(request.telefone());
+
+        repository.save(user);
+    }    
 
     public Usuario findByUuid(UUID uuid) {
         return this.repository.findByUuid(uuid).orElseThrow(
-                () -> new EntityNotFoundException("Usuário não encontrado"));
+                () -> EscolaException.ofNotFound("Usuário não encontrado."));
+    }
+
+    public void delete(UUID uuid) {
+        Usuario user = this.findByUuid(uuid);
+        user.setStatus(Status.INATIVO);
+        repository.save(user);
+    }
+
+    public Usuario findByEmailComEscola(String email) {
+        return this.repository.buscarUsuarioAtivoComEscolaPorEmail(email).orElseThrow(
+                () -> EscolaException.ofNotFound("Usuário não encontrado."));
+    }
+
+    public Page<UsuarioSummary> findAll(UsuarioSpecification specification, Pageable pageable) {
+        return this.repository.findAllProjected(specification, pageable, UsuarioSummary.class);
     }
 
     /**
@@ -138,6 +169,71 @@ public class UsuarioService {
         usuario.setSenha(passwordEncoder.encode(request.novaSenha()));
 
         this.repository.save(usuario);     
+    }
+
+    private void validateProfileAssignmentPermission(UsuarioLogado currentUser, Perfil requestedPerfil) {
+        if (currentUser.possuiPerfil(Perfil.ADMIN) && requestedPerfil == Perfil.MASTER) {
+            throw EscolaException.ofValidation("Operação não permitida");
+        }
+
+        if (currentUser.possuiPerfil(Perfil.FUNCIONARIO) && requestedPerfil == Perfil.ADMIN) {
+            throw EscolaException.ofValidation("Operação não permitida");
+        }
+    }    
+
+    private Escola getEscola(UUID uuid) {
+        return this.escolaService.findByUuid(uuid);
+    }
+
+    /**
+    * Gera uma senha temporária aleatória com tamanho fixo de 8 caracteres.
+    *
+    * <p>A senha gerada atende aos seguintes requisitos:
+    * <ul>
+    *   <li>Contém pelo menos um caractere maiúsculo</li>
+    *   <li>Contém pelo menos um caractere minúsculo</li>
+    *   <li>Contém pelo menos um dígito numérico</li>
+    *   <li>Contém pelo menos um caractere especial</li>
+    * </ul>
+    * Os demais caracteres são escolhidos aleatoriamente dentre todos os caracteres permitidos.
+    * A ordem dos caracteres é embaralhada para evitar qualquer padrão previsível.
+    * </p>
+    *
+    * @return uma String contendo a senha temporária gerada.
+    */
+    private String gerarSenhaTemporaria() {
+
+        int tamanhoSenha = 8;
+
+        String maiusculas = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String minusculas = "abcdefghijklmnopqrstuvwxyz";
+        String numeros = "0123456789";
+        String especiais = "!@#$%^&*()-_=+[]{}|;:,.<>?";
+        String todos = maiusculas + minusculas + numeros + especiais;
+
+        SecureRandom random = new SecureRandom();
+        
+        List<Character> senha = new java.util.ArrayList<>();
+        
+        // Adiciona obrigatoriamente um caractere de cada tipo
+        senha.add(maiusculas.charAt(random.nextInt(maiusculas.length())));
+        senha.add(minusculas.charAt(random.nextInt(minusculas.length())));
+        senha.add(numeros.charAt(random.nextInt(numeros.length())));
+        senha.add(especiais.charAt(random.nextInt(especiais.length())));
+
+        for (int i = 4; i < tamanhoSenha; i++) {
+            senha.add(todos.charAt(random.nextInt(todos.length())));
+        }
+
+        Collections.shuffle(senha, random);
+        
+        // Converte a lista de caracteres para String
+        StringBuilder resultado = new StringBuilder(tamanhoSenha);
+        for (char c : senha) {
+            resultado.append(c);
+        }
+
+        return resultado.toString();
     }
 
 }

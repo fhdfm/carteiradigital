@@ -9,6 +9,11 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.exception.escola.EscolaException;
@@ -64,10 +69,26 @@ public class CheckAccessAspect {
 
         AccessPolicy policy = accessPolicyFactory.getPolicy(entity);
 
-        if (!policy.hasAccess(usuarioLogado, resourceId))
+        String httpMethod = getHttpMethodFromAnnotations(method);
+
+        if (!policy.hasAccess(usuarioLogado, httpMethod, resourceId))
             throw new AccessDeniedException("Acesso negado");
 
         return joinPoint.proceed();
     }
+
+    private String getHttpMethodFromAnnotations(Method method) {
+        if (method.isAnnotationPresent(GetMapping.class)) return "GET";
+        if (method.isAnnotationPresent(PostMapping.class)) return "POST";
+        if (method.isAnnotationPresent(PutMapping.class)) return "PUT";
+        if (method.isAnnotationPresent(DeleteMapping.class)) return "DELETE";
+        if (method.isAnnotationPresent(RequestMapping.class)) {
+            RequestMapping mapping = method.getAnnotation(RequestMapping.class);
+            if (mapping.method().length > 0) {
+                return mapping.method()[0].name(); // Retorna o primeiro método HTTP definido
+            }
+        }
+        return "UNKNOWN"; // Se não encontrou nenhuma anotação específica
+    }    
 
 }
