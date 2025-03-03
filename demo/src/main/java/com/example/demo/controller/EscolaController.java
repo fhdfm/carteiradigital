@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.springdoc.core.annotations.ParameterObject;
@@ -17,10 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.controller.doc.EscolaApiOperation;
+import com.example.demo.domain.enums.Perfil;
 import com.example.demo.dto.EscolaParametrosRequest;
 import com.example.demo.dto.EscolaRequest;
+import com.example.demo.dto.projection.escola.EscolaIdAndName;
 import com.example.demo.dto.projection.escola.EscolaView;
 import com.example.demo.repository.specification.EscolaSpecification;
+import com.example.demo.security.SecurityUtils;
+import com.example.demo.security.UsuarioLogado;
 import com.example.demo.security.accesscontrol.EntityNames;
 import com.example.demo.security.accesscontrol.annotation.CheckAccess;
 import com.example.demo.service.EscolaService;
@@ -118,6 +124,35 @@ public class EscolaController {
             @PathVariable("uuid") UUID uuid
     ) {
         return ResponseEntity.ok(ApiReturn.of(service.buscarPorUuid(uuid)));
+    }
+
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
+    @GetMapping("/combobox")
+    public ResponseEntity<ApiReturn<List<EscolaIdAndName>>> montarCombobox() {
+
+        List<EscolaIdAndName> escolas = new ArrayList<>();
+
+        UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
+        if (currentUser.possuiPerfil(Perfil.MASTER)) {
+            escolas = service.getCombobox();
+        } else {
+            EscolaView escola = service.buscarPorUuid(currentUser.getEscolaUuid());
+            escolas.add(new EscolaIdAndName() {
+
+                @Override
+                public UUID getUuid() {
+                    return escola.getUuid();
+                }
+
+                @Override
+                public String getNome() {
+                    return escola.getNome();
+                }
+                
+            });
+        }
+
+        return ResponseEntity.ok(ApiReturn.of(escolas));
     }
 
     /**
