@@ -16,11 +16,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.domain.enums.Status;
+import com.example.demo.dto.CurrentUserView;
 import com.example.demo.dto.TrocarSenhaRequest;
 import com.example.demo.dto.UsuarioRequest;
 import com.example.demo.dto.projection.usuario.UsuarioFull;
 import com.example.demo.dto.projection.usuario.UsuarioSummary;
 import com.example.demo.repository.specification.UsuarioSpecification;
+import com.example.demo.security.SecurityUtils;
+import com.example.demo.security.UsuarioLogado;
 import com.example.demo.security.accesscontrol.EntityNames;
 import com.example.demo.security.accesscontrol.annotation.CheckAccess;
 import com.example.demo.service.UsuarioService;
@@ -31,7 +34,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
-    
+
     private final UsuarioService service;
 
     public UsuarioController(UsuarioService service) {
@@ -46,17 +49,18 @@ public class UsuarioController {
 
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO','PDV','RESPONSAVEL')")
     @PutMapping("/{uuid}")
-    public ResponseEntity<ApiReturn<String>> update(@PathVariable("uuid") UUID uuid, 
-        @RequestBody @Valid UsuarioRequest request) {
-            service.update(uuid, request);
+    @CheckAccess(entity = EntityNames.USUARIO)
+    public ResponseEntity<ApiReturn<String>> update(@PathVariable("uuid") UUID uuid,
+                                                    @RequestBody @Valid UsuarioRequest request) {
+        service.update(uuid, request);
         return ResponseEntity.ok(ApiReturn.of("Usuário atualizado com sucesso."));
     }
 
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
     @GetMapping
     public ResponseEntity<ApiReturn<Page<UsuarioSummary>>> findAll(
-                @ParameterObject UsuarioSpecification specification, 
-                @ParameterObject Pageable pageable) {
+            @ParameterObject UsuarioSpecification specification,
+            @ParameterObject Pageable pageable) {
         return ResponseEntity.ok(ApiReturn.of(service.findAll(specification, pageable)));
     }
 
@@ -65,6 +69,18 @@ public class UsuarioController {
     @GetMapping("/{uuid}")
     public ResponseEntity<ApiReturn<UsuarioFull>> findByUuid(@PathVariable("uuid") UUID uuid) {
         return ResponseEntity.ok(ApiReturn.of(service.findByUuid(uuid, UsuarioFull.class)));
+    }
+
+    @PreAuthorize("hasAnyRole('MASTER', 'ADMIN', 'FUNCIONARIO', 'PDV', 'RESPONSAVEL', 'ALUNO')")
+    @GetMapping("/current")
+    public ResponseEntity<ApiReturn<CurrentUserView>> buscarUsuarioLogado() {
+        UsuarioLogado usuarioLogado = SecurityUtils.getUsuarioLogado();
+        CurrentUserView view = new CurrentUserView(
+                usuarioLogado.getName(),
+                usuarioLogado.getUsername(),
+                usuarioLogado.getPerfil());
+
+        return ResponseEntity.ok(ApiReturn.of(view));
     }
 
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")

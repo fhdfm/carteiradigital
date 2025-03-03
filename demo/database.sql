@@ -180,6 +180,21 @@ CREATE TABLE item_pedido (
 );
 
 -- ==========================
+-- TABELA CATEGORIA
+-- ==========================
+CREATE TABLE categoria_produto
+(
+    id        SERIAL PRIMARY KEY,
+    uuid      UUID UNIQUE           DEFAULT uuid_generate_v4(),
+    nome      VARCHAR(255) NOT NULL UNIQUE,
+    status    VARCHAR(50)  NOT NULL,
+    escola_id INT          NOT NULL REFERENCES escola (id),
+    version   INT          NOT NULL DEFAULT 0
+);
+
+
+
+-- ==========================
 -- ÍNDICES INDIVIDUAIS
 -- ==========================
 

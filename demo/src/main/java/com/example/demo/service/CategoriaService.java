@@ -1,9 +1,11 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.enums.Status;
-import com.example.demo.domain.model.Categoria;
+import com.example.demo.domain.model.CategoriaProduto;
 import com.example.demo.exception.escola.EscolaException;
 import com.example.demo.repository.CategoriaRepository;
+import com.example.demo.security.SecurityUtils;
+import com.example.demo.security.UsuarioLogado;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,25 +23,28 @@ public class CategoriaService {
     }
 
     public void salvar(UUID uuid, String nome) {
-        Categoria categoria = new Categoria();
+        CategoriaProduto categoria = new CategoriaProduto();
         if (uuid != null) {
             categoria = repository.findByUuid(uuid)
                     .orElseThrow(() -> EscolaException.ofNotFound("Categoria não encontrado."));
         }
+        UsuarioLogado usuarioLogado = SecurityUtils.getUsuarioLogado();
+
         categoria.setNome(nome);
+        categoria.getEscola().setId(usuarioLogado.getEscolaId());
         categoria.setStatus(Status.ATIVO);
 
         repository.save(categoria);
     }
 
 
-    public Categoria buscarPorUuid(UUID uuid) {
+    public CategoriaProduto buscarPorUuid(UUID uuid) {
         return repository.findByUuid(uuid)
                 .orElseThrow(() -> EscolaException.ofNotFound("Categoria não encontrado."));
     }
 
-    public Page<Categoria> listar(String nome, Pageable pageable) {
-        Page<Categoria> page;
+    public Page<CategoriaProduto> listar(String nome, Pageable pageable) {
+        Page<CategoriaProduto> page;
 
         if (nome != null && !nome.isBlank()) {
             page = repository.findByNomeContainingIgnoreCase(nome, pageable);
@@ -55,8 +60,8 @@ public class CategoriaService {
     }
 
     public void modificarStatus(UUID uuid) {
-        Optional<Categoria> produto = repository.findByUuid(uuid);
-        produto.get().setStatus(produto.get().getStatus() == Status.ATIVO ? Status.ATIVO : Status.INATIVO);
+        Optional<CategoriaProduto> produto = repository.findByUuid(uuid);
+        produto.get().setStatus(produto.get().getStatus() == Status.ATIVO ? Status.INATIVO : Status.ATIVO);
         repository.save(produto.get());
     }
 
