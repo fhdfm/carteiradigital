@@ -70,8 +70,11 @@ public class CheckAccessAspect {
         AccessPolicy policy = accessPolicyFactory.getPolicy(entity);
 
         String httpMethod = getHttpMethodFromAnnotations(method);
+        
+        // Identificar se o `PUT` é de ativação/inativação ou uma edição normal
+        boolean isStatusUpdate = isStatusUpdateMethod(method);        
 
-        if (!policy.hasAccess(usuarioLogado, httpMethod, resourceId))
+        if (!policy.hasAccess(usuarioLogado, httpMethod, isStatusUpdate, resourceId))
             throw new AccessDeniedException("Acesso negado");
 
         return joinPoint.proceed();
@@ -89,6 +92,14 @@ public class CheckAccessAspect {
             }
         }
         return "UNKNOWN"; // Se não encontrou nenhuma anotação específica
+    }
+
+    /**
+     * Identifica se o `PUT` é de ativação/inativação, analisando o nome do método.
+     */
+    private boolean isStatusUpdateMethod(Method method) {
+        String methodName = method.getName().toLowerCase();
+        return methodName.contains("ativar") || methodName.contains("inativar");
     }    
 
 }

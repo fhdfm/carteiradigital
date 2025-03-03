@@ -31,13 +31,16 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final UsuarioRepository repository;
     private final EscolaService escolaService;
+    private final AlunoService alunoService;
 
-    public UsuarioService(UsuarioRepository repository, PasswordEncoder passwordEncoder, 
-        EscolaService escolaService) {
+    public UsuarioService(UsuarioRepository repository, 
+        PasswordEncoder passwordEncoder, EscolaService escolaService, 
+        AlunoService alunoService) {
         
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.escolaService = escolaService;
+        this.alunoService = alunoService;
     }
 
     public UUID create(UsuarioRequest request) {
@@ -113,10 +116,22 @@ public class UsuarioService {
                 () -> EscolaException.ofNotFound("Usuário não encontrado."));
     }
 
-    public void delete(UUID uuid) {
+    public void atualizarStatus(UUID uuid, Status status) {
+        
         Usuario user = this.findByUuid(uuid);
-        user.setStatus(Status.INATIVO);
-        repository.save(user);
+
+        if (user.getStatus() != status) {
+            
+            if (status == Status.INATIVO) {
+                // Verificar se possui dependentes...
+                if (alunoService.existsByResponsavel(user))
+                    throw EscolaException.ofConflict("Não é possível inativar o Reponsável, pois possui Alunos vinculados.");
+
+            }
+
+            user.setStatus(status);
+            this.repository.save(user);
+        }
     }
 
     public Usuario findByEmailComEscola(String email) {

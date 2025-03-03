@@ -1,14 +1,21 @@
 package com.example.demo.service;
 
-import java.util.UUID;
-
 import org.springframework.stereotype.Service;
+
+import com.example.demo.domain.model.Usuario;
+import com.example.demo.repository.AlunoRepository;
 
 @Service
 public class AlunoService {
-    
-    public boolean isAlunoDoResponsavel(UUID alunoId, UUID responsavelId) {
-        return true;
+
+    private final AlunoRepository repository;
+
+    public AlunoService(AlunoRepository repository) {
+        this.repository = repository;
     }
-    
+
+    public boolean existsByResponsavel(Usuario responsavel) {
+        return repository.existsByResponsavel(responsavel);
+    }
+
 }

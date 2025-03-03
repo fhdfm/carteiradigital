@@ -15,7 +15,7 @@ import com.example.demo.service.UsuarioService;
 public class UsuarioAccessPolicy implements AccessPolicy {
 
     private final UsuarioService usuarioService;
-    
+
     public UsuarioAccessPolicy(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
@@ -26,53 +26,51 @@ public class UsuarioAccessPolicy implements AccessPolicy {
     }
 
     @Override
-    public boolean hasAccess(UsuarioLogado currentUser, String httpMethod, Object resourceId) {
-        // MASTER tem acesso irrestrito
-        if (currentUser.possuiPerfil(Perfil.MASTER)) {
-            return true;
-        }
-    
+    public boolean hasAccess(UsuarioLogado currentUser, String httpMethod, boolean isStatusUpdate, Object resourceId) {
         UUID targetUuid = parseResourceId(resourceId);
-        Usuario userEntity = usuarioService.findByUuid(targetUuid); // Sem carregar perfil
-    
-        // Se o usuário não existir, nega acesso
+        Usuario userEntity = usuarioService.findByUuid(targetUuid);
+
         if (userEntity == null) {
-            throw EscolaException.ofNotFound("Usuario (" + targetUuid + " não encontrado");
+            throw EscolaException.ofNotFound("Usuário (" + targetUuid + ") não encontrado.");
         }
-    
+
+        // Se a entidade for um ALUNO, encerra a lógica e nega o acesso
+        if (userEntity.getPerfil() == Perfil.ALUNO) {
+            return false;
+        }
+
         boolean mesmaEscola = currentUser.getEscolaUuid() != null &&
                               userEntity.getEscola() != null &&
                               currentUser.getEscolaUuid().equals(userEntity.getEscola().getUuid());
-    
+
         boolean mesmoUsuario = userEntity.getUuid().equals(currentUser.getUuid());
-    
-        if ("GET".equals(httpMethod)) {
-            return mesmaEscola || mesmoUsuario;
+
+        // Se for ativação/inativação, apenas MASTER, ADMIN e FUNCIONÁRIO podem fazer isso
+        if ("PUT".equals(httpMethod) && isStatusUpdate) {
+            return (currentUser.possuiPerfil(Perfil.MASTER) || currentUser.possuiPerfil(Perfil.ADMIN) || currentUser.possuiPerfil(Perfil.FUNCIONARIO)) && mesmaEscola;
         }
-    
+
+        // Se for uma atualização normal de dados
         if ("PUT".equals(httpMethod)) {
             // ADMIN e FUNCIONÁRIO podem editar usuários da mesma escola
             if ((currentUser.possuiPerfil(Perfil.ADMIN) || currentUser.possuiPerfil(Perfil.FUNCIONARIO)) && mesmaEscola) {
                 return true;
             }
-            // FUNCIONÁRIO e PDV podem editar apenas a si mesmos
-            return mesmoUsuario;
+
+            // RESPONSÁVEL e PDV só podem editar seus próprios dados
+            if ((currentUser.possuiPerfil(Perfil.RESPONSAVEL) || currentUser.possuiPerfil(Perfil.PDV)) && mesmoUsuario) {
+                return true;
+            }
         }
-    
-        if ("DELETE".equals(httpMethod)) {
-            // Apenas ADMIN e FUNCIONÁRIO podem excluir (inativar) usuários da mesma escola
-            return (currentUser.possuiPerfil(Perfil.ADMIN) || currentUser.possuiPerfil(Perfil.FUNCIONARIO)) && mesmaEscola;
-        }
-    
+
         return false;
-    }        
-    
+    }
+
     private UUID parseResourceId(Object resourceId) {
         try {
             return UUID.fromString(resourceId.toString());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("ResourceId inválido: " + resourceId, e);
         }
-    }    
-    
+    }
 }

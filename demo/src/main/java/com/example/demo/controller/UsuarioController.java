@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.domain.enums.Status;
 import com.example.demo.dto.TrocarSenhaRequest;
 import com.example.demo.dto.UsuarioRequest;
 import com.example.demo.dto.projection.usuario.UsuarioFull;
@@ -69,11 +69,19 @@ public class UsuarioController {
 
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
     @CheckAccess(entity = EntityNames.USUARIO)
-    @DeleteMapping("/{uuid}")
-    public ResponseEntity<ApiReturn<String>> delete(@PathVariable("uuid") UUID uuid) {
-        service.delete(uuid);
-        return ResponseEntity.ok(ApiReturn.of("Usuário deletado com sucesso."));
+    @PutMapping("/{uuid}/inativar")
+    public ResponseEntity<ApiReturn<String>> inativar(@PathVariable("uuid") UUID uuid) {
+        service.atualizarStatus(uuid, Status.INATIVO);
+        return ResponseEntity.ok(ApiReturn.of("Usuário inativado com sucesso."));
     }
+
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
+    @CheckAccess(entity = EntityNames.USUARIO)
+    @PutMapping("/{uuid}/ativar")
+    public ResponseEntity<ApiReturn<String>> ativar(@PathVariable("uuid") UUID uuid) {
+        service.atualizarStatus(uuid, Status.ATIVO);
+        return ResponseEntity.ok(ApiReturn.of("Usuário reativado com sucesso."));
+    }    
 
     @PostMapping("/change-password")
     public ResponseEntity<ApiReturn<String>> changePassword(@RequestBody @Valid TrocarSenhaRequest request) {

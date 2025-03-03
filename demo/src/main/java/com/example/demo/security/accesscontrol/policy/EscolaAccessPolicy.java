@@ -15,7 +15,7 @@ public class EscolaAccessPolicy implements AccessPolicy {
     }
 
     @Override
-    public boolean hasAccess(UsuarioLogado usuarioLogado, String httpMethod, Object resourceId) {
+    public boolean hasAccess(UsuarioLogado usuarioLogado, String httpMethod, boolean isStatusUpdate, Object resourceId) {
         
         // Validação básica de entrada.
         if (usuarioLogado == null || resourceId == null) {
