@@ -4,10 +4,10 @@ import java.util.UUID;
 
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.enums.Status;
-import com.example.demo.dto.projection.escola.EscolaCombo;
+import com.example.demo.dto.projection.escola.EscolaIdAndName;
 
 public interface UsuarioFull {
-    EscolaCombo getEscola();
+    EscolaIdAndName getEscola();
     UUID getUuid();
     String getNome();
     String getEmail();

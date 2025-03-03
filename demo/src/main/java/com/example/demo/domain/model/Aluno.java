@@ -21,10 +21,6 @@ public class Aluno extends Usuario {
     @JoinColumn(name = "responsavel_id", nullable = false)
     private Usuario responsavel;
 
-    /* senha do cartão */
-    @Column(name = "senha", nullable = false)
-    private String senha;
-
     @Column(name = "matricula")
     private String matricula;
 
@@ -43,14 +39,6 @@ public class Aluno extends Usuario {
 
     public void setResponsavel(Usuario responsavel) {
         this.responsavel = responsavel;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
     }
 
     public void setMatricula(String matricula) {

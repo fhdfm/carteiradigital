@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,7 +45,8 @@ public class UsuarioController {
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
     @PostMapping
     public ResponseEntity<ApiReturn<UUID>> create(@RequestBody @Valid UsuarioRequest request) {
-        return ResponseEntity.ok(ApiReturn.of(service.create(request)));
+        UUID uuid = service.createUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiReturn.of(uuid));
     }
 
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO','PDV','RESPONSAVEL')")
@@ -52,7 +54,7 @@ public class UsuarioController {
     @CheckAccess(entity = EntityNames.USUARIO)
     public ResponseEntity<ApiReturn<String>> update(@PathVariable("uuid") UUID uuid,
                                                     @RequestBody @Valid UsuarioRequest request) {
-        service.update(uuid, request);
+        service.updateUser(uuid, request);
         return ResponseEntity.ok(ApiReturn.of("Usuário atualizado com sucesso."));
     }
 
@@ -61,14 +63,14 @@ public class UsuarioController {
     public ResponseEntity<ApiReturn<Page<UsuarioSummary>>> findAll(
             @ParameterObject UsuarioSpecification specification,
             @ParameterObject Pageable pageable) {
-        return ResponseEntity.ok(ApiReturn.of(service.findAll(specification, pageable)));
+        return ResponseEntity.ok(ApiReturn.of(service.findAllUsers(specification, pageable)));
     }
 
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO','PDV','RESPONSAVEL')")
     @CheckAccess(entity = EntityNames.USUARIO)
     @GetMapping("/{uuid}")
     public ResponseEntity<ApiReturn<UsuarioFull>> findByUuid(@PathVariable("uuid") UUID uuid) {
-        return ResponseEntity.ok(ApiReturn.of(service.findByUuid(uuid, UsuarioFull.class)));
+        return ResponseEntity.ok(ApiReturn.of(service.findUserByUuid(uuid, UsuarioFull.class)));
     }
 
     @PreAuthorize("hasAnyRole('MASTER', 'ADMIN', 'FUNCIONARIO', 'PDV', 'RESPONSAVEL', 'ALUNO')")
@@ -87,7 +89,7 @@ public class UsuarioController {
     @CheckAccess(entity = EntityNames.USUARIO)
     @PutMapping("/{uuid}/inativar")
     public ResponseEntity<ApiReturn<String>> inativar(@PathVariable("uuid") UUID uuid) {
-        service.atualizarStatus(uuid, Status.INATIVO);
+        service.changeUserStatus(uuid, Status.INATIVO);
         return ResponseEntity.ok(ApiReturn.of("Usuário inativado com sucesso."));
     }
 
@@ -95,7 +97,7 @@ public class UsuarioController {
     @CheckAccess(entity = EntityNames.USUARIO)
     @PutMapping("/{uuid}/ativar")
     public ResponseEntity<ApiReturn<String>> ativar(@PathVariable("uuid") UUID uuid) {
-        service.atualizarStatus(uuid, Status.ATIVO);
+        service.changeUserStatus(uuid, Status.ATIVO);
         return ResponseEntity.ok(ApiReturn.of("Usuário reativado com sucesso."));
     }    
 

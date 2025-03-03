@@ -54,7 +54,6 @@ CREATE INDEX idx_usuario_cpf ON usuario(cpf);
 CREATE TABLE aluno (
     id BIGINT PRIMARY KEY,
     responsavel_id BIGINT NOT NULL,
-    senha VARCHAR(255) NOT NULL,
     matricula VARCHAR(255),
     foto VARCHAR(255),
     CONSTRAINT fk_aluno_id
@@ -80,12 +79,10 @@ CREATE TABLE cartao_aluno (
     uuid UUID NOT NULL,
     aluno_id BIGINT NOT NULL,
     numero VARCHAR(255) NOT NULL,
+    senha VARCHAR(255) NOT NULL, 
     status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO' NOT NULL,
     version INT NOT NULL DEFAULT 0,
     criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
-
-    -- Torna 'numero' único
-    CONSTRAINT uq_cartao_aluno_numero UNIQUE (numero),
 
     -- Chave estrangeira para a tabela aluno
     CONSTRAINT fk_cartao_aluno 
@@ -97,9 +94,10 @@ CREATE TABLE cartao_aluno (
 
 -- Índices (além dos UNIQUE, que geram índices implícitos, 
 -- podemos criar índices adicionais para buscas específicas)
-CREATE INDEX idx_cartao_aluno_id    ON cartao_aluno(id);
-CREATE INDEX idx_cartao_aluno_uuid  ON cartao_aluno(uuid);
-CREATE INDEX idx_cartao_aluno_aluno ON cartao_aluno(aluno_id);
+CREATE INDEX idx_cartao_aluno_id     ON cartao_aluno(id);
+CREATE INDEX idx_cartao_aluno_uuid   ON cartao_aluno(uuid);
+CREATE INDEX idx_cartao_aluno_aluno  ON cartao_aluno(aluno_id);
+CREATE INDEX idx_cartao_aluno_numero ON cartao_aluno (numero);
 
 -- ==========================
 -- TABELA PRODUTO
