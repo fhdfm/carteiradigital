@@ -26,7 +26,7 @@ public class EscolaAccessPolicy implements AccessPolicy {
         boolean isAdmin = usuarioLogado.possuiPerfil(Perfil.ADMIN);
         
         // Outros perfis não possuem acesso.
-        return isAdmin || resourceId.equals(usuarioLogado.getEscolaUuid());
+        return isAdmin || resourceId.equals(usuarioLogado.getEscola().getUuid());
     }    
     
 }

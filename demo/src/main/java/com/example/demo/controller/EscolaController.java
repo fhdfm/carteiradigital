@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.controller.doc.EscolaApiOperation;
 import com.example.demo.domain.enums.Perfil;
+import com.example.demo.domain.model.Escola;
 import com.example.demo.dto.EscolaParametrosRequest;
 import com.example.demo.dto.EscolaRequest;
 import com.example.demo.dto.projection.escola.EscolaIdAndName;
@@ -136,7 +137,7 @@ public class EscolaController {
         if (currentUser.possuiPerfil(Perfil.MASTER)) {
             escolas = service.getCombobox();
         } else {
-            EscolaView escola = service.buscarPorUuid(currentUser.getEscolaUuid());
+            Escola escola = currentUser.getEscola();
             escolas.add(new EscolaIdAndName() {
 
                 @Override

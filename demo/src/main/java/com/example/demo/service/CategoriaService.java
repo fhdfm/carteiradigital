@@ -1,17 +1,18 @@
 package com.example.demo.service;
 
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.example.demo.domain.enums.Status;
 import com.example.demo.domain.model.CategoriaProduto;
 import com.example.demo.exception.escola.EscolaException;
 import com.example.demo.repository.CategoriaRepository;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class CategoriaService {
@@ -31,7 +32,7 @@ public class CategoriaService {
         UsuarioLogado usuarioLogado = SecurityUtils.getUsuarioLogado();
 
         categoria.setNome(nome);
-        categoria.getEscola().setId(usuarioLogado.getEscolaId());
+        categoria.getEscola().setId(usuarioLogado.getEscola().getId());
         categoria.setStatus(Status.ATIVO);
 
         repository.save(categoria);
