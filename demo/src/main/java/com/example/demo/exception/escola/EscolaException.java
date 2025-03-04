@@ -74,6 +74,10 @@ public class EscolaException extends RuntimeException {
         return new UnauthorizedException(message, getCallerClass());
     }
 
+    public static EscolaException ofForbidden(String message) {
+        return new ForbiddenException(message, getCallerClass());
+    }
+
     public static EscolaException ofNotFound(String message) {
         return new NotFoundException(message, getCallerClass());
     }

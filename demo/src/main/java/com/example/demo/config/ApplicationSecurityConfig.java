@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -45,7 +46,7 @@ public class ApplicationSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper mapper) throws Exception {
         http.cors(c -> c.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req -> {
@@ -59,12 +60,8 @@ public class ApplicationSecurityConfig {
                         management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling
-                                .authenticationEntryPoint((request, response, authException) -> {
-                                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
-                                })
-                                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                                    response.sendError(HttpServletResponse.SC_FORBIDDEN, accessDeniedException.getMessage());
-                                })
+                                .authenticationEntryPoint(new ApiReturnAuthenticationEntryPoint(mapper))
+                                .accessDeniedHandler(new ApiReturnAccessDeniedHandler(mapper))
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider);

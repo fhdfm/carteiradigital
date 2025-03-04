@@ -10,9 +10,13 @@ public enum ErrorType {
      */
     VALIDATION(400),
     /**
-     * Erro de sem autorização
+     * Erro de sem autenticação
      */
     UNAUTHORIZED(401),
+    /**
+     * Erro de sem autorização
+     */
+    FORBIDDEN(403),
     /**
      * Erro de não encontrado
      */
