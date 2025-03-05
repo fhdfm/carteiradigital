@@ -39,9 +39,11 @@ public class UsuarioAccessPolicy implements AccessPolicy {
             return false;
         }
 
-        boolean mesmaEscola = currentUser.getEscolaUuid() != null &&
+        UUID escolaUuid = currentUser.getEscola().getUuid();
+
+        boolean mesmaEscola = escolaUuid != null &&
                               userEntity.getEscola() != null &&
-                              currentUser.getEscolaUuid().equals(userEntity.getEscola().getUuid());
+                              escolaUuid.equals(userEntity.getEscola().getUuid());
 
         boolean mesmoUsuario = userEntity.getUuid().equals(currentUser.getUuid());
 

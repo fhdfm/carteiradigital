@@ -1,16 +1,18 @@
 package com.example.demo.security;
 
-import com.example.demo.domain.enums.Perfil;
-import com.example.demo.domain.enums.Status;
-import com.example.demo.domain.model.Usuario;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import com.example.demo.domain.enums.Perfil;
+import com.example.demo.domain.enums.Status;
+import com.example.demo.domain.model.Escola;
+import com.example.demo.domain.model.Usuario;
 
 public class UsuarioLogado implements UserDetails {
 
@@ -92,19 +94,12 @@ public class UsuarioLogado implements UserDetails {
                 .anyMatch(authority -> authority.getAuthority().equals(authorityToCheck));
     }
 
-    public UUID getEscolaUuid() {
+    public Escola getEscola() {
 
         if (possuiPerfil(Perfil.MASTER))
             return null;
 
-        return this.usuario.getEscola().getUuid();
-    }
-    public Long getEscolaId() {
-
-        if (possuiPerfil(Perfil.MASTER))
-            return null;
-
-        return this.usuario.getEscola().getId();
+        return this.usuario.getEscola();
     }
 
     public boolean isPrimeiroAcesso() {

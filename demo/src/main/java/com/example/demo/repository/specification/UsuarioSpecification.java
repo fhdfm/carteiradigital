@@ -45,7 +45,7 @@ public class UsuarioSpecification implements Specification<Usuario> {
         // Se for ADMIN ou FUNCIONARIO, força o filtro para a escola do usuário logado
         UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
         if (currentUser.possuiPerfil(Perfil.ADMIN) || currentUser.possuiPerfil(Perfil.FUNCIONARIO)) {
-            this.escolaId = currentUser.getEscolaUuid();
+            this.escolaId = currentUser.getEscola().getUuid();
         }
 
         // Se houver valor para escolaId (seja vindo do parâmetro ou do usuário logado) adiciona o predicate de filtro
