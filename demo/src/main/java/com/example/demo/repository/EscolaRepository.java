@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.example.demo.dto.projection.escola.EscolaView;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -26,4 +27,7 @@ public interface EscolaRepository extends BaseRepository<Escola, Long> {
         ORDER BY e.nome ASC
     """)
     List<EscolaIdAndName> findAllProjected();
+
+    @Query("SELECT e FROM Escola e WHERE e.uuid = :uuid")
+    Optional<EscolaView> findEscolaViewByUuid(UUID uuid);
 }

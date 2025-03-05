@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.demo.dto.EscolaUsuariosView;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -126,6 +127,21 @@ public class EscolaController {
         return ResponseEntity.ok(ApiReturn.of(service.buscarPorUuid(uuid)));
     }
 
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
+    @CheckAccess(entity = EntityNames.ESCOLA)
+    @EscolaApiOperation(
+            summary = "Busca usuarios de uma escola",
+            description = "Busca usuarios a partir do seu UUID, uma escola persistida."
+    )
+    @GetMapping("/{uuid}/usuarios")
+    public ResponseEntity<ApiReturn<EscolaUsuariosView>> buscarUsuariosEscolaPorUuid(
+            @Parameter(description = "UUID da escola a ser buscada", required = true)
+            @PathVariable("uuid") UUID uuid,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiReturn.of(service.buscarUsuariosEscolaPorUuid(uuid,pageable)));
+    }
+
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
     @GetMapping("/combobox")
     public ResponseEntity<ApiReturn<List<EscolaIdAndName>>> montarCombobox() {
@@ -148,7 +164,7 @@ public class EscolaController {
                 public String getNome() {
                     return escola.getNome();
                 }
-                
+
             });
         }
 
