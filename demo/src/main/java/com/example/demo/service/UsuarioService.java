@@ -21,7 +21,7 @@ import com.example.demo.dto.TrocarSenhaRequest;
 import com.example.demo.dto.UsuarioRequest;
 import com.example.demo.dto.projection.aluno.AlunoSummary;
 import com.example.demo.dto.projection.usuario.UsuarioSummary;
-import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.AlunoRepository;
 import com.example.demo.repository.UsuarioRepository;
 import com.example.demo.repository.specification.AlunoSpecification;
@@ -57,11 +57,11 @@ public class UsuarioService {
 
         String email = request.email().trim();
         if (this.usuarioRepository.existsByEmail(email))
-            throw EscolaException.ofValidation(email + " já está cadastrado");
+            throw EurekaException.ofValidation(email + " já está cadastrado");
 
         String cpf = request.cpf().trim().replaceAll("\\D", "");
         if (this.usuarioRepository.existsByCpf(cpf))
-            throw EscolaException.ofValidation(cpf + " já está cadastrado");
+            throw EurekaException.ofValidation(cpf + " já está cadastrado");
 
         String senha = this.gerarSenhaTemporaria();
 
@@ -84,7 +84,7 @@ public class UsuarioService {
         usuarioRepository.save(user);
 
         Usuario newUser = this.usuarioRepository.findByEmail(email).orElseThrow(() 
-                        -> EscolaException.ofNotFound("Usuário não encontrado."));
+                        -> EurekaException.ofNotFound("Usuário não encontrado."));
         return newUser.getUuid();
     }
 
@@ -98,11 +98,11 @@ public class UsuarioService {
 
         String email = request.email().trim();
         if (this.usuarioRepository.existsByEmailAndUuidNot(email, uuid))
-            throw EscolaException.ofValidation(email + " já está cadastrado");
+            throw EurekaException.ofValidation(email + " já está cadastrado");
 
         String cpf = request.cpf().trim().replaceAll("\\D", "");
         if (this.usuarioRepository.existsByCpfAndUuidNot(cpf, uuid))
-            throw EscolaException.ofValidation(cpf + " já está cadastrado");
+            throw EurekaException.ofValidation(cpf + " já está cadastrado");
 
         Escola escola = this.getEscola(request.escolaId());
         
@@ -118,7 +118,7 @@ public class UsuarioService {
 
     public Usuario findUserByUuid(UUID uuid) {
         return this.usuarioRepository.findByUuid(uuid).orElseThrow(
-                () -> EscolaException.ofNotFound("Usuário não encontrado."));
+                () -> EurekaException.ofNotFound("Usuário não encontrado."));
     }
 
     public void changeUserStatus(UUID uuid, Status status) {
@@ -130,7 +130,7 @@ public class UsuarioService {
             if (status == Status.INATIVO) {
                 // Verificar se possui dependentes...
                 if (alunoRepository.existsByResponsavelId(user.getUuid()))
-                    throw EscolaException.ofConflict("Não é possível inativar o Reponsável, pois possui Alunos vinculados.");
+                    throw EurekaException.ofConflict("Não é possível inativar o Reponsável, pois possui Alunos vinculados.");
 
             }
 
@@ -141,7 +141,7 @@ public class UsuarioService {
 
     public Usuario findByEmailComEscola(String email) {
         return this.usuarioRepository.buscarUsuarioAtivoComEscolaPorEmail(email).orElseThrow(
-                () -> EscolaException.ofNotFound("Usuário não encontrado."));
+                () -> EurekaException.ofNotFound("Usuário não encontrado."));
     }
 
     public Page<UsuarioSummary> findAllUsers(UsuarioSpecification specification, Pageable pageable) {
@@ -158,30 +158,30 @@ public class UsuarioService {
     public <T> T findUserByUuid(UUID uuid, Class<T> clazz) {
 
         Object usuario = this.usuarioRepository.findByUuid(uuid).orElseThrow(
-                () -> EscolaException.ofNotFound("Usuario não encontrado."));
+                () -> EurekaException.ofNotFound("Usuario não encontrado."));
 
         return clazz.cast(usuario);
     }
 
     public Aluno findStudentByUuid(UUID alunoId) {
         return this.alunoRepository.findByUuid(alunoId).orElseThrow(
-                () -> EscolaException.ofNotFound("Aluno não encontrado."));
+                () -> EurekaException.ofNotFound("Aluno não encontrado."));
     }
 
     public Aluno findStudentWithResponsavelByUuid(UUID alunoId) {
         return this.alunoRepository.findWithResponsavelByUuid(alunoId).orElseThrow(
-                () -> EscolaException.ofNotFound("Aluno não encontrado."));
+                () -> EurekaException.ofNotFound("Aluno não encontrado."));
     }
 
     public UUID createStudent(AlunoRequest request) {
         
         String email = request.email().trim();
         if (this.alunoRepository.existsByEmail(email))
-            throw EscolaException.ofValidation(email + " já está cadastrado");
+            throw EurekaException.ofValidation(email + " já está cadastrado");
 
         String cpf = request.cpf().trim().replaceAll("\\D", "");
         if (this.alunoRepository.existsByCpf(cpf))
-            throw EscolaException.ofValidation(cpf + " já está cadastrado");
+            throw EurekaException.ofValidation(cpf + " já está cadastrado");
 
         String senha = this.gerarSenhaTemporaria();
 
@@ -209,7 +209,7 @@ public class UsuarioService {
         alunoRepository.save(student);
 
         Aluno newStudent = this.alunoRepository.findByEmail(email).orElseThrow(() 
-                        -> EscolaException.ofNotFound("Aluno não encontrado."));
+                        -> EurekaException.ofNotFound("Aluno não encontrado."));
         return newStudent.getUuid();
     }
 
@@ -219,11 +219,11 @@ public class UsuarioService {
 
         String email = request.email().trim();
         if (this.alunoRepository.existsByEmailAndUuidNot(email, uuid))
-            throw EscolaException.ofValidation(email + " já está cadastrado");
+            throw EurekaException.ofValidation(email + " já está cadastrado");
 
         String cpf = request.cpf().trim().replaceAll("\\D", "");
         if (this.alunoRepository.existsByCpfAndUuidNot(cpf, uuid))
-            throw EscolaException.ofValidation(cpf + " já está cadastrado");
+            throw EurekaException.ofValidation(cpf + " já está cadastrado");
 
         Usuario responsavel = this.findUserByUuid(request.responsavelId());
         
@@ -273,14 +273,14 @@ public class UsuarioService {
             Boolean alunoPodeTrocarSenha =
                 this.usuarioRepository.isPrimeiroAcessoResponsavel(currentUser.getUuid());
             if (alunoPodeTrocarSenha != null && !alunoPodeTrocarSenha)
-                EscolaException.ofValidation("O responsável ainda não habilitou sua conta.");
+                EurekaException.ofValidation("O responsável ainda não habilitou sua conta.");
         }
 
         if (!passwordEncoder.matches(request.senhaAntiga(), currentUser.getPassword()))
-            EscolaException.ofValidation("Senha incorreta.");
+            EurekaException.ofValidation("Senha incorreta.");
 
         if (!request.novaSenha().equals(request.confirmarNovaSenha()))
-            EscolaException.ofValidation("Senha e confirmação não conferem.");
+            EurekaException.ofValidation("Senha e confirmação não conferem.");
 
         Usuario usuario = this.findUserByUuid(currentUser.getUuid());
         usuario.setPrimeiroAcesso(false);
@@ -291,11 +291,11 @@ public class UsuarioService {
 
     private void validateProfileAssignmentPermission(UsuarioLogado currentUser, Perfil requestedPerfil) {
         if (currentUser.possuiPerfil(Perfil.ADMIN) && requestedPerfil == Perfil.MASTER) {
-            throw EscolaException.ofValidation("Operação não permitida");
+            throw EurekaException.ofValidation("Operação não permitida");
         }
 
         if (currentUser.possuiPerfil(Perfil.FUNCIONARIO) && requestedPerfil == Perfil.ADMIN) {
-            throw EscolaException.ofValidation("Operação não permitida");
+            throw EurekaException.ofValidation("Operação não permitida");
         }
     }    
 

@@ -1,8 +1,8 @@
-package com.example.demo.exception.escola;
+package com.example.demo.exception.eureka;
 
 import com.example.demo.util.ErrorType;
 
-public class ValidationException extends EscolaException {
+public class ValidationException extends EurekaException {
     private static final long serialVersionUID = 1L;
 
     public ValidationException(String message, Class<?> clazz) {

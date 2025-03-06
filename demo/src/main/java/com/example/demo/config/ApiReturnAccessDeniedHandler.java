@@ -1,6 +1,6 @@
 package com.example.demo.config;
 
-import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.util.ApiReturn;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +23,6 @@ public class ApiReturnAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        mapper.writeValue(response.getOutputStream(), ApiReturn.ofEscolaException(EscolaException.ofForbidden("Acesso negado")));
+        mapper.writeValue(response.getOutputStream(), ApiReturn.ofEurekaException(EurekaException.ofForbidden("Acesso negado")));
     }
 }

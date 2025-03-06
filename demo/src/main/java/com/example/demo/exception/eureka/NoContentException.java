@@ -1,8 +1,8 @@
-package com.example.demo.exception.escola;
+package com.example.demo.exception.eureka;
 
 import com.example.demo.util.ErrorType;
 
-public class NoContentException extends EscolaException {
+public class NoContentException extends EurekaException {
     private static final long serialVersionUID = 1L;
 
     public NoContentException(String message, Class<?> clazz) {

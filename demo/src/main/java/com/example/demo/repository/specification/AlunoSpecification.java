@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -22,12 +23,25 @@ import jakarta.persistence.criteria.Root;
 @ParameterObject
 public class AlunoSpecification implements Specification<Aluno> {
 
+    @Schema(description = "UUID da Escola", example = "00000000-0000-0000-0000-000000000000")
     private UUID escolaId;
+
+    @Schema(description = "Nome do aluno", example = "João")
     private String nome;
+
+    @Schema(description = "CPF do aluno", example = "123.456.789-00")
     private String cpf;
+
+    @Schema(description = "E-mail do aluno", example = "joao@example.com")
     private String email;
+
+    @Schema(description = "Status do aluno", example = "ATIVO")
     private Status status;
+
+    @Schema(description = "Número de matrícula do aluno", example = "2021001234")
     private String matricula;
+
+    @Schema(description = "UUID do responsável", example = "00000000-0000-0000-0000-000000000000")
     private UUID responsavelId;
 
     public AlunoSpecification(

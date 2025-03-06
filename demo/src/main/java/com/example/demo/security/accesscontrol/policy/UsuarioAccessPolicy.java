@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.model.Usuario;
-import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.security.UsuarioLogado;
 import com.example.demo.security.accesscontrol.EntityNames;
 import com.example.demo.service.UsuarioService;
@@ -31,7 +31,7 @@ public class UsuarioAccessPolicy implements AccessPolicy {
         Usuario userEntity = usuarioService.findUserByUuid(targetUuid);
 
         if (userEntity == null) {
-            throw EscolaException.ofNotFound("Usuário (" + targetUuid + ") não encontrado.");
+            throw EurekaException.ofNotFound("Usuário (" + targetUuid + ") não encontrado.");
         }
 
         // Se a entidade for um ALUNO, encerra a lógica e nega o acesso

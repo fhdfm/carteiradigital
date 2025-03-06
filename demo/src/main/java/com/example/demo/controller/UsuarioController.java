@@ -2,6 +2,9 @@ package com.example.demo.controller;
 
 import java.util.UUID;
 
+import com.example.demo.controller.doc.EurekaApiOperation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +37,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/usuarios")
+@Tag(name = "Usuários", description = "Endpoints para gerenciamento de usuários")
 public class UsuarioController {
 
     private final UsuarioService service;
@@ -42,39 +46,76 @@ public class UsuarioController {
         this.service = service;
     }
 
-    @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
     @PostMapping
-    public ResponseEntity<ApiReturn<UUID>> create(@RequestBody @Valid UsuarioRequest request) {
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
+    @EurekaApiOperation(
+            summary = "Criar um usuário",
+            description = "Cria e persiste um novo usuário contendo as informações especificadas na requisião."
+    )
+    public ResponseEntity<ApiReturn<UUID>> create(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Corpo da requisição com os dados de um usuário",
+                    required = true
+            )
+            @RequestBody @Valid UsuarioRequest request
+    ) {
         UUID uuid = service.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiReturn.of(uuid));
     }
 
-    @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO','PDV','RESPONSAVEL')")
     @PutMapping("/{uuid}")
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO','PDV','RESPONSAVEL')")
     @CheckAccess(entity = EntityNames.USUARIO)
-    public ResponseEntity<ApiReturn<String>> update(@PathVariable("uuid") UUID uuid,
-                                                    @RequestBody @Valid UsuarioRequest request) {
+    @EurekaApiOperation(
+            summary = "Atualizar um usuário",
+            description = "Atualiza, a partir do seu UUID, um usuário persistido com as informações especificadas na requisião."
+    )
+    public ResponseEntity<ApiReturn<String>> update(
+            @Parameter(description = "UUID do usuário a ser atualizado", required = true)
+            @PathVariable("uuid") UUID uuid,
+
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Corpo da requisição com os dados de um usuário",
+                    required = true
+            )
+            @RequestBody @Valid UsuarioRequest request
+    ) {
         service.updateUser(uuid, request);
         return ResponseEntity.ok(ApiReturn.of("Usuário atualizado com sucesso."));
     }
 
-    @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
     @GetMapping
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
+    @EurekaApiOperation(
+            summary = "Lista os usuários",
+            description = "Retorna um page contendo usuários de acordo com os filtros especificados."
+    )
     public ResponseEntity<ApiReturn<Page<UsuarioSummary>>> findAll(
             @ParameterObject UsuarioSpecification specification,
             @ParameterObject Pageable pageable) {
         return ResponseEntity.ok(ApiReturn.of(service.findAllUsers(specification, pageable)));
     }
 
+    @GetMapping("/{uuid}")
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO','PDV','RESPONSAVEL')")
     @CheckAccess(entity = EntityNames.USUARIO)
-    @GetMapping("/{uuid}")
-    public ResponseEntity<ApiReturn<UsuarioFull>> findByUuid(@PathVariable("uuid") UUID uuid) {
+    @EurekaApiOperation(
+            summary = "Busca um usuário",
+            description = "Busca, a partir do seu UUID, um usuário persistido."
+    )
+    public ResponseEntity<ApiReturn<UsuarioFull>> findByUuid(
+            @Parameter(description = "UUID do usuário a ser buscado", required = true)
+            @PathVariable("uuid") UUID uuid
+    ) {
         return ResponseEntity.ok(ApiReturn.of(service.findUserByUuid(uuid, UsuarioFull.class)));
     }
 
-    @PreAuthorize("hasAnyRole('MASTER', 'ADMIN', 'FUNCIONARIO', 'PDV', 'RESPONSAVEL', 'ALUNO')")
     @GetMapping("/current")
+    @PreAuthorize("hasAnyRole('MASTER', 'ADMIN', 'FUNCIONARIO', 'PDV', 'RESPONSAVEL', 'ALUNO')")
+    @EurekaApiOperation(
+            summary = "Busca o usuário logado",
+            description = "Busca, o usuário que está logado."
+    )
     public ResponseEntity<ApiReturn<CurrentUserView>> buscarUsuarioLogado() {
         UsuarioLogado usuarioLogado = SecurityUtils.getUsuarioLogado();
         CurrentUserView view = new CurrentUserView(
@@ -85,24 +126,48 @@ public class UsuarioController {
         return ResponseEntity.ok(ApiReturn.of(view));
     }
 
+    @PutMapping("/{uuid}/inativar")
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
     @CheckAccess(entity = EntityNames.USUARIO)
-    @PutMapping("/{uuid}/inativar")
-    public ResponseEntity<ApiReturn<String>> inativar(@PathVariable("uuid") UUID uuid) {
+    @EurekaApiOperation(
+            summary = "Inativa um usuário",
+            description = "Inativa, a partir do seu UUID, um usuário persistido."
+    )
+    public ResponseEntity<ApiReturn<String>> inativar(
+            @Parameter(description = "UUID do usuário a ser inativado", required = true)
+            @PathVariable("uuid") UUID uuid
+    ) {
         service.changeUserStatus(uuid, Status.INATIVO);
         return ResponseEntity.ok(ApiReturn.of("Usuário inativado com sucesso."));
     }
 
+    @PutMapping("/{uuid}/ativar")
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
     @CheckAccess(entity = EntityNames.USUARIO)
-    @PutMapping("/{uuid}/ativar")
-    public ResponseEntity<ApiReturn<String>> ativar(@PathVariable("uuid") UUID uuid) {
+    @EurekaApiOperation(
+            summary = "Ativa um usuário",
+            description = "Ativa, a partir do seu UUID, um usuário persistido."
+    )
+    public ResponseEntity<ApiReturn<String>> ativar(
+            @Parameter(description = "UUID do usuário a ser ativado", required = true)
+            @PathVariable("uuid") UUID uuid
+    ) {
         service.changeUserStatus(uuid, Status.ATIVO);
         return ResponseEntity.ok(ApiReturn.of("Usuário reativado com sucesso."));
     }    
 
     @PostMapping("/change-password")
-    public ResponseEntity<ApiReturn<String>> changePassword(@RequestBody @Valid TrocarSenhaRequest request) {
+    @EurekaApiOperation(
+            summary = "Trocar senha",
+            description = "Troca a senha de um usuário persistido."
+    )
+    public ResponseEntity<ApiReturn<String>> changePassword(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Corpo da requisição com os dados de troca de senha",
+                    required = true
+            )
+            @RequestBody @Valid TrocarSenhaRequest request
+    ) {
         service.changePassword(request);
         return ResponseEntity.ok(ApiReturn.of("Senha alterada com sucesso."));
     }

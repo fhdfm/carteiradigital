@@ -1,6 +1,6 @@
 package com.example.demo.config;
 
-import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.util.ApiReturn;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.AuthenticationException;
@@ -22,6 +22,6 @@ public class ApiReturnAuthenticationEntryPoint implements AuthenticationEntryPoi
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
-        mapper.writeValue(response.getOutputStream(), ApiReturn.ofEscolaException(EscolaException.ofUnauthorized("Falha na autenticação")));
+        mapper.writeValue(response.getOutputStream(), ApiReturn.ofEurekaException(EurekaException.ofUnauthorized("Falha na autenticação")));
     }
 }

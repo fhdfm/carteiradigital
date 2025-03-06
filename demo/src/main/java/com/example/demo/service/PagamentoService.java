@@ -5,10 +5,9 @@ import com.example.demo.domain.model.Pagamento;
 import com.example.demo.domain.model.PagamentoItem;
 import com.example.demo.domain.model.Usuario;
 import com.example.demo.dto.CriarPagamentoRequest;
-import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.PagamentoRepository;
 import com.example.demo.security.SecurityUtils;
-import com.example.demo.util.LogUtil;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.preference.PreferenceClient;
 import com.mercadopago.client.preference.PreferenceItemRequest;
@@ -41,7 +40,8 @@ public class PagamentoService {
         List<PagamentoItem> itens = new ArrayList<>();
         for (CriarPagamentoRequest pagamentoRequest : pagamentoRequestList) {
             PagamentoItem item = new PagamentoItem();
-            item.setAluno(new Aluno()); // TODO trocar para a consulta de aluno
+            Aluno aluno = usuarioService.findStudentByUuid(pagamentoRequest.alunoUUID());
+            item.setAluno(aluno);
             item.setTipo(pagamentoRequest.tipo());
             item.setTitulo(pagamentoRequest.tipo().getDescricao() + " - Aluno: " + item.getAluno().getNome());
             item.setValorIndividual(BigDecimal.valueOf(pagamentoRequest.valor()));
@@ -55,7 +55,7 @@ public class PagamentoService {
         pagamento.setStatus("criando_preference");
 
 
-        Usuario usuario = usuarioService.findByUuid(SecurityUtils.getUsuarioLogado().getUuid());
+        Usuario usuario = usuarioService.findUserByUuid(SecurityUtils.getUsuarioLogado().getUuid());
         pagamento.setUsuarioPagante(usuario);
         this.repository.save(pagamento);
 
@@ -131,7 +131,7 @@ public class PagamentoService {
             return client.create(preferenceRequest);
 
         } catch (Exception e) {
-            throw EscolaException.ofException("Erro ao criar pagamento, tente novamente mais tarde");
+            throw EurekaException.ofException("Erro ao criar pagamento, tente novamente mais tarde");
         }
     }
 

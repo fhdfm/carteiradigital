@@ -124,7 +124,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
                 ),
         }
 )
-public @interface EscolaApiOperation {
+public @interface EurekaApiOperation {
     String summary() default "";
     String description() default "";
 }

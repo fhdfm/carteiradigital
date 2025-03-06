@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.domain.enums.Status;
 import com.example.demo.domain.model.CategoriaProduto;
-import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.CategoriaRepository;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
@@ -27,7 +27,7 @@ public class CategoriaService {
         CategoriaProduto categoria = new CategoriaProduto();
         if (uuid != null) {
             categoria = repository.findByUuid(uuid)
-                    .orElseThrow(() -> EscolaException.ofNotFound("Categoria não encontrado."));
+                    .orElseThrow(() -> EurekaException.ofNotFound("Categoria não encontrado."));
         }
         UsuarioLogado usuarioLogado = SecurityUtils.getUsuarioLogado();
 
@@ -41,7 +41,7 @@ public class CategoriaService {
 
     public CategoriaProduto buscarPorUuid(UUID uuid) {
         return repository.findByUuid(uuid)
-                .orElseThrow(() -> EscolaException.ofNotFound("Categoria não encontrado."));
+                .orElseThrow(() -> EurekaException.ofNotFound("Categoria não encontrado."));
     }
 
     public Page<CategoriaProduto> listar(String nome, Pageable pageable) {
@@ -54,7 +54,7 @@ public class CategoriaService {
         }
 
         if (page.isEmpty()) {
-            throw EscolaException.ofNoContent("Nenhuma categoria encontrada.");
+            throw EurekaException.ofNoContent("Nenhuma categoria encontrada.");
         }
 
         return page;

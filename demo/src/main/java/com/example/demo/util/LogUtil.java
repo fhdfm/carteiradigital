@@ -3,7 +3,7 @@ package com.example.demo.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.exception.eureka.EurekaException;
 
 public class LogUtil {
 
@@ -44,22 +44,22 @@ public class LogUtil {
      *
      * @param clazz     a classe de onde o log está sendo chamado
      * @param type      o tipo de log (INFO, WARN, ERROR, DEBUG)
-     * @param EscolaException a exceção a ser logada
+     * @param EurekaException a exceção a ser logada
      */
-    public static void log(Class<?> clazz, LogType type, EscolaException escolaException) {
+    public static void log(Class<?> clazz, LogType type, EurekaException eurekaException) {
         Logger logger = LoggerFactory.getLogger(clazz);
         switch (type) {
             case WARN:
-                logger.warn(escolaException.getMessage(), escolaException);
+                logger.warn(eurekaException.getMessage(), eurekaException);
                 break;
             case ERROR:
-                logger.error(escolaException.getMessage(), escolaException);
+                logger.error(eurekaException.getMessage(), eurekaException);
                 break;
             case DEBUG:
-                logger.debug(escolaException.getMessage(), escolaException);
+                logger.debug(eurekaException.getMessage(), eurekaException);
                 break;
             default:
-                logger.info(escolaException.getMessage(), escolaException);
+                logger.info(eurekaException.getMessage(), eurekaException);
                 break;
         }
     }

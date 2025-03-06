@@ -1,8 +1,8 @@
-package com.example.demo.exception.escola;
+package com.example.demo.exception.eureka;
 
 import com.example.demo.util.ErrorType;
 
-public class EscolaException extends RuntimeException {
+public class EurekaException extends RuntimeException {
     private static final long serialVersionUID = 1L;
     protected final ErrorType errorType;
     protected final short errorCode;
@@ -11,7 +11,7 @@ public class EscolaException extends RuntimeException {
     /**
      * Construtor principal.
      */
-    public EscolaException(ErrorType errorType, String message, Class<?> clazz) {
+    public EurekaException(ErrorType errorType, String message, Class<?> clazz) {
         super(message);
         this.errorType = errorType;
         this.errorCode = errorType.getCode();
@@ -21,7 +21,7 @@ public class EscolaException extends RuntimeException {
     /**
      * Construtor para um errorCode
      */
-    public EscolaException(ErrorType errorType, short errorCode, String message, Class<?> clazz) {
+    public EurekaException(ErrorType errorType, short errorCode, String message, Class<?> clazz) {
         super(message);
         this.errorType = errorType;
         this.errorCode = errorCode;
@@ -31,7 +31,7 @@ public class EscolaException extends RuntimeException {
     /**
      * Construtor para incluir causa (Throwable).
      */
-    public EscolaException(ErrorType errorType, short errorCode, String message, Throwable cause, Class<?> clazz) {
+    public EurekaException(ErrorType errorType, short errorCode, String message, Throwable cause, Class<?> clazz) {
         super(message, cause);
         this.errorType = errorType;
         this.errorCode = errorCode;
@@ -58,35 +58,35 @@ public class EscolaException extends RuntimeException {
         try {
             return Class.forName(stack[3].getClassName());
         } catch (ClassNotFoundException e) {
-            return EscolaException.class;
+            return EurekaException.class;
         }
     }
 
-    public static EscolaException ofNoContent(String message) {
+    public static EurekaException ofNoContent(String message) {
         return new NoContentException(message, getCallerClass());
     }
 
-    public static EscolaException ofValidation(String message) {
+    public static EurekaException ofValidation(String message) {
         return new ValidationException(message, getCallerClass());
     }
 
-    public static EscolaException ofUnauthorized(String message) {
+    public static EurekaException ofUnauthorized(String message) {
         return new UnauthorizedException(message, getCallerClass());
     }
 
-    public static EscolaException ofForbidden(String message) {
+    public static EurekaException ofForbidden(String message) {
         return new ForbiddenException(message, getCallerClass());
     }
 
-    public static EscolaException ofNotFound(String message) {
+    public static EurekaException ofNotFound(String message) {
         return new NotFoundException(message, getCallerClass());
     }
 
-    public static EscolaException ofConflict(String message) {
+    public static EurekaException ofConflict(String message) {
         return new ConflictException(message, getCallerClass());
     }
 
-    public static EscolaException ofException(String message) {
-        return new EscolaException(ErrorType.EXCEPTION, message, getCallerClass());
+    public static EurekaException ofException(String message) {
+        return new EurekaException(ErrorType.EXCEPTION, message, getCallerClass());
     }
 }
