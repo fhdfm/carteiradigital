@@ -4,7 +4,7 @@ import com.example.demo.domain.enums.Status;
 import com.example.demo.domain.model.Produto;
 import com.example.demo.dto.ProdutoRequest;
 import com.example.demo.dto.projection.ProdutoView;
-import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.ProdutoRepository;
 import com.example.demo.repository.specification.ProdutoSpecification;
 import org.springframework.data.domain.Page;
@@ -38,7 +38,7 @@ public class ProdutoService {
 
         if (uuid != null) {
             produto = repository.findByUuid(uuid)
-                    .orElseThrow(() -> EscolaException.ofNotFound("Produto não encontrado."));
+                    .orElseThrow(() -> EurekaException.ofNotFound("Produto não encontrado."));
         }
 
         produto.setNome(request.nome());
@@ -50,14 +50,14 @@ public class ProdutoService {
 
     public ProdutoView buscarPorUuid(UUID uuid) {
         return repository.findByUuid(uuid, ProdutoView.class)
-                .orElseThrow(() -> EscolaException.ofNotFound("Produto não encontrado."));
+                .orElseThrow(() -> EurekaException.ofNotFound("Produto não encontrado."));
     }
 
     public Page<ProdutoView> listar(ProdutoSpecification specification, Pageable pageable) {
         Page<ProdutoView> page = repository.findAllProjected(specification, pageable, ProdutoView.class);
 
         if (page.isEmpty()) {
-            EscolaException.ofNoContent("Consulta com filtro informado não possui dados para retorno");
+            EurekaException.ofNoContent("Consulta com filtro informado não possui dados para retorno");
         }
 
         return page;

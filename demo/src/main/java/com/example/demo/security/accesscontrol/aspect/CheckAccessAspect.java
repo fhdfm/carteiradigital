@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.demo.domain.enums.Perfil;
-import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
 import com.example.demo.security.accesscontrol.annotation.CheckAccess;
@@ -65,7 +65,7 @@ public class CheckAccessAspect {
         }
 
         if (resourceId == null)
-            EscolaException.ofValidation("Parâmetro '" + paramName + "' não encontrado no método.");
+            EurekaException.ofValidation("Parâmetro '" + paramName + "' não encontrado no método.");
 
         AccessPolicy policy = accessPolicyFactory.getPolicy(entity);
 

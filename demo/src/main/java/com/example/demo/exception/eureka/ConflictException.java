@@ -1,8 +1,8 @@
-package com.example.demo.exception.escola;
+package com.example.demo.exception.eureka;
 
 import com.example.demo.util.ErrorType;
 
-public class ConflictException extends EscolaException {
+public class ConflictException extends EurekaException {
     private static final long serialVersionUID = 1L;
 
     public ConflictException(String message, Class<?> clazz) {

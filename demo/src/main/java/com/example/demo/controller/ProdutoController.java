@@ -1,10 +1,12 @@
 package com.example.demo.controller;
 
+import com.example.demo.controller.doc.EurekaApiOperation;
 import com.example.demo.dto.ProdutoRequest;
 import com.example.demo.dto.projection.ProdutoView;
 import com.example.demo.repository.specification.ProdutoSpecification;
 import com.example.demo.service.ProdutoService;
 import com.example.demo.util.ApiReturn;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
@@ -28,44 +30,93 @@ public class ProdutoController {
         this.service = service;
     }
 
-    @PreAuthorize("hasRole('MASTER')")
     @PostMapping
-    public ResponseEntity<ApiReturn<String>> criarProduto(@RequestBody @Valid ProdutoRequest request) {
+    @PreAuthorize("hasRole('MASTER')")
+    @EurekaApiOperation(
+            summary = "Criar um produto",
+            description = "Cria e persiste um novo produto contendo as informações especificadas na requisião."
+    )
+    public ResponseEntity<ApiReturn<String>> criarProduto(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Corpo da requisição com os dados de um produto",
+                    required = true
+            )
+            @RequestBody @Valid ProdutoRequest request
+    ) {
         service.salvar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiReturn.of("Produto criado com sucesso."));
     }
 
-    @PreAuthorize("hasRole('MASTER')")
     @PutMapping("/{uuid}")
-    public ResponseEntity<ApiReturn<String>> atualizarProduto(@PathVariable("uuid") UUID uuid,
-                                                              @RequestBody @Valid ProdutoRequest request) {
+    @PreAuthorize("hasRole('MASTER')")
+    @EurekaApiOperation(
+            summary = "Atualizar um produto",
+            description = "Atualiza, a partir do seu UUID, um produto persistido com as informações especificadas na requisião."
+    )
+    public ResponseEntity<ApiReturn<String>> atualizarProduto(
+            @Parameter(description = "UUID do produto a ser atualizado", required = true)
+            @PathVariable("uuid") UUID uuid,
+
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Corpo da requisição com os dados de um produto",
+                    required = true
+            )
+            @RequestBody @Valid ProdutoRequest request
+    ) {
         service.salvar(uuid, request);
         return ResponseEntity.ok(ApiReturn.of("Produto atualizado com sucesso."));
     }
 
-    @PreAuthorize("!hasRole('ALUNO')")
     @GetMapping("/{uuid}")
-    public ResponseEntity<ApiReturn<ProdutoView>> buscarProdutoPorUuid(@PathVariable("uuid") UUID uuid) {
+    @PreAuthorize("!hasRole('ALUNO')")
+    @EurekaApiOperation(
+            summary = "Busca um produto",
+            description = "Busca, a partir do seu UUID, um produto persistido."
+    )
+    public ResponseEntity<ApiReturn<ProdutoView>> buscarProdutoPorUuid(
+            @Parameter(description = "UUID do produto a ser buscado", required = true)
+            @PathVariable("uuid") UUID uuid
+    ) {
         return ResponseEntity.ok(ApiReturn.of(service.buscarPorUuid(uuid)));
     }
 
-    @PreAuthorize("!hasRole('ALUNO')")
     @GetMapping
-    public ResponseEntity<ApiReturn<Page<ProdutoView>>> listarProdutos(@ParameterObject ProdutoSpecification specification,
-                                                                       @ParameterObject Pageable pageable) {
+    @PreAuthorize("!hasRole('ALUNO')")
+    @EurekaApiOperation(
+            summary = "Lista os produtos",
+            description = "Retorna um page contendo produtos de acordo com os filtros especificados."
+    )
+    public ResponseEntity<ApiReturn<Page<ProdutoView>>> listarProdutos(
+            @ParameterObject ProdutoSpecification specification,
+            @ParameterObject Pageable pageable
+    ) {
         return ResponseEntity.ok(ApiReturn.of(service.listar(specification, pageable)));
     }
 
-    @PreAuthorize("!hasRole('ALUNO')")
     @PutMapping("/{uuid}/inativar")
-    public ResponseEntity<ApiReturn<String>> inativarProduto(@PathVariable("uuid") UUID uuid) {
+    @PreAuthorize("!hasRole('ALUNO')")
+    @EurekaApiOperation(
+            summary = "Inativa um produto",
+            description = "Inativa, a partir do seu UUID, um produto persistido."
+    )
+    public ResponseEntity<ApiReturn<String>> inativarProduto(
+            @Parameter(description = "UUID do produto a ser inativado", required = true)
+            @PathVariable("uuid") UUID uuid
+    ) {
         service.modificarStatus(uuid);
         return ResponseEntity.ok(ApiReturn.of("Produto inativado com sucesso."));
     }
 
-    @PreAuthorize("hasRole('MASTER')")
     @PutMapping("/{uuid}/ativar")
-    public ResponseEntity<ApiReturn<String>> ativarProduto(@PathVariable("uuid") UUID uuid) {
+    @PreAuthorize("hasRole('MASTER')")
+    @EurekaApiOperation(
+            summary = "Ativa um produto",
+            description = "Ativa, a partir do seu UUID, um produto persistido."
+    )
+    public ResponseEntity<ApiReturn<String>> ativarProduto(
+            @Parameter(description = "UUID do produto a ser ativado", required = true)
+            @PathVariable("uuid") UUID uuid
+    ) {
         service.modificarStatus(uuid);
         return ResponseEntity.ok(ApiReturn.of("Produto ativado com sucesso."));
     }

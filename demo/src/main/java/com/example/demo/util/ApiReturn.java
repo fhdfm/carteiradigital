@@ -1,7 +1,7 @@
 package com.example.demo.util;
 
-import com.example.demo.exception.escola.EscolaException;
-import com.example.demo.exception.escola.NoContentException;
+import com.example.demo.exception.eureka.EurekaException;
+import com.example.demo.exception.eureka.NoContentException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ApiReturn<T> {
@@ -57,7 +57,7 @@ public class ApiReturn<T> {
         return of(ErrorType.EXCEPTION, ErrorType.EXCEPTION.getCode(), exception.getMessage(), exception.getCause());
     }
 
-    public static ApiReturn<String> ofEscolaException(EscolaException ex) {
+    public static ApiReturn<String> ofEurekaException(EurekaException ex) {
         return of(ex.getErrorType(), ex.getErrorCode(), ex.getMessage(), ex);
     }
 

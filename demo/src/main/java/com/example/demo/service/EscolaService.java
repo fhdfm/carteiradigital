@@ -8,7 +8,7 @@ import com.example.demo.dto.EscolaUsuariosView;
 import com.example.demo.dto.UsuarioView;
 import com.example.demo.dto.projection.escola.EscolaIdAndName;
 import com.example.demo.dto.projection.escola.EscolaView;
-import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.EscolaRepository;
 import com.example.demo.repository.UsuarioRepository;
 import com.example.demo.repository.specification.EscolaSpecification;
@@ -43,7 +43,7 @@ public class EscolaService {
                 cnpj).orElse(null);
 
         if (Objects.nonNull(escola))
-            throw EscolaException.ofValidation("CNPJ já cadastrado.");
+            throw EurekaException.ofValidation("CNPJ já cadastrado.");
 
         escola = new Escola();
         escola.setNome(nome);
@@ -62,7 +62,7 @@ public class EscolaService {
                 cnpj).orElse(null);
 
         if (Objects.nonNull(escola) && !uuid.equals(escola.getUuid()))
-            throw EscolaException.ofConflict("CNPJ já cadastrado.");
+            throw EurekaException.ofConflict("CNPJ já cadastrado.");
 
         escola.setNome(nome);
         escola.setCnpj(cnpj);
@@ -73,14 +73,14 @@ public class EscolaService {
     public EscolaView buscarPorUuid(UUID uuid) {
 
         return repository.findByUuid(uuid, EscolaView.class)
-                .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada."));
+                .orElseThrow(() -> EurekaException.ofNotFound("Escola não encontrada."));
     }
 
     public Page<EscolaView> listar(EscolaSpecification specification, Pageable pageable) {
         Page<EscolaView> page = repository.findAllProjected(specification, pageable, EscolaView.class);
 
         if (page.isEmpty()) {
-            throw EscolaException.ofNoContent("Consulta com filtro informado não possui dados para retorno");
+            throw EurekaException.ofNoContent("Consulta com filtro informado não possui dados para retorno");
         }
 
         return page;
@@ -115,7 +115,7 @@ public class EscolaService {
 
     public Escola findByUuid(UUID uuid) {
         return repository.findByUuid(uuid)
-                .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada."));
+                .orElseThrow(() -> EurekaException.ofNotFound("Escola não encontrada."));
     }
 
     public List<EscolaIdAndName> getCombobox() {
@@ -124,7 +124,7 @@ public class EscolaService {
 
     public EscolaUsuariosView buscarUsuariosEscolaPorUuid(UUID escolaId, Pageable pageable) {
         EscolaView escola = repository.findEscolaViewByUuid(escolaId)
-                .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada"));
+                .orElseThrow(() -> EurekaException.ofNotFound("Escola não encontrada"));
 
         Page<UsuarioView> usuarios = usuarioRepository.findAllByEscolaUuid(escolaId, pageable);
 

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.controller.doc.EscolaApiOperation;
+import com.example.demo.controller.doc.EurekaApiOperation;
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.model.Escola;
 import com.example.demo.dto.EscolaParametrosRequest;
@@ -59,12 +59,12 @@ public class EscolaController {
      *   ...
      * }
      */
+    @PostMapping
     @PreAuthorize("hasRole('MASTER')")
-    @EscolaApiOperation(
+    @EurekaApiOperation(
             summary = "Criar uma escola",
             description = "Cria e persiste uma nova escola contendo as informações especificadas na requisião."
     )
-    @PostMapping
     public ResponseEntity<ApiReturn<String>> criarEscola(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Corpo da requisição com os dados de uma escola",
@@ -89,12 +89,12 @@ public class EscolaController {
      *   ...
      * }
      */
+    @PutMapping("/{uuid}")
     @PreAuthorize("hasRole('MASTER')")
-    @EscolaApiOperation(
+    @EurekaApiOperation(
             summary = "Atualizar uma escola",
             description = "Atualiza, a partir do seu UUID, uma escola persistida com as informações especificadas na requisião."
     )
-    @PutMapping("/{uuid}")
     public ResponseEntity<ApiReturn<String>> atualizarEscola(
             @Parameter(description = "UUID da escola a ser buscada", required = true)
             @PathVariable("uuid") UUID uuid,
@@ -114,13 +114,13 @@ public class EscolaController {
      * Retorna uma escola pelo UUID.
      * Exemplo de requisição: GET /api/escolas/{uuid}
      */
+    @GetMapping("/{uuid}")
     @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
     @CheckAccess(entity = EntityNames.ESCOLA)
-    @EscolaApiOperation(
+    @EurekaApiOperation(
             summary = "Busca uma escola",
             description = "Busca, a partir do seu UUID, uma escola persistida."
     )
-    @GetMapping("/{uuid}")
     public ResponseEntity<ApiReturn<EscolaView>> buscarEscolaPorUuid(
             @Parameter(description = "UUID da escola a ser buscada", required = true)
             @PathVariable("uuid") UUID uuid
@@ -128,13 +128,13 @@ public class EscolaController {
         return ResponseEntity.ok(ApiReturn.of(service.buscarPorUuid(uuid)));
     }
 
+    @GetMapping("/{uuid}/usuarios")
     @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
     @CheckAccess(entity = EntityNames.ESCOLA)
-    @EscolaApiOperation(
+    @EurekaApiOperation(
             summary = "Busca usuarios de uma escola",
             description = "Busca usuarios a partir do seu UUID, uma escola persistida."
     )
-    @GetMapping("/{uuid}/usuarios")
     public ResponseEntity<ApiReturn<EscolaUsuariosView>> buscarUsuariosEscolaPorUuid(
             @Parameter(description = "UUID da escola a ser buscada", required = true)
             @PathVariable("uuid") UUID uuid,
@@ -143,8 +143,8 @@ public class EscolaController {
         return ResponseEntity.ok(ApiReturn.of(service.buscarUsuariosEscolaPorUuid(uuid,pageable)));
     }
 
-    @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
     @GetMapping("/combobox")
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
     public ResponseEntity<ApiReturn<List<EscolaIdAndName>>> montarCombobox() {
 
         List<EscolaIdAndName> escolas = new ArrayList<>();
@@ -176,24 +176,24 @@ public class EscolaController {
      * Lista as escolas ativas com paginação.
      * Exemplo de requisição: GET /api/escolas?page=0&size=10
      */
+    @GetMapping
     @PreAuthorize("hasRole('MASTER')")
-    @EscolaApiOperation(
+    @EurekaApiOperation(
             summary = "Lista as escolas",
             description = "Retorna um page contendo escolas de acordo com os filtros especificados."
     )
-    @GetMapping
     public ResponseEntity<ApiReturn<Page<EscolaView>>> listarEscolas(
             @ParameterObject EscolaSpecification specification,
             @ParameterObject Pageable pageable) {
         return ResponseEntity.ok(ApiReturn.of(service.listar(specification, pageable)));
     }
 
+    @PutMapping("/{uuid}/inativar")
     @PreAuthorize("hasRole('MASTER')")
-    @EscolaApiOperation(
+    @EurekaApiOperation(
             summary = "Inativa uma escola",
             description = "Inativa, a partir do seu UUID, uma escola persistida."
     )
-    @PutMapping("/{uuid}/inativar")
     public ResponseEntity<ApiReturn<String>> inativarEscola(
             @Parameter(description = "UUID da escola a ser inativada", required = true)
             @PathVariable("uuid") UUID uuid
@@ -204,12 +204,12 @@ public class EscolaController {
         return ResponseEntity.ok(ApiReturn.of("Escola inativada com sucesso."));
     }
 
+    @PutMapping("/{uuid}/ativar")
     @PreAuthorize("hasRole('MASTER')")
-    @EscolaApiOperation(
+    @EurekaApiOperation(
             summary = "Ativa uma escola",
             description = "Ativa, a partir do seu UUID, uma escola persistida."
     )
-    @PutMapping("/{uuid}/ativar")
     public ResponseEntity<ApiReturn<String>> ativarEscola(
             @Parameter(description = "UUID da escola a ser ativada", required = true)
             @PathVariable("uuid") UUID uuid
@@ -222,11 +222,11 @@ public class EscolaController {
      * Atualiza os parametros de uma escola existente identificada pelo UUID.
      * Exemplo de requisição: PUT /api/escolas/params/{uuid}
      */
-    @EscolaApiOperation(
+    @PutMapping("params/{uuid}")
+    @EurekaApiOperation(
             summary = "Atualizar os parametros de uma escola",
             description = "Atualiza, a partir do seu UUID, os parametros de uma escola persistida com as informações especificadas na requisião."
     )
-    @PutMapping("params/{uuid}")
     public ResponseEntity<ApiReturn<String>> atualizarParametrosEscola(
             @Parameter(description = "UUID da escola a ser buscada", required = true)
             @PathVariable("uuid") UUID uuid,
