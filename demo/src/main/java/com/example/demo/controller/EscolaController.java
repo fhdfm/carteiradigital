@@ -1,7 +1,10 @@
 package com.example.demo.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import com.example.demo.dto.EscolaUsuariosView;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,10 +20,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.controller.doc.EscolaApiOperation;
+import com.example.demo.domain.enums.Perfil;
+import com.example.demo.domain.model.Escola;
 import com.example.demo.dto.EscolaParametrosRequest;
 import com.example.demo.dto.EscolaRequest;
+import com.example.demo.dto.projection.escola.EscolaIdAndName;
 import com.example.demo.dto.projection.escola.EscolaView;
 import com.example.demo.repository.specification.EscolaSpecification;
+import com.example.demo.security.SecurityUtils;
+import com.example.demo.security.UsuarioLogado;
 import com.example.demo.security.accesscontrol.EntityNames;
 import com.example.demo.security.accesscontrol.annotation.CheckAccess;
 import com.example.demo.service.EscolaService;
@@ -118,6 +126,50 @@ public class EscolaController {
             @PathVariable("uuid") UUID uuid
     ) {
         return ResponseEntity.ok(ApiReturn.of(service.buscarPorUuid(uuid)));
+    }
+
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
+    @CheckAccess(entity = EntityNames.ESCOLA)
+    @EscolaApiOperation(
+            summary = "Busca usuarios de uma escola",
+            description = "Busca usuarios a partir do seu UUID, uma escola persistida."
+    )
+    @GetMapping("/{uuid}/usuarios")
+    public ResponseEntity<ApiReturn<EscolaUsuariosView>> buscarUsuariosEscolaPorUuid(
+            @Parameter(description = "UUID da escola a ser buscada", required = true)
+            @PathVariable("uuid") UUID uuid,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(ApiReturn.of(service.buscarUsuariosEscolaPorUuid(uuid,pageable)));
+    }
+
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
+    @GetMapping("/combobox")
+    public ResponseEntity<ApiReturn<List<EscolaIdAndName>>> montarCombobox() {
+
+        List<EscolaIdAndName> escolas = new ArrayList<>();
+
+        UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
+        if (currentUser.possuiPerfil(Perfil.MASTER)) {
+            escolas = service.getCombobox();
+        } else {
+            Escola escola = currentUser.getEscola();
+            escolas.add(new EscolaIdAndName() {
+
+                @Override
+                public UUID getUuid() {
+                    return escola.getUuid();
+                }
+
+                @Override
+                public String getNome() {
+                    return escola.getNome();
+                }
+
+            });
+        }
+
+        return ResponseEntity.ok(ApiReturn.of(escolas));
     }
 
     /**

@@ -1,28 +1,37 @@
 package com.example.demo.service;
 
-import java.util.Objects;
-import java.util.UUID;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
 import com.example.demo.domain.enums.Status;
 import com.example.demo.domain.model.Escola;
 import com.example.demo.dto.EscolaParametrosRequest;
 import com.example.demo.dto.EscolaRequest;
+import com.example.demo.dto.EscolaUsuariosView;
+import com.example.demo.dto.UsuarioView;
+import com.example.demo.dto.projection.escola.EscolaIdAndName;
 import com.example.demo.dto.projection.escola.EscolaView;
 import com.example.demo.exception.escola.EscolaException;
 import com.example.demo.repository.EscolaRepository;
+import com.example.demo.repository.UsuarioRepository;
 import com.example.demo.repository.specification.EscolaSpecification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Service
 public class EscolaService {
-    
-    private final EscolaRepository repository;
 
-    public EscolaService(EscolaRepository repository) {
+    private final EscolaRepository repository;
+    private final UsuarioRepository usuarioRepository;
+
+    public EscolaService(
+            EscolaRepository repository,
+            UsuarioRepository usuarioRepository
+    ) {
         this.repository = repository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     public void salvar(EscolaRequest request) {
@@ -50,10 +59,10 @@ public class EscolaService {
         String nome = request.nome();
 
         Escola escola = repository.findByCnpj(
-            cnpj).orElse(null);
+                cnpj).orElse(null);
 
         if (Objects.nonNull(escola) && !uuid.equals(escola.getUuid()))
-                throw EscolaException.ofConflict("CNPJ já cadastrado.");
+            throw EscolaException.ofConflict("CNPJ já cadastrado.");
 
         escola.setNome(nome);
         escola.setCnpj(cnpj);
@@ -64,11 +73,11 @@ public class EscolaService {
     public EscolaView buscarPorUuid(UUID uuid) {
 
         return repository.findByUuid(uuid, EscolaView.class)
-            .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada."));
+                .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada."));
     }
 
     public Page<EscolaView> listar(EscolaSpecification specification, Pageable pageable) {
-        Page<EscolaView> page =  repository.findAllProjected(specification, pageable, EscolaView.class);
+        Page<EscolaView> page = repository.findAllProjected(specification, pageable, EscolaView.class);
 
         if (page.isEmpty()) {
             throw EscolaException.ofNoContent("Consulta com filtro informado não possui dados para retorno");
@@ -82,16 +91,16 @@ public class EscolaService {
         Escola escola = findByUuid(uuid);
 
         escola.setStatus(Status.INATIVO);
-        
+
         repository.save(escola);
     }
 
     public void ativar(UUID uuid) {
-        
+
         Escola escola = findByUuid(uuid);
 
         escola.setStatus(Status.ATIVO);
-        
+
         repository.save(escola);
     }
 
@@ -109,4 +118,16 @@ public class EscolaService {
                 .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada."));
     }
 
+    public List<EscolaIdAndName> getCombobox() {
+        return repository.findAllProjected();
+    }
+
+    public EscolaUsuariosView buscarUsuariosEscolaPorUuid(UUID escolaId, Pageable pageable) {
+        EscolaView escola = repository.findEscolaViewByUuid(escolaId)
+                .orElseThrow(() -> EscolaException.ofNotFound("Escola não encontrada"));
+
+        Page<UsuarioView> usuarios = usuarioRepository.findAllByEscolaUuid(escolaId, pageable);
+
+        return new EscolaUsuariosView(escola, usuarios);
+    }
 }

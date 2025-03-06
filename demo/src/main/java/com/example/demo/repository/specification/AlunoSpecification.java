@@ -10,7 +10,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.enums.Status;
-import com.example.demo.domain.model.Usuario;
+import com.example.demo.domain.model.Aluno;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
 
@@ -20,25 +20,30 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
 @ParameterObject
-public class UsuarioSpecification implements Specification<Usuario> {
+public class AlunoSpecification implements Specification<Aluno> {
 
     private UUID escolaId;
     private String nome;
     private String cpf;
     private String email;
-    private Perfil perfil;
     private Status status;
+    private String matricula;
+    private UUID responsavelId;
 
-    public UsuarioSpecification(String nome, String cpf, String email, Perfil perfil, Status status) {
+    public AlunoSpecification(
+            String nome, String cpf, String email, Status status, 
+            String matricula, UUID responsavelId) {
+
         this.nome = nome;
         this.cpf = cpf;
         this.email = email;
-        this.perfil = perfil;
         this.status = status;
+        this.matricula = matricula;
+        this.responsavelId = responsavelId;
     }
 
     @Override
-    public Predicate toPredicate(Root<Usuario> root, CriteriaQuery<?> query, CriteriaBuilder criteria) {
+    public Predicate toPredicate(Root<Aluno> root, CriteriaQuery<?> query, CriteriaBuilder criteria) {
         
         List<Predicate> predicates = new ArrayList<>();
 
@@ -66,14 +71,8 @@ public class UsuarioSpecification implements Specification<Usuario> {
             predicates.add(criteria.like(root.get("email"), "%" + this.email + "%"));
         }
 
-        // Garante que aluno não será exibido.
-        predicates.add(criteria.notEqual(root.get("perfil"), Perfil.ALUNO));
-
-        if (Objects.nonNull(perfil)) {
-            if (perfil != Perfil.ALUNO) {
-                predicates.add(criteria.equal(root.get("perfil"), this.perfil));
-            }
-        }
+        // Garante que só exibira ALUNO
+        predicates.add(criteria.equal(root.get("perfil"), Perfil.ALUNO));
 
         if (Objects.nonNull(status)) {
             predicates.add(criteria.equal(root.get("status"), this.status));
@@ -81,11 +80,27 @@ public class UsuarioSpecification implements Specification<Usuario> {
             predicates.add(criteria.notEqual(root.get("status"), Status.INATIVO));
         }
 
+        if (Objects.nonNull(matricula) && !matricula.isEmpty()) {
+            predicates.add(criteria.like(root.get("matricula"), "%" + this.matricula + "%"));
+        }
+
+        if (Objects.nonNull(responsavelId)) {
+            predicates.add(criteria.equal(root.get("responsavel").get("uuid"), this.responsavelId));
+        }
+
         return criteria.and(predicates.stream().toArray(Predicate[]::new));
     }
 
     public UUID getEscolaId() {
         return escolaId;
+    }
+
+    public UUID getResponsavelId() {
+        return responsavelId;
+    }
+
+    public String getMatricula() {
+        return matricula;
     }
 
     public String getNome() {
@@ -98,10 +113,6 @@ public class UsuarioSpecification implements Specification<Usuario> {
 
     public String getEmail() {
         return email;
-    }
-
-    public Perfil getPerfil() {
-        return perfil;
     }
 
     public Status getStatus() {
