@@ -1,55 +1,68 @@
 package com.example.demo.service;
 
+import com.example.demo.domain.model.Aluno;
+import com.example.demo.domain.model.Pagamento;
+import com.example.demo.domain.model.PagamentoItem;
+import com.example.demo.domain.model.Usuario;
+import com.example.demo.dto.CriarPagamentoRequest;
+import com.example.demo.exception.escola.EscolaException;
+import com.example.demo.repository.PagamentoRepository;
+import com.example.demo.security.SecurityUtils;
+import com.example.demo.util.LogUtil;
+import com.mercadopago.MercadoPagoConfig;
+import com.mercadopago.client.preference.PreferenceClient;
+import com.mercadopago.client.preference.PreferenceItemRequest;
+import com.mercadopago.client.preference.PreferencePayerRequest;
+import com.mercadopago.client.preference.PreferenceRequest;
+import com.mercadopago.resources.preference.Preference;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class PagamentoService {
 //
-//    private final PagamentoRepository repository;
-//
-//    private final MatriculaService matriculaService;
-//
-//    private final CursoRepository cursoRepository;
-//    private final UsuarioRepository usuarioRepository;
-//    private final ApostilaRepository apostilaRepository;
-//
-//    public PagamentoService(
-//            PagamentoRepository repository,
-//            MatriculaService matriculaService,
-//            UsuarioRepository usuarioRepository,
-//            CursoRepository cursoRepository,
-//            ApostilaRepository apostilaRepository
-//    ) {
-//        this.repository = repository;
-//        this.matriculaService = matriculaService;
-//        this.usuarioRepository = usuarioRepository;
-//        this.cursoRepository = cursoRepository;
-//        this.apostilaRepository = apostilaRepository;
-//    }
-//
-//    public String registrarPreCompra(ProdutoMercadoPagoRequest produto) {
-//        Pagamento pagamento = new Pagamento();
-//        pagamento.setTipo(produto.getTipo());
-//
-//        if (produto.getTipo().equals(TipoProduto.QUESTOES)) {
-//            pagamento.setProdutoId(UUID.fromString("00000000-0000-0000-0000-000000000000"));
-//            pagamento.setPeriodo(produto.getPeriodo());
-//        } else {
-//            if (produto.getTipo().equals(TipoProduto.APOSTILA)) {
-//
-//
-//            }
-//            pagamento.setProdutoId(produto.getUuid());
-//        }
-//
-//        UsuarioLogado currentUser = SecurityUtil.obterUsuarioLogado();
-//
-//        pagamento.setUsuarioId(currentUser.getId());
-//
-//        this.repository.save(pagamento);
-//
-//        return pagamento.getId().toString();
-//    }
+    private final PagamentoRepository repository;
+    private final UsuarioService usuarioService;
+
+    public PagamentoService(PagamentoRepository repository, UsuarioService usuarioService) {
+        this.repository = repository;
+        this.usuarioService = usuarioService;
+    }
+
+
+    public String registrarPreCompra(List<CriarPagamentoRequest> pagamentoRequestList) {
+        Pagamento pagamento = new Pagamento();
+
+        BigDecimal valorTotal = BigDecimal.ZERO;
+        List<PagamentoItem> itens = new ArrayList<>();
+        for (CriarPagamentoRequest pagamentoRequest : pagamentoRequestList) {
+            PagamentoItem item = new PagamentoItem();
+            item.setAluno(new Aluno()); // TODO trocar para a consulta de aluno
+            item.setTipo(pagamentoRequest.tipo());
+            item.setTitulo(pagamentoRequest.tipo().getDescricao() + " - Aluno: " + item.getAluno().getNome());
+            item.setValorIndividual(BigDecimal.valueOf(pagamentoRequest.valor()));
+            valorTotal = valorTotal.add(BigDecimal.valueOf(pagamentoRequest.valor()));
+            itens.add(item);
+        }
+
+        pagamento.setItens(itens);
+        pagamento.setData(LocalDateTime.now());
+        pagamento.setValorTotal(valorTotal);
+        pagamento.setStatus("criando_preference");
+
+
+        Usuario usuario = usuarioService.findByUuid(SecurityUtils.getUsuarioLogado().getUuid());
+        pagamento.setUsuarioPagante(usuario);
+        this.repository.save(pagamento);
+
+        Preference preference = createPayment(pagamento);
+
+        return preference.getInitPoint();
+    }
 //
 //    @Transactional
 //    public void update(Pagamento pagamento) {
@@ -81,46 +94,45 @@ public class PagamentoService {
 //        }
 //    }
 //
-//    public String createPayment(ProdutoMercadoPagoRequest produto) {
-//        try {
-//            Optional<Usuario> usuario = usuarioRepository.findById(SecurityUtil.obterUsuarioLogado().getId());
-//
-//            PreferenceClient client = new PreferenceClient();
-//
-//            // CASO PRECISE ---------------------------------------
-////            PreferenceReceiverAddressRequest addressRequest = PreferenceReceiverAddressRequest.builder()
-////                    .streetName("")
-////                    .cityName("")
-////                    .streetNumber("")
-////                    .build();
-////            PreferenceShipmentsRequest preferenceShipmentsRequest =  PreferenceShipmentsRequest.builder()
-////                    .receiverAddress(addressRequest)
-////                    .build();
-//            // CASO PRECISE ---------------------------------------
-//
-//            PreferenceItemRequest itemRequest = PreferenceItemRequest.builder()
-//                    .title(produto.getTitulo())
-//                    .quantity(1)
-//                    .unitPrice(BigDecimal.valueOf(produto.getValor()))
+    private Preference createPayment(Pagamento pagamento) {
+        try {
+            MercadoPagoConfig.setAccessToken(pagamento.getItens().getFirst().getAluno().getEscola().getPaymentSecret());
+            PreferenceClient client = new PreferenceClient();
+
+            // CASO PRECISE ---------------------------------------
+//            PreferenceReceiverAddressRequest addressRequest = PreferenceReceiverAddressRequest.builder()
+//                    .streetName("")
+//                    .cityName("")
+//                    .streetNumber("")
 //                    .build();
-//
-//            PreferencePayerRequest payerRequest = PreferencePayerRequest.builder()
-//                    .email(usuario.get().getEmail())
+//            PreferenceShipmentsRequest preferenceShipmentsRequest =  PreferenceShipmentsRequest.builder()
+//                    .receiverAddress(addressRequest)
 //                    .build();
-//
-//            PreferenceRequest preferenceRequest = PreferenceRequest.builder()
-//                    .items(Collections.singletonList(itemRequest))
-//                    .payer(payerRequest)
-//                    .externalReference(registrarPreCompra(produto))
-//                    .build();
-//
-//            Preference preference = client.create(preferenceRequest);
-//
-//            return preference.getInitPoint();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return "Erro ao criar pagamento";
-//        }
-//    }
+            // CASO PRECISE ---------------------------------------
+
+            List<PreferenceItemRequest> itens = pagamento.getItens().stream()
+                    .map(pagamentoItem -> PreferenceItemRequest.builder()
+                            .title(pagamentoItem.getTitulo())
+                            .quantity(1)
+                            .unitPrice(pagamentoItem.getValorIndividual())
+                            .build())
+                    .toList();
+
+            PreferencePayerRequest payerRequest = PreferencePayerRequest.builder()
+                    .email(pagamento.getUsuarioPagante().getEmail())
+                    .build();
+
+            PreferenceRequest preferenceRequest = PreferenceRequest.builder()
+                    .items(itens)
+                    .payer(payerRequest)
+                    .externalReference(pagamento.getUuid().toString())
+                    .build();
+
+            return client.create(preferenceRequest);
+
+        } catch (Exception e) {
+            throw EscolaException.ofException("Erro ao criar pagamento, tente novamente mais tarde");
+        }
+    }
 
 }
