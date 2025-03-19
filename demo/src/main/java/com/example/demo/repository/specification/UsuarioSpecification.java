@@ -42,7 +42,8 @@ public class UsuarioSpecification implements Specification<Usuario> {
     private Status status;
 
 
-    public UsuarioSpecification(String nome, String cpf, String email, Perfil perfil, Status status) {
+    public UsuarioSpecification(UUID escolaId, String nome, String cpf, String email, Perfil perfil, Status status) {
+        this.escolaId = escolaId;
         this.nome = nome;
         this.cpf = cpf;
         this.email = email;
