@@ -1,5 +1,6 @@
 package com.example.demo.domain.model;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.example.demo.domain.converter.CnpjConverter;
@@ -92,6 +93,26 @@ public class Escola extends BaseEntity {
     @Override
     public void setUuid(UUID uuid) {
         super.uuid = uuid;
+    }
+
+    @Override
+    protected LocalDateTime getCriadoEm() {
+        return super.criadoEm;
+    }
+
+    @Override
+    protected void setCriadoEm(LocalDateTime criadoEm) {
+        super.criadoEm = criadoEm;
+    }
+
+    @Override
+    protected LocalDateTime getAtualizadoEm() {
+        return super.atualizadoEm;
+    }
+
+    @Override
+    protected void setAtualizadoEm(LocalDateTime atualizadoEm) {
+        super.atualizadoEm = atualizadoEm;
     }
 
 }

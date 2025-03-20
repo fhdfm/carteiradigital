@@ -1,5 +1,6 @@
-package com.example.demo.service;
+package com.example.demo.service.pagamento;
 
+import com.example.demo.domain.enums.TipoPagamento;
 import com.example.demo.domain.model.Aluno;
 import com.example.demo.domain.model.Pagamento;
 import com.example.demo.domain.model.PagamentoItem;
@@ -8,6 +9,7 @@ import com.example.demo.dto.CriarPagamentoRequest;
 import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.PagamentoRepository;
 import com.example.demo.security.SecurityUtils;
+import com.example.demo.service.UsuarioService;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.preference.PreferenceClient;
 import com.mercadopago.client.preference.PreferenceItemRequest;
@@ -26,12 +28,13 @@ public class PagamentoService {
 //
     private final PagamentoRepository repository;
     private final UsuarioService usuarioService;
+    private final PagamentoProcessorFactory processorFactory;
 
-    public PagamentoService(PagamentoRepository repository, UsuarioService usuarioService) {
+    public PagamentoService(PagamentoRepository repository, UsuarioService usuarioService, PagamentoProcessorFactory processorFactory) {
         this.repository = repository;
         this.usuarioService = usuarioService;
+        this.processorFactory = processorFactory;
     }
-
 
     public String registrarPreCompra(List<CriarPagamentoRequest> pagamentoRequestList) {
         Pagamento pagamento = new Pagamento();
@@ -62,6 +65,14 @@ public class PagamentoService {
         Preference preference = createPayment(pagamento);
 
         return preference.getInitPoint();
+    }
+
+    public void atualizaPagamento() {
+        // TODO adicionar modo de conclusão de pagamento
+
+        processorFactory
+                .getProcessor(TipoPagamento.RECARGA_CARTAO)
+                .processaPagamento(new PagamentoItem());
     }
 //
 //    @Transactional

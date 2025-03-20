@@ -1,9 +1,11 @@
 package com.example.demo.domain.model;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.example.demo.domain.enums.Status;
 
+import com.example.demo.domain.model.carteira.Carteira;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -18,7 +20,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
 @Entity
-@Table(name = "cartao_aluno")
+@Table(name = "cartao_carteira")
 public class Cartao extends BaseEntity {
     
     @Id
@@ -26,8 +28,8 @@ public class Cartao extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "aluno_id", nullable = false)
-    private Aluno aluno;
+    @JoinColumn(name = "carteira_id", nullable = false)
+    private Carteira carteira;
 
     @Column(name = "numero", nullable = false)
     private String numero;
@@ -54,12 +56,12 @@ public class Cartao extends BaseEntity {
         this.id = id;
     }
 
-    public Aluno getAluno() {
-        return aluno;
+    public Carteira getCarteira() {
+        return carteira;
     }
 
-    public void setAluno(Aluno aluno) {
-        this.aluno = aluno;
+    public void setCarteira(Carteira carteira) {
+        this.carteira = carteira;
     }
 
     public void setNumero(String numero) {
@@ -88,4 +90,23 @@ public class Cartao extends BaseEntity {
         super.uuid = uuid;
     }
 
+    @Override
+    protected LocalDateTime getCriadoEm() {
+        return super.criadoEm;
+    }
+
+    @Override
+    protected void setCriadoEm(LocalDateTime criadoEm) {
+        super.criadoEm = criadoEm;
+    }
+
+    @Override
+    protected LocalDateTime getAtualizadoEm() {
+        return super.atualizadoEm;
+    }
+
+    @Override
+    protected void setAtualizadoEm(LocalDateTime atualizadoEm) {
+        super.atualizadoEm = atualizadoEm;
+    }
 }

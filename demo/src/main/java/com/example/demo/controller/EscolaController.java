@@ -128,21 +128,6 @@ public class EscolaController {
         return ResponseEntity.ok(ApiReturn.of(service.buscarPorUuid(uuid)));
     }
 
-    @GetMapping("/{uuid}/usuarios")
-    @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
-    @CheckAccess(entity = EntityNames.ESCOLA)
-    @EurekaApiOperation(
-            summary = "Busca usuarios de uma escola",
-            description = "Busca usuarios a partir do seu UUID, uma escola persistida."
-    )
-    public ResponseEntity<ApiReturn<EscolaUsuariosView>> buscarUsuariosEscolaPorUuid(
-            @Parameter(description = "UUID da escola a ser buscada", required = true)
-            @PathVariable("uuid") UUID uuid,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(ApiReturn.of(service.buscarUsuariosEscolaPorUuid(uuid,pageable)));
-    }
-
     @GetMapping("/combobox")
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
     public ResponseEntity<ApiReturn<List<EscolaIdAndName>>> montarCombobox() {
@@ -218,28 +203,28 @@ public class EscolaController {
         return ResponseEntity.ok(ApiReturn.of("Escola ativada com sucesso."));
     }
 
-    /**
-     * Atualiza os parametros de uma escola existente identificada pelo UUID.
-     * Exemplo de requisição: PUT /api/escolas/params/{uuid}
-     */
-    @PutMapping("params/{uuid}")
-    @EurekaApiOperation(
-            summary = "Atualizar os parametros de uma escola",
-            description = "Atualiza, a partir do seu UUID, os parametros de uma escola persistida com as informações especificadas na requisião."
-    )
-    public ResponseEntity<ApiReturn<String>> atualizarParametrosEscola(
-            @Parameter(description = "UUID da escola a ser buscada", required = true)
-            @PathVariable("uuid") UUID uuid,
-
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Corpo da requisição com os parâmetros a serem salvos da escola",
-                    required = true
-            )
-            @RequestBody @Valid EscolaParametrosRequest request
-    ) {
-        service.atualizarParametrosEscola(uuid, request);
-
-        return ResponseEntity.ok(ApiReturn.of("Escola atualizada com sucesso."));
-    }
+//    /**
+//     * Atualiza os parametros de uma escola existente identificada pelo UUID.
+//     * Exemplo de requisição: PUT /api/escolas/params/{uuid}
+//     */
+//    @PutMapping("params/{uuid}")
+//    @EurekaApiOperation(
+//            summary = "Atualizar os parametros de uma escola",
+//            description = "Atualiza, a partir do seu UUID, os parametros de uma escola persistida com as informações especificadas na requisião."
+//    )
+//    public ResponseEntity<ApiReturn<String>> atualizarParametrosEscola(
+//            @Parameter(description = "UUID da escola a ser buscada", required = true)
+//            @PathVariable("uuid") UUID uuid,
+//
+//            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+//                    description = "Corpo da requisição com os parâmetros a serem salvos da escola",
+//                    required = true
+//            )
+//            @RequestBody @Valid EscolaParametrosRequest request
+//    ) {
+//        service.atualizarParametrosEscola(uuid, request);
+//
+//        return ResponseEntity.ok(ApiReturn.of("Escola atualizada com sucesso."));
+//    }
 
 }

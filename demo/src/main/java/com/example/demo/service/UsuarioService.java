@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.demo.domain.model.carteira.Carteira;
+import com.example.demo.repository.CarteiraRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,15 +40,18 @@ public class UsuarioService {
     private final EscolaService escolaService;
     private final UsuarioRepository usuarioRepository;
     private final AlunoRepository alunoRepository;
+    private final CarteiraRepository carteiraRepository;
 
     public UsuarioService(UsuarioRepository usuarioRepository, 
         PasswordEncoder passwordEncoder, EscolaService escolaService, 
-        AlunoRepository alunoRepository) {
+        AlunoRepository alunoRepository,
+                          CarteiraRepository carteiraRepository) {
         
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.escolaService = escolaService;
         this.alunoRepository = alunoRepository;
+        this.carteiraRepository = carteiraRepository;
     }
 
     public UUID createUser(UsuarioRequest request) {
@@ -203,6 +208,10 @@ public class UsuarioService {
         student.setSenha(passwordEncoder.encode(senha));
         // TODO: integrar com o s3
         //student.setFoto(senha);
+
+        Carteira carteira = new Carteira();
+        carteira.setAluno(student);
+        carteiraRepository.save(carteira);
 
         // TODO: - Envia e-mail para o usuário.
 

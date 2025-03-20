@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.CriarPagamentoRequest;
-import com.example.demo.service.PagamentoService;
+import com.example.demo.service.pagamento.PagamentoService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

@@ -57,12 +57,4 @@ public class Aluno extends Usuario {
         this.foto = foto;
     }
 
-    public void setCartoes(List<Cartao> cartoes) {
-        this.cartoes = cartoes;
-    }
-
-    public List<Cartao> getCartoes() {
-        return cartoes;
-    }
-
 }

@@ -104,14 +104,12 @@ public class EscolaService {
         repository.save(escola);
     }
 
-    public void atualizarParametrosEscola(UUID uuid, EscolaParametrosRequest request) {
-
-        Escola escola = findByUuid(uuid);
-
-        escola.setPaymentSecret(request.paymentSecret());
-
-        repository.save(escola);
-    }
+//    public void atualizarParametrosEscola(UUID uuid, EscolaParametrosRequest request) {
+//
+//        Escola escola = findByUuid(uuid);
+//
+//        repository.save(escola);
+//    }
 
     public Escola findByUuid(UUID uuid) {
         return repository.findByUuid(uuid)
@@ -120,14 +118,5 @@ public class EscolaService {
 
     public List<EscolaIdAndName> getCombobox() {
         return repository.findAllProjected();
-    }
-
-    public EscolaUsuariosView buscarUsuariosEscolaPorUuid(UUID escolaId, Pageable pageable) {
-        EscolaView escola = repository.findEscolaViewByUuid(escolaId)
-                .orElseThrow(() -> EurekaException.ofNotFound("Escola não encontrada"));
-
-        Page<UsuarioView> usuarios = usuarioRepository.findAllByEscolaUuid(escolaId, pageable);
-
-        return new EscolaUsuariosView(escola, usuarios);
     }
 }

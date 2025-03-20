@@ -7,6 +7,7 @@ import com.example.demo.domain.enums.Status;
 import com.example.demo.security.UsuarioLogado;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -80,6 +81,26 @@ public class Usuario extends BaseEntity {
     @Override
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
+    }
+
+    @Override
+    protected LocalDateTime getCriadoEm() {
+        return super.criadoEm;
+    }
+
+    @Override
+    protected void setCriadoEm(LocalDateTime criadoEm) {
+        super.criadoEm = criadoEm;
+    }
+
+    @Override
+    protected LocalDateTime getAtualizadoEm() {
+        return super.atualizadoEm;
+    }
+
+    @Override
+    protected void setAtualizadoEm(LocalDateTime atualizadoEm) {
+        super.atualizadoEm = atualizadoEm;
     }
 
     public Escola getEscola() {
