@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.CriarPagamentoRequest;
+import com.example.demo.dto.RecargaManualRequest;
 import com.example.demo.dto.projection.carteira.CarteiraView;
 import com.example.demo.service.CarteiraService;
 import com.example.demo.service.pagamento.PagamentoService;
@@ -40,10 +41,10 @@ public class CarteiraController {
     public ResponseEntity<ApiReturn<String>> realizarRecargaManual(
             @Parameter(description = "UUID do aluno dono da carteira a ser buscado", required = true)
             @PathVariable("uuid") UUID uuid,
-            @Parameter(description = "Valor da recarga", required = true)
-            @RequestParam("valor") BigDecimal valor
+
+            @RequestBody() RecargaManualRequest request
     ) {
-        return ResponseEntity.ok(ApiReturn.of(service.realizarRecargaManual(uuid, valor)));
+        return ResponseEntity.ok(ApiReturn.of(service.realizarRecargaManual(uuid, request.valor())));
     }
 
 }
