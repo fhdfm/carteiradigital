@@ -125,6 +125,39 @@ CREATE INDEX idx_cartao_carteira_uuid      ON cartao_carteira(uuid);
 CREATE INDEX idx_cartao_carteira_carteira  ON cartao_carteira(carteira_id);
 CREATE INDEX idx_cartao_carteira_numero    ON cartao_carteira (numero);
 
+
+-- ==========================
+-- TABELA TRANSAÇÃO
+-- ==========================
+CREATE TABLE transacao (
+                          id BIGSERIAL PRIMARY KEY,
+                          uuid UUID NOT NULL,
+                          carteira_id BIGINT NOT NULL,
+                          valor DECIMAL(19, 2) NOT NULL DEFAULT 0,
+                          tipoTransacao VARCHAR NOT NULL,
+                          usuario_id BIGINT NOT NULL,
+                          pedido_id BIGINT NOT NULL,
+                          version INT NOT NULL DEFAULT 0,
+                          criado_em TIMESTAMP DEFAULT NOW(),
+                          atualizado_em TIMESTAMP DEFAULT NOW(),
+                          CONSTRAINT fk_transacao_carteira
+                              FOREIGN KEY (carteira_id) REFERENCES carteira(id)
+                                  ON DELETE NO ACTION,
+                          CONSTRAINT fk_transacao_usuario
+                              FOREIGN KEY (usuario_id) REFERENCES usuario(id)
+                                  ON DELETE NO ACTION,
+                          CONSTRAINT fk_transacao_pedido
+                              FOREIGN KEY (pedido_id) REFERENCES pedido(id)
+                                  ON DELETE NO ACTION,
+                          CONSTRAINT uq_carteira_uuid UNIQUE (uuid)
+);
+
+-- Índices (além dos UNIQUE, que geram índices implícitos,
+-- podemos criar índices adicionais para buscas específicas)
+CREATE INDEX idx_transacao_id        ON transacao(id);
+CREATE INDEX idx_transacao_uuid      ON transacao(uuid);
+CREATE INDEX idx_transacao_carteira     ON transacao(carteira_id);
+
 -- ==========================
 -- TABELA PRODUTO
 -- ==========================

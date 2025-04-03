@@ -209,13 +209,13 @@ public class UsuarioService {
         // TODO: integrar com o s3
         //student.setFoto(senha);
 
-        Carteira carteira = new Carteira();
-        carteira.setAluno(student);
-        carteiraRepository.save(carteira);
-
         // TODO: - Envia e-mail para o usuário.
 
         alunoRepository.save(student);
+
+        Carteira carteira = new Carteira();
+        carteira.setAluno(student);
+        carteiraRepository.save(carteira);
 
         Aluno newStudent = this.alunoRepository.findByEmail(email).orElseThrow(() 
                         -> EurekaException.ofNotFound("Aluno não encontrado."));
