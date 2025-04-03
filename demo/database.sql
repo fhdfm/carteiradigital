@@ -55,6 +55,7 @@ CREATE INDEX idx_usuario_cpf ON usuario(cpf);
 -- ==========================
 CREATE TABLE aluno (
     id BIGINT PRIMARY KEY,
+    uuid UUID UNIQUE DEFAULT uuid_generate_v4(),
     responsavel_id BIGINT NOT NULL,
     matricula VARCHAR(255),
     foto VARCHAR(255),
@@ -71,22 +72,26 @@ CREATE TABLE aluno (
 
 -- ÍNDICES (opcionais, conforme suas necessidades de consulta)
 CREATE INDEX idx_aluno_responsavel ON aluno(responsavel_id);
+CREATE INDEX idx_aluno_uuid ON aluno(uuid);
 
 -- Se quiser indexar 'matricula'
 CREATE INDEX idx_aluno_matricula ON aluno(matricula);
 
+-- ==========================
+-- TABELA Carteira
+-- ==========================
 CREATE TABLE carteira (
-    id BIGSERIAL PRIMARY KEY,
-    uuid UUID NOT NULL,
-    aluno_id BIGINT NOT NULL,
-    saldo DECIMAL(19, 2) NOT NULL DEFAULT 0,
-    version INT NOT NULL DEFAULT 0,
-    criado_em TIMESTAMP DEFAULT NOW(),
-    atualizado_em TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT fk_carteira_aluno
-        FOREIGN KEY (aluno_id) REFERENCES aluno(id)
-        ON DELETE NO ACTION,
-    CONSTRAINT uq_carteira_uuid UNIQUE (uuid)
+                          id BIGSERIAL PRIMARY KEY,
+                          uuid UUID UNIQUE DEFAULT uuid_generate_v4(),
+                          aluno_id BIGINT NOT NULL,
+                          saldo DECIMAL(19, 2) NOT NULL DEFAULT 0,
+                          version INT NOT NULL DEFAULT 0,
+                          criado_em TIMESTAMP DEFAULT NOW(),
+                          atualizado_em TIMESTAMP DEFAULT NOW(),
+                          CONSTRAINT fk_carteira_aluno
+                              FOREIGN KEY (aluno_id) REFERENCES aluno(id)
+                                  ON DELETE NO ACTION,
+                          CONSTRAINT uq_carteira_uuid UNIQUE (uuid)
 );
 
 -- Índices (além dos UNIQUE, que geram índices implícitos,
@@ -100,25 +105,25 @@ CREATE INDEX idx_carteira_aluno     ON carteira(aluno_id);
 -- TABELA CARTÃO_CARTEIRA
 -- ==========================
 CREATE TABLE cartao_carteira (
-    id BIGSERIAL PRIMARY KEY,
-    uuid UUID NOT NULL,
-    carteira_id BIGINT NOT NULL,
-    numero VARCHAR(255) NOT NULL,
-    senha VARCHAR(255) NOT NULL, 
-    status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO' NOT NULL,
-    version INT NOT NULL DEFAULT 0,
-    criado_em TIMESTAMP DEFAULT NOW(),
-    atualizado_em TIMESTAMP DEFAULT NOW()
+                                 id BIGSERIAL PRIMARY KEY,
+                                 uuid UUID UNIQUE DEFAULT uuid_generate_v4(),
+                                 carteira_id BIGINT NOT NULL,
+                                 numero VARCHAR(255) NOT NULL,
+                                 senha VARCHAR(255) NOT NULL,
+                                 status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO' NOT NULL,
+                                 version INT NOT NULL DEFAULT 0,
+                                 criado_em TIMESTAMP DEFAULT NOW(),
+                                 atualizado_em TIMESTAMP DEFAULT NOW(),
 
     -- Chave estrangeira para a tabela aluno
-    CONSTRAINT fk_cartao_carteira
-        FOREIGN KEY (carteira_id) REFERENCES carteira(id) ON DELETE NO ACTION,
-    
+                                 CONSTRAINT fk_cartao_carteira
+                                     FOREIGN KEY (carteira_id) REFERENCES carteira(id) ON DELETE NO ACTION,
+
     -- Constraint de unicidade para o campo uuid
-    CONSTRAINT uq_cartao_carteira_uuid UNIQUE (uuid)
+                                 CONSTRAINT uq_cartao_carteira_uuid UNIQUE (uuid)
 );
 
--- Índices (além dos UNIQUE, que geram índices implícitos, 
+-- Índices (além dos UNIQUE, que geram índices implícitos,
 -- podemos criar índices adicionais para buscas específicas)
 CREATE INDEX idx_cartao_carteira_id        ON cartao_carteira(id);
 CREATE INDEX idx_cartao_carteira_uuid      ON cartao_carteira(uuid);
@@ -130,26 +135,26 @@ CREATE INDEX idx_cartao_carteira_numero    ON cartao_carteira (numero);
 -- TABELA TRANSAÇÃO
 -- ==========================
 CREATE TABLE transacao (
-                          id BIGSERIAL PRIMARY KEY,
-                          uuid UUID NOT NULL,
-                          carteira_id BIGINT NOT NULL,
-                          valor DECIMAL(19, 2) NOT NULL DEFAULT 0,
-                          tipoTransacao VARCHAR NOT NULL,
-                          usuario_id BIGINT NOT NULL,
-                          pedido_id BIGINT NOT NULL,
-                          version INT NOT NULL DEFAULT 0,
-                          criado_em TIMESTAMP DEFAULT NOW(),
-                          atualizado_em TIMESTAMP DEFAULT NOW(),
-                          CONSTRAINT fk_transacao_carteira
-                              FOREIGN KEY (carteira_id) REFERENCES carteira(id)
-                                  ON DELETE NO ACTION,
-                          CONSTRAINT fk_transacao_usuario
-                              FOREIGN KEY (usuario_id) REFERENCES usuario(id)
-                                  ON DELETE NO ACTION,
-                          CONSTRAINT fk_transacao_pedido
-                              FOREIGN KEY (pedido_id) REFERENCES pedido(id)
-                                  ON DELETE NO ACTION,
-                          CONSTRAINT uq_carteira_uuid UNIQUE (uuid)
+                           id BIGSERIAL PRIMARY KEY,
+                           uuid UUID UNIQUE DEFAULT uuid_generate_v4(),
+                           carteira_id BIGINT NOT NULL,
+                           valor DECIMAL(19, 2) NOT NULL DEFAULT 0,
+                           tipoTransacao VARCHAR NOT NULL,
+                           usuario_id BIGINT NOT NULL,
+                           pedido_id BIGINT NOT NULL,
+                           version INT NOT NULL DEFAULT 0,
+                           criado_em TIMESTAMP DEFAULT NOW(),
+                           atualizado_em TIMESTAMP DEFAULT NOW(),
+                           CONSTRAINT fk_transacao_carteira
+                               FOREIGN KEY (carteira_id) REFERENCES carteira(id)
+                                   ON DELETE NO ACTION,
+                           CONSTRAINT fk_transacao_usuario
+                               FOREIGN KEY (usuario_id) REFERENCES usuario(id)
+                                   ON DELETE NO ACTION,
+                           CONSTRAINT fk_transacao_pedido
+                               FOREIGN KEY (pedido_id) REFERENCES pedido(id)
+                                   ON DELETE NO ACTION,
+                           CONSTRAINT uq_transacao_uuid UNIQUE (uuid)
 );
 
 -- Índices (além dos UNIQUE, que geram índices implícitos,

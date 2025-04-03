@@ -26,7 +26,7 @@ public class CarteiraController {
     public CarteiraController(CarteiraService service) {
         this.service = service;
     }
-    @GetMapping
+    @GetMapping("/{uuid}")
     @PreAuthorize("hasAnyRole('ALUNO', 'RESPONSAVEL')")
     public ResponseEntity<ApiReturn<CarteiraView>> consultarSaldo(
             @Parameter(description = "UUID do aluno dono da carteira a ser buscado", required = true)
@@ -35,13 +35,13 @@ public class CarteiraController {
         return ResponseEntity.ok(ApiReturn.of(service.buscarPorAlunoUuid(uuid)));
     }
 
-    @PutMapping
+    @PutMapping("/{uuid}")
     @PreAuthorize("hasAnyRole('MASTER', 'ADMIN')")
     public ResponseEntity<ApiReturn<String>> realizarRecargaManual(
             @Parameter(description = "UUID do aluno dono da carteira a ser buscado", required = true)
             @PathVariable("uuid") UUID uuid,
             @Parameter(description = "Valor da recarga", required = true)
-            @PathVariable("valor") BigDecimal valor
+            @RequestParam("valor") BigDecimal valor
     ) {
         return ResponseEntity.ok(ApiReturn.of(service.realizarRecargaManual(uuid, valor)));
     }

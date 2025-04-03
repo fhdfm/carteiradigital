@@ -32,6 +32,7 @@ import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UsuarioService {
@@ -178,6 +179,7 @@ public class UsuarioService {
                 () -> EurekaException.ofNotFound("Aluno não encontrado."));
     }
 
+    @Transactional
     public UUID createStudent(AlunoRequest request) {
         
         String email = request.email().trim();
