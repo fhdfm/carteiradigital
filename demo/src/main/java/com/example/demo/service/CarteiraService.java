@@ -63,13 +63,30 @@ public class CarteiraService {
                 .orElseThrow(() -> EurekaException.ofNotFound("Carteira não encontrada."));
 
         Transacao transacao = new Transacao();
-        transacao.setTipoTransacao(TipoTransacao.DEBITO);
+        transacao.setTipoTransacao(TipoTransacao.CREDITO);
         transacao.setCarteira(carteira);
         transacao.setValor(valor);
         transacao.setUsuario(usuarioResponsavel);
 
         transacaoRepository.save(transacao);
+    }
 
+    /**
+     * Método para atualizar salto da carteira a partir de uma recarga.
+     */
+    public String realizarRecargaManual(UUID alunoUuid, BigDecimal valor) {
+        Carteira carteira = repository.findByAlunoUuid(alunoUuid)
+                .orElseThrow(() -> EurekaException.ofNotFound("Carteira não encontrada."));
 
+        Transacao transacao = new Transacao();
+        transacao.setTipoTransacao(TipoTransacao.CREDITO);
+        transacao.setCarteira(carteira);
+        transacao.setValor(valor);
+
+        // TODO Calcular taxa futura sobpagamento
+
+        transacaoRepository.save(transacao);
+
+        return "OK";
     }
 }

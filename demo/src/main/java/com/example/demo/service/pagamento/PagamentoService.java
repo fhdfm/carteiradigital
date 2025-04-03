@@ -1,6 +1,5 @@
 package com.example.demo.service.pagamento;
 
-import com.example.demo.domain.enums.TipoPagamento;
 import com.example.demo.domain.model.Aluno;
 import com.example.demo.domain.model.Pagamento;
 import com.example.demo.domain.model.PagamentoItem;
@@ -10,18 +9,13 @@ import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.PagamentoRepository;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.service.UsuarioService;
-import com.mercadopago.MercadoPagoConfig;
-import com.mercadopago.client.preference.PreferenceClient;
-import com.mercadopago.client.preference.PreferenceItemRequest;
-import com.mercadopago.client.preference.PreferencePayerRequest;
-import com.mercadopago.client.preference.PreferenceRequest;
-import com.mercadopago.resources.preference.Preference;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PagamentoService {
@@ -60,19 +54,28 @@ public class PagamentoService {
 
         Usuario usuario = usuarioService.findUserByUuid(SecurityUtils.getUsuarioLogado().getUuid());
         pagamento.setUsuarioPagante(usuario);
-        this.repository.save(pagamento);
+        repository.save(pagamento);
 
-        Preference preference = createPayment(pagamento);
+//        Preference preference = createPayment(pagamento);
 
-        return preference.getInitPoint();
+        return "OK";
     }
 
-    public void atualizaPagamento() {
-        // TODO adicionar modo de conclusão de pagamento
+    public String confirmarCompra(UUID pagamentoId) {
+        Pagamento pagamento = repository
+                .findByUuid(pagamentoId)
+                .orElseThrow(() -> EurekaException.ofNotFound("Pagamento não encontrado."));
 
-        processorFactory
-                .getProcessor(TipoPagamento.RECARGA_CARTAO)
-                .processaPagamento(new PagamentoItem());
+        pagamento.setStatus("Concluido");
+        repository.save(pagamento);
+
+        for (PagamentoItem item : pagamento.getItens()) {
+            processorFactory
+                    .getProcessor(item.getTipo())
+                    .processaPagamento(pagamento.getUsuarioPagante(), item);
+        }
+
+        return "OK";
     }
 //
 //    @Transactional
@@ -105,45 +108,44 @@ public class PagamentoService {
 //        }
 //    }
 //
-    private Preference createPayment(Pagamento pagamento) {
-        try {
-            MercadoPagoConfig.setAccessToken(pagamento.getItens().getFirst().getAluno().getEscola().getPaymentSecret());
-            PreferenceClient client = new PreferenceClient();
-
-            // CASO PRECISE ---------------------------------------
-//            PreferenceReceiverAddressRequest addressRequest = PreferenceReceiverAddressRequest.builder()
-//                    .streetName("")
-//                    .cityName("")
-//                    .streetNumber("")
+//    private Preference createPayment(Pagamento pagamento) {
+//        try {
+//            PreferenceClient client = new PreferenceClient();
+//
+//            // CASO PRECISE ---------------------------------------
+////            PreferenceReceiverAddressRequest addressRequest = PreferenceReceiverAddressRequest.builder()
+////                    .streetName("")
+////                    .cityName("")
+////                    .streetNumber("")
+////                    .build();
+////            PreferenceShipmentsRequest preferenceShipmentsRequest =  PreferenceShipmentsRequest.builder()
+////                    .receiverAddress(addressRequest)
+////                    .build();
+//            // CASO PRECISE ---------------------------------------
+//
+//            List<PreferenceItemRequest> itens = pagamento.getItens().stream()
+//                    .map(pagamentoItem -> PreferenceItemRequest.builder()
+//                            .title(pagamentoItem.getTitulo())
+//                            .quantity(1)
+//                            .unitPrice(pagamentoItem.getValorIndividual())
+//                            .build())
+//                    .toList();
+//
+//            PreferencePayerRequest payerRequest = PreferencePayerRequest.builder()
+//                    .email(pagamento.getUsuarioPagante().getEmail())
 //                    .build();
-//            PreferenceShipmentsRequest preferenceShipmentsRequest =  PreferenceShipmentsRequest.builder()
-//                    .receiverAddress(addressRequest)
+//
+//            PreferenceRequest preferenceRequest = PreferenceRequest.builder()
+//                    .items(itens)
+//                    .payer(payerRequest)
+//                    .externalReference(pagamento.getUuid().toString())
 //                    .build();
-            // CASO PRECISE ---------------------------------------
-
-            List<PreferenceItemRequest> itens = pagamento.getItens().stream()
-                    .map(pagamentoItem -> PreferenceItemRequest.builder()
-                            .title(pagamentoItem.getTitulo())
-                            .quantity(1)
-                            .unitPrice(pagamentoItem.getValorIndividual())
-                            .build())
-                    .toList();
-
-            PreferencePayerRequest payerRequest = PreferencePayerRequest.builder()
-                    .email(pagamento.getUsuarioPagante().getEmail())
-                    .build();
-
-            PreferenceRequest preferenceRequest = PreferenceRequest.builder()
-                    .items(itens)
-                    .payer(payerRequest)
-                    .externalReference(pagamento.getUuid().toString())
-                    .build();
-
-            return client.create(preferenceRequest);
-
-        } catch (Exception e) {
-            throw EurekaException.ofException("Erro ao criar pagamento, tente novamente mais tarde");
-        }
-    }
+//
+//            return client.create(preferenceRequest);
+//
+//        } catch (Exception e) {
+//            throw EurekaException.ofException("Erro ao criar pagamento, tente novamente mais tarde");
+//        }
+//    }
 
 }

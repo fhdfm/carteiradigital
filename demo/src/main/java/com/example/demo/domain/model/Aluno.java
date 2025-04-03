@@ -27,9 +27,6 @@ public class Aluno extends Usuario {
     @Column(name = "foto")
     private String foto;
 
-    @OneToMany(mappedBy = "aluno", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<Cartao> cartoes;
-
     public Aluno() {
     }
 
