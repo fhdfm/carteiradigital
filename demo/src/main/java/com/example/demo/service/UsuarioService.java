@@ -23,6 +23,7 @@ import com.example.demo.dto.projection.aluno.AlunoSummary;
 import com.example.demo.dto.projection.usuario.UsuarioSummary;
 import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.AlunoRepository;
+import com.example.demo.repository.EscolaRepository;
 import com.example.demo.repository.UsuarioRepository;
 import com.example.demo.repository.specification.AlunoSpecification;
 import com.example.demo.repository.specification.UsuarioSpecification;
@@ -35,17 +36,17 @@ import jakarta.persistence.EntityNotFoundException;
 public class UsuarioService {
     
     private final PasswordEncoder passwordEncoder;
-    private final EscolaService escolaService;
+    private final EscolaRepository escolaRepository;
     private final UsuarioRepository usuarioRepository;
     private final AlunoRepository alunoRepository;
 
     public UsuarioService(UsuarioRepository usuarioRepository, 
-        PasswordEncoder passwordEncoder, EscolaService escolaService, 
+        PasswordEncoder passwordEncoder, EscolaRepository escolaRepository, 
         AlunoRepository alunoRepository) {
         
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
-        this.escolaService = escolaService;
+        this.escolaRepository = escolaRepository;
         this.alunoRepository = alunoRepository;
     }
 
@@ -114,7 +115,7 @@ public class UsuarioService {
         user.setTelefone(request.telefone());
 
         usuarioRepository.save(user);
-    }    
+    }
 
     public Usuario findUserByUuid(UUID uuid) {
         return this.usuarioRepository.findByUuid(uuid).orElseThrow(
@@ -300,7 +301,8 @@ public class UsuarioService {
     }    
 
     private Escola getEscola(UUID uuid) {
-        return this.escolaService.findByUuid(uuid);
+        return this.escolaRepository.findByUuid(uuid)
+            .orElseThrow(() -> EurekaException.ofNotFound("Escola não encontrada."));
     }
 
     /**
