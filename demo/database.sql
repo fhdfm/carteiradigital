@@ -139,9 +139,9 @@ CREATE TABLE transacao (
                            uuid UUID UNIQUE DEFAULT uuid_generate_v4(),
                            carteira_id BIGINT NOT NULL,
                            valor DECIMAL(19, 2) NOT NULL DEFAULT 0,
-                           tipoTransacao VARCHAR NOT NULL,
-                           usuario_id BIGINT NOT NULL,
-                           pedido_id BIGINT NOT NULL,
+                           tipo_transacao VARCHAR NOT NULL,
+                           usuario_id BIGINT,
+                           pedido_id BIGINT,
                            version INT NOT NULL DEFAULT 0,
                            criado_em TIMESTAMP DEFAULT NOW(),
                            atualizado_em TIMESTAMP DEFAULT NOW(),
@@ -162,6 +162,46 @@ CREATE TABLE transacao (
 CREATE INDEX idx_transacao_id        ON transacao(id);
 CREATE INDEX idx_transacao_uuid      ON transacao(uuid);
 CREATE INDEX idx_transacao_carteira     ON transacao(carteira_id);
+
+
+-- ==========================
+-- TRIGGER CARTEIRA TRANSAÇÃO
+-- ==========================
+CREATE OR REPLACE FUNCTION atualizar_saldo_carteira()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- INSERT
+  IF TG_OP = 'INSERT' THEN
+    IF NEW.tipo_transacao = 'CREDITO' THEN
+UPDATE carteira SET saldo = saldo + NEW.valor WHERE id = NEW.carteira_id;
+ELSIF NEW.tipo_transacao = 'DEBITO' THEN
+UPDATE carteira SET saldo = saldo - NEW.valor WHERE id = NEW.carteira_id;
+END IF;
+
+  -- UPDATE
+  ELSIF TG_OP = 'UPDATE' THEN
+    IF OLD.tipo_transacao = 'CREDITO' THEN
+UPDATE carteira SET saldo = saldo - OLD.valor WHERE id = OLD.carteira_id;
+ELSIF OLD.tipo_transacao = 'DEBITO' THEN
+UPDATE carteira SET saldo = saldo + OLD.valor WHERE id = OLD.carteira_id;
+END IF;
+
+    IF NEW.tipo_transacao = 'CREDITO' THEN
+UPDATE carteira SET saldo = saldo + NEW.valor WHERE id = NEW.carteira_id;
+ELSIF NEW.tipo_transacao = 'DEBITO' THEN
+UPDATE carteira SET saldo = saldo - NEW.valor WHERE id = NEW.carteira_id;
+END IF;
+END IF;
+
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_atualizar_saldo_carteira
+    AFTER INSERT OR UPDATE ON transacao
+                        FOR EACH ROW
+                        EXECUTE FUNCTION atualizar_saldo_carteira();
+
 
 -- ==========================
 -- TABELA PRODUTO

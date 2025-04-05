@@ -29,7 +29,7 @@ public class CarteiraService {
      * Busca a Carteira via UUID, retornando a projeção CarteiraView.
      */
     public CarteiraView buscarPorAlunoUuid(UUID alunoUuid) {
-        return repository.findByAlunoUuid(alunoUuid, CarteiraView.class)
+        return repository.findByAluno_Uuid(alunoUuid, CarteiraView.class)
                 .orElseThrow(() -> EurekaException.ofNotFound("Carteira não encontrada."));
     }
 
@@ -37,7 +37,7 @@ public class CarteiraService {
      * Método para debitar uma compra da carteira.
      */
     public void debitarCompra(UUID alunoUuid, BigDecimal valor, Pedido pedido, Usuario usuarioResponsavel) {
-        Carteira carteira = repository.findByAlunoUuid(alunoUuid)
+        Carteira carteira = repository.findByAluno_Uuid(alunoUuid)
                 .orElseThrow(() -> EurekaException.ofNotFound("Carteira não encontrada."));
 
         BigDecimal novoSaldo = carteira.getSaldo().subtract(valor);
@@ -59,7 +59,7 @@ public class CarteiraService {
      * Método para atualizar salto da carteira a partir de uma recarga.
      */
     public void realizarRecarga(UUID alunoUuid, BigDecimal valor, Usuario usuarioResponsavel) {
-        Carteira carteira = repository.findByAlunoUuid(alunoUuid)
+        Carteira carteira = repository.findByAluno_Uuid(alunoUuid)
                 .orElseThrow(() -> EurekaException.ofNotFound("Carteira não encontrada."));
 
         Transacao transacao = new Transacao();
@@ -75,7 +75,7 @@ public class CarteiraService {
      * Método para atualizar salto da carteira a partir de uma recarga.
      */
     public String realizarRecargaManual(UUID alunoUuid, BigDecimal valor) {
-        Carteira carteira = repository.findByAlunoUuid(alunoUuid)
+        Carteira carteira = repository.findByAluno_Uuid(alunoUuid)
                 .orElseThrow(() -> EurekaException.ofNotFound("Carteira não encontrada."));
 
         Transacao transacao = new Transacao();
