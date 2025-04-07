@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.UUID;
 
 import com.example.demo.domain.model.carteira.Carteira;
+import com.example.demo.dto.email.EmailDto;
 import com.example.demo.repository.CarteiraRepository;
+import com.example.demo.util.SenhaUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,19 +44,25 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final AlunoRepository alunoRepository;
     private final CarteiraRepository carteiraRepository;
+    private final EmailService emailService;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, 
-        PasswordEncoder passwordEncoder, EscolaService escolaService, 
-        AlunoRepository alunoRepository,
-                          CarteiraRepository carteiraRepository) {
-        
-        this.usuarioRepository = usuarioRepository;
+    public UsuarioService(
+            PasswordEncoder passwordEncoder,
+            EscolaService escolaService,
+            UsuarioRepository usuarioRepository,
+            AlunoRepository alunoRepository,
+            CarteiraRepository carteiraRepository,
+            EmailService emailService
+    ) {
         this.passwordEncoder = passwordEncoder;
         this.escolaService = escolaService;
+        this.usuarioRepository = usuarioRepository;
         this.alunoRepository = alunoRepository;
         this.carteiraRepository = carteiraRepository;
+        this.emailService = emailService;
     }
 
+    @Transactional
     public UUID createUser(UsuarioRequest request) {
 
         UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
@@ -69,7 +77,7 @@ public class UsuarioService {
         if (this.usuarioRepository.existsByCpf(cpf))
             throw EurekaException.ofValidation(cpf + " já está cadastrado");
 
-        String senha = this.gerarSenhaTemporaria();
+        String senha = SenhaUtil.gerarSenhaTemporaria();
 
         Escola escola = this.getEscola(request.escolaId());
 
@@ -85,9 +93,9 @@ public class UsuarioService {
         user.setPrimeiroAcesso(true);
         user.setSenha(passwordEncoder.encode(senha));
 
-        // TODO - Envia e-mail para o usuário.
-
         usuarioRepository.save(user);
+
+        enviaEmailNovoUsuario(user.getNome(), user.getEmail(), senha);
 
         Usuario newUser = this.usuarioRepository.findByEmail(email).orElseThrow(() 
                         -> EurekaException.ofNotFound("Usuário não encontrado."));
@@ -190,7 +198,7 @@ public class UsuarioService {
         if (this.alunoRepository.existsByCpf(cpf))
             throw EurekaException.ofValidation(cpf + " já está cadastrado");
 
-        String senha = this.gerarSenhaTemporaria();
+        String senha = SenhaUtil.gerarSenhaTemporaria();
 
         Escola escola = this.getEscola(request.escolaId());
         Usuario responsavel = this.findUserByUuid(request.responsavelId());
@@ -211,9 +219,9 @@ public class UsuarioService {
         // TODO: integrar com o s3
         //student.setFoto(senha);
 
-        // TODO: - Envia e-mail para o usuário.
-
         alunoRepository.save(student);
+
+        enviaEmailNovoUsuario(student.getNome(), student.getEmail(), senha);
 
         Carteira carteira = new Carteira();
         carteira.setAluno(student);
@@ -314,55 +322,21 @@ public class UsuarioService {
         return this.escolaService.findByUuid(uuid);
     }
 
-    /**
-    * Gera uma senha temporária aleatória com tamanho fixo de 8 caracteres.
-    *
-    * <p>A senha gerada atende aos seguintes requisitos:
-    * <ul>
-    *   <li>Contém pelo menos um caractere maiúsculo</li>
-    *   <li>Contém pelo menos um caractere minúsculo</li>
-    *   <li>Contém pelo menos um dígito numérico</li>
-    *   <li>Contém pelo menos um caractere especial</li>
-    * </ul>
-    * Os demais caracteres são escolhidos aleatoriamente dentre todos os caracteres permitidos.
-    * A ordem dos caracteres é embaralhada para evitar qualquer padrão previsível.
-    * </p>
-    *
-    * @return uma String contendo a senha temporária gerada.
-    */
-    private String gerarSenhaTemporaria() {
-
-        int tamanhoSenha = 8;
-
-        String maiusculas = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        String minusculas = "abcdefghijklmnopqrstuvwxyz";
-        String numeros = "0123456789";
-        String especiais = "!@#$%^&*()-_=+[]{}|;:,.<>?";
-        String todos = maiusculas + minusculas + numeros + especiais;
-
-        SecureRandom random = new SecureRandom();
-        
-        List<Character> senha = new java.util.ArrayList<>();
-        
-        // Adiciona obrigatoriamente um caractere de cada tipo
-        senha.add(maiusculas.charAt(random.nextInt(maiusculas.length())));
-        senha.add(minusculas.charAt(random.nextInt(minusculas.length())));
-        senha.add(numeros.charAt(random.nextInt(numeros.length())));
-        senha.add(especiais.charAt(random.nextInt(especiais.length())));
-
-        for (int i = 4; i < tamanhoSenha; i++) {
-            senha.add(todos.charAt(random.nextInt(todos.length())));
-        }
-
-        Collections.shuffle(senha, random);
-        
-        // Converte a lista de caracteres para String
-        StringBuilder resultado = new StringBuilder(tamanhoSenha);
-        for (char c : senha) {
-            resultado.append(c);
-        }
-
-        return resultado.toString();
+    private void enviaEmailNovoUsuario(String nome, String email, String senha) {
+        String body = String.format("Olá, %s! Sua senha temporária é:%n%s", nome, senha);
+        emailService.sendEmail(
+                new EmailDto(
+                        body,
+                        List.of(email),
+                        List.of(),
+                        List.of(),
+                        "Suas credenciais chegaram!",
+                        List.of(),
+                        null
+                )
+        );
     }
+
+
 
 }
