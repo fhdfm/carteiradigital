@@ -54,7 +54,7 @@ public class CarteiraController {
             @Parameter(description = "UUID do aluno dono da carteira a ser buscado", required = true)
             @PathVariable("uuid") UUID uuid,
 
-            @RequestBody() RecargaManualRequest request
+            @RequestBody RecargaManualRequest request
     ) {
         return ResponseEntity.ok(ApiReturn.of(service.realizarRecargaManual(uuid, request.valor())));
     }

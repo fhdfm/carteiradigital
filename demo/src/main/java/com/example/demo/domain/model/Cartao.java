@@ -64,12 +64,16 @@ public class Cartao extends BaseEntity {
         this.carteira = carteira;
     }
 
+    public String getNumero() {
+        return numero;
+    }
+
     public void setNumero(String numero) {
         this.numero = numero;
     }
 
-    public String getNumero() {
-        return numero;
+    public void setSenha(String senha) {
+        this.senha = senha;
     }
 
     public Status getStatus() {

@@ -58,4 +58,30 @@ public class SenhaUtil {
 
         return resultado.toString();
     }
+
+    /**
+     * Gera uma senha temporária de 4 dígitos numéricos, no estilo PIN de cartão.
+     * <p>
+     * A senha contém apenas números (0-9), podendo incluir zeros à esquerda.
+     * Útil para autenticação rápida, senhas de uso único e etc.
+     * </p>
+     *
+     * <pre>
+     * Exemplo de saída:
+     * gerarSenhaTemporariaCartao(); // "0742"
+     * </pre>
+     *
+     * @return uma {@code String} com exatamente 4 dígitos numéricos aleatórios.
+     */
+    public static String gerarSenhaTemporariaPin() {
+        SecureRandom random = new SecureRandom();
+        StringBuilder senha = new StringBuilder(4);
+
+        for (int i = 0; i < 4; i++) {
+            senha.append(random.nextInt(10)); // de 0 a 9
+        }
+
+        return senha.toString();
+    }
+
 }

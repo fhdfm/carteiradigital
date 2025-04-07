@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.demo.domain.model.Cartao;
 import com.example.demo.domain.model.carteira.Carteira;
 import com.example.demo.dto.email.EmailDto;
 import com.example.demo.repository.CarteiraRepository;
@@ -222,14 +223,30 @@ public class UsuarioService {
 
         alunoRepository.save(student);
 
-        enviaEmailNovoUsuario(student.getNome(), student.getEmail(), senha);
-
         Carteira carteira = new Carteira();
         carteira.setAluno(student);
+
+        String senhaCartao = SenhaUtil.gerarSenhaTemporariaPin();
+
+        Cartao novoCartao = new Cartao();
+        novoCartao.setCarteira(carteira);
+        novoCartao.setNumero(request.numeroCartao());
+        novoCartao.setSenha(passwordEncoder.encode(senhaCartao));
+        novoCartao.setStatus(Status.ATIVO);
+
+        carteira.getCartoes().add(novoCartao);
+
         carteiraRepository.save(carteira);
 
         Aluno newStudent = this.alunoRepository.findByEmail(email).orElseThrow(() 
                         -> EurekaException.ofNotFound("Aluno não encontrado."));
+
+        enviaEmailNovoUsuario(student.getNome(), student.getEmail(), senha);
+
+        if (request.numeroCartao() != null) {
+            enviaEmailNovoCartao(student.getNome(), student.getEmail(), student.getResponsavel().getEmail(), request.numeroCartao(), senhaCartao);
+        }
+
         return newStudent.getUuid();
     }
 
@@ -332,6 +349,21 @@ public class UsuarioService {
                         List.of(),
                         List.of(),
                         "Suas credenciais chegaram!",
+                        List.of(),
+                        null
+                )
+        );
+    }
+
+    private void enviaEmailNovoCartao(String nome, String email, String emailResponsavel, String numero, String senha) {
+        String body = String.format("Olá, %s! A senha do seu cartão (%s) é:%n%s", nome, numero, senha);
+        emailService.sendEmail(
+                new EmailDto(
+                        body,
+                        List.of(email, emailResponsavel),
+                        List.of(),
+                        List.of(),
+                        "Seu cartão foi cadastrado!",
                         List.of(),
                         null
                 )
