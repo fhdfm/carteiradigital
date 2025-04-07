@@ -6,6 +6,8 @@ import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @MappedSuperclass
@@ -19,6 +21,7 @@ public abstract class BaseEntity {
         updatable = false,
         columnDefinition = "UUID DEFAULT uuid_generate_v4()"
     )
+    @Generated(GenerationTime.INSERT)
     protected UUID uuid;
 
     @Column(name = "criado_em", nullable = false, updatable = false)
