@@ -8,6 +8,7 @@ import java.util.UUID;
 import com.example.demo.domain.model.carteira.Carteira;
 import com.example.demo.dto.email.EmailDto;
 import com.example.demo.repository.CarteiraRepository;
+import com.example.demo.repository.EscolaRepository;
 import com.example.demo.util.SenhaUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UsuarioService {
     
     private final PasswordEncoder passwordEncoder;
-    private final EscolaService escolaService;
+    private final EscolaRepository escolaRepository;
     private final UsuarioRepository usuarioRepository;
     private final AlunoRepository alunoRepository;
     private final CarteiraRepository carteiraRepository;
@@ -48,14 +49,14 @@ public class UsuarioService {
 
     public UsuarioService(
             PasswordEncoder passwordEncoder,
-            EscolaService escolaService,
+            EscolaRepository escolaRepository,
             UsuarioRepository usuarioRepository,
             AlunoRepository alunoRepository,
             CarteiraRepository carteiraRepository,
             EmailService emailService
     ) {
         this.passwordEncoder = passwordEncoder;
-        this.escolaService = escolaService;
+        this.escolaRepository = escolaRepository;
         this.usuarioRepository = usuarioRepository;
         this.alunoRepository = alunoRepository;
         this.carteiraRepository = carteiraRepository;
@@ -319,7 +320,7 @@ public class UsuarioService {
     }    
 
     private Escola getEscola(UUID uuid) {
-        return this.escolaService.findByUuid(uuid);
+        return this.escolaRepository.findByUuid(uuid).orElseThrow(() -> EurekaException.ofNotFound("Escola não encontrada."));
     }
 
     private void enviaEmailNovoUsuario(String nome, String email, String senha) {
