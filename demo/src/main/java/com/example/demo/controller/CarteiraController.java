@@ -1,24 +1,18 @@
 package com.example.demo.controller;
 
 import com.example.demo.controller.doc.EurekaApiOperation;
-import com.example.demo.dto.CriarPagamentoRequest;
-import com.example.demo.dto.CurrentUserView;
-import com.example.demo.dto.RecargaManualRequest;
+import com.example.demo.dto.*;
 import com.example.demo.dto.projection.carteira.CarteiraView;
-import com.example.demo.security.SecurityUtils;
-import com.example.demo.security.UsuarioLogado;
 import com.example.demo.service.CarteiraService;
-import com.example.demo.service.pagamento.PagamentoService;
 import com.example.demo.util.ApiReturn;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.MediaType;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -45,7 +39,7 @@ public class CarteiraController {
     }
 
     @PutMapping("/{uuid}")
-    @PreAuthorize("hasAnyRole('MASTER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @EurekaApiOperation(
             summary = "Realiza uma recarga manual",
             description = "Realiza uma recarga manual para a carteira do aluno."
@@ -57,6 +51,30 @@ public class CarteiraController {
             @RequestBody RecargaManualRequest request
     ) {
         return ResponseEntity.ok(ApiReturn.of(service.realizarRecargaManual(uuid, request.valor())));
+    }
+
+    @PostMapping("/cartao")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @EurekaApiOperation(
+            summary = "Cadastra um novo cartão",
+            description = "Cadastra um novo cartão a carteira do aluno."
+    )
+    public ResponseEntity<ApiReturn<String>> cadastrarCartao(
+            @RequestBody @Valid CartaoCadastroRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiReturn.of(service.cadastrarCartao(request)));
+    }
+
+    @PutMapping("/cartao")
+    @PreAuthorize("hasAnyRole('ALUNO', 'RESPONSAVEL')")
+    @EurekaApiOperation(
+            summary = "Realiza uma recarga manual",
+            description = "Realiza uma recarga manual para a carteira do aluno."
+    )
+    public ResponseEntity<ApiReturn<String>> alterarSenhaCartao(
+            @RequestBody @Valid AlteracaoPinRequest request
+    ) {
+        return ResponseEntity.ok(ApiReturn.of(service.alterarSenhaCartao(request)));
     }
 
 }

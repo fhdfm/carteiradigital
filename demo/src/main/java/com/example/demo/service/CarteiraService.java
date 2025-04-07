@@ -114,8 +114,10 @@ public class CarteiraService {
      * </ol>
      *
      * @param request objeto contendo o UUID da carteira e o número do novo cartão.
+     * @return
      */
-    public void cadastrarCartao(CartaoCadastroRequest request) {
+    @Transactional
+    public String cadastrarCartao(CartaoCadastroRequest request) {
         Carteira carteira = getCarteira(request.uuid());
 
         carteira.getCartoes().forEach(cartao -> cartao.setStatus(Status.INATIVO));
@@ -138,6 +140,8 @@ public class CarteiraService {
                 novoCartao.getNumero(),
                 senha
         );
+
+        return "OK";
     }
 
     /**
@@ -151,15 +155,19 @@ public class CarteiraService {
      * </ul>
      *
      * @param request objeto contendo o UUID do aluno e a nova senha.
+     * @return
      * @throws IllegalStateException se não houver cartão ativo associado à carteira.
      */
-    public void mudarSenhaCartao(AlteracaoPinRequest request) {
+    @Transactional
+    public String alterarSenhaCartao(AlteracaoPinRequest request) {
         Cartao cartaoAtivo = cartaoRepository.findByStatusAndCarteira_Aluno_Uuid(Status.ATIVO, request.uuid())
                 .orElseThrow(() -> new IllegalStateException("Nenhum cartão ativo encontrado para o aluno"));
 
         cartaoAtivo.setSenha(passwordEncoder.encode(request.senha()));
 
         cartaoRepository.save(cartaoAtivo);
+
+        return "Ok";
     }
 
 
