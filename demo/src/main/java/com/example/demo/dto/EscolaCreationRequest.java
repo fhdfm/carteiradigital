@@ -16,18 +16,22 @@ public record EscolaCreationRequest(
         @NotBlank(message = "CNPJ deve ser preenchido")
         @CNPJ String cnpj,
 
+        @Schema(description = "Nome do admin", example = "Nome")
         @NotBlank(message = "O nome do admin é obrigatório")
         @Size(min = 3, max = 255, message = "O nome do admin deve ter entre 3 e 255 caracteres")
         String nomeAdmin,
 
+        @Schema(description = "Email do admin", example = "email@email.com")
         @NotBlank(message = "O email do admin é obrigatório")
         @Email(message = "Informe um email válido")
         String emailAdmin,
 
+        @Schema(description = "CPF do admin", example = "000.000.000-00")
         @NotBlank(message = "O CPF do admin é obrigatório")
         @CPF(message = "CPF inválido")
         String cpfAdmin,
 
+        @Schema(description = "Telefone do admin", example = "00000000000")
         @NotBlank(message = "O telefone do admin é obrigatório")
         String telefoneAdmin
 ) {

@@ -55,7 +55,6 @@ CREATE INDEX idx_usuario_cpf ON usuario(cpf);
 -- ==========================
 CREATE TABLE aluno (
     id BIGINT PRIMARY KEY,
-    uuid UUID UNIQUE DEFAULT uuid_generate_v4(),
     responsavel_id BIGINT NOT NULL,
     matricula VARCHAR(255),
     foto VARCHAR(255),
@@ -72,7 +71,6 @@ CREATE TABLE aluno (
 
 -- ÍNDICES (opcionais, conforme suas necessidades de consulta)
 CREATE INDEX idx_aluno_responsavel ON aluno(responsavel_id);
-CREATE INDEX idx_aluno_uuid ON aluno(uuid);
 
 -- Se quiser indexar 'matricula'
 CREATE INDEX idx_aluno_matricula ON aluno(matricula);
