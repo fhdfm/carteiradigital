@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.demo.dto.EscolaCreationRequest;
 import com.example.demo.dto.EscolaUsuariosView;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -70,7 +71,7 @@ public class EscolaController {
                     description = "Corpo da requisição com os dados de uma escola",
                     required = true
             )
-            @RequestBody @Valid EscolaRequest request
+            @RequestBody @Valid EscolaCreationRequest request
     ) {
         
         service.salvar(request);

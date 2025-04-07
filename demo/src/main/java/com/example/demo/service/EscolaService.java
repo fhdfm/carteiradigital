@@ -1,11 +1,9 @@
 package com.example.demo.service;
 
+import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.enums.Status;
 import com.example.demo.domain.model.Escola;
-import com.example.demo.dto.EscolaParametrosRequest;
-import com.example.demo.dto.EscolaRequest;
-import com.example.demo.dto.EscolaUsuariosView;
-import com.example.demo.dto.UsuarioView;
+import com.example.demo.dto.*;
 import com.example.demo.dto.projection.escola.EscolaIdAndName;
 import com.example.demo.dto.projection.escola.EscolaView;
 import com.example.demo.exception.eureka.EurekaException;
@@ -15,6 +13,7 @@ import com.example.demo.repository.specification.EscolaSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -24,17 +23,18 @@ import java.util.UUID;
 public class EscolaService {
 
     private final EscolaRepository repository;
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
 
     public EscolaService(
             EscolaRepository repository,
-            UsuarioRepository usuarioRepository
+            UsuarioService usuarioService
     ) {
         this.repository = repository;
-        this.usuarioRepository = usuarioRepository;
+        this.usuarioService = usuarioService;
     }
 
-    public void salvar(EscolaRequest request) {
+    @Transactional
+    public void salvar(EscolaCreationRequest request) {
 
         String nome = request.nome();
         String cnpj = request.cnpj();
@@ -51,6 +51,18 @@ public class EscolaService {
         escola.setStatus(Status.ATIVO);
 
         repository.save(escola);
+
+        usuarioService.createUser(
+                new UsuarioRequest(
+                        escola.getUuid(),
+                        request.nomeAdmin(),
+                        request.emailAdmin(),
+                        request.cpfAdmin(),
+                        request.telefoneAdmin(),
+                        Perfil.ADMIN
+                )
+        );
+
     }
 
     public void salvar(UUID uuid, EscolaRequest request) {
@@ -103,13 +115,6 @@ public class EscolaService {
 
         repository.save(escola);
     }
-
-//    public void atualizarParametrosEscola(UUID uuid, EscolaParametrosRequest request) {
-//
-//        Escola escola = findByUuid(uuid);
-//
-//        repository.save(escola);
-//    }
 
     public Escola findByUuid(UUID uuid) {
         return repository.findByUuid(uuid)
