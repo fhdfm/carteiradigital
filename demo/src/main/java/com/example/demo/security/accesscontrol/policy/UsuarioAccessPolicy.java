@@ -28,7 +28,7 @@ public class UsuarioAccessPolicy implements AccessPolicy {
     @Override
     public boolean hasAccess(UsuarioLogado currentUser, String httpMethod, boolean isStatusUpdate, Object resourceId) {
         UUID targetUuid = parseResourceId(resourceId);
-        Usuario userEntity = usuarioService.findUserByUuid(targetUuid);
+        Usuario userEntity = usuarioService.findByUuid(targetUuid);
 
         if (userEntity == null) {
             throw EurekaException.ofNotFound("Usuário (" + targetUuid + ") não encontrado.");

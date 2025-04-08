@@ -1,12 +1,11 @@
 package com.example.demo.dto;
 
+import java.util.UUID;
+
 import com.example.demo.domain.enums.TipoPagamento;
-import com.example.demo.validation.annotation.CNPJ;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-
-import java.util.UUID;
 
 public record CriarPagamentoRequest(
 

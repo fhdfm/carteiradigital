@@ -1,5 +1,12 @@
 package com.example.demo.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.example.demo.domain.model.Aluno;
 import com.example.demo.domain.model.Pagamento;
 import com.example.demo.domain.model.PagamentoItem;
@@ -14,22 +21,18 @@ import com.mercadopago.client.preference.PreferenceItemRequest;
 import com.mercadopago.client.preference.PreferencePayerRequest;
 import com.mercadopago.client.preference.PreferenceRequest;
 import com.mercadopago.resources.preference.Preference;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class PagamentoService {
 //
     private final PagamentoRepository repository;
     private final UsuarioService usuarioService;
+    private final AlunoService alunoService;
 
-    public PagamentoService(PagamentoRepository repository, UsuarioService usuarioService) {
+    public PagamentoService(PagamentoRepository repository, UsuarioService usuarioService, AlunoService alunoService) {
         this.repository = repository;
         this.usuarioService = usuarioService;
+        this.alunoService = alunoService;
     }
 
 
@@ -40,7 +43,7 @@ public class PagamentoService {
         List<PagamentoItem> itens = new ArrayList<>();
         for (CriarPagamentoRequest pagamentoRequest : pagamentoRequestList) {
             PagamentoItem item = new PagamentoItem();
-            Aluno aluno = usuarioService.findStudentByUuid(pagamentoRequest.alunoUUID());
+            Aluno aluno = alunoService.findByUuid(pagamentoRequest.alunoUUID());
             item.setAluno(aluno);
             item.setTipo(pagamentoRequest.tipo());
             item.setTitulo(pagamentoRequest.tipo().getDescricao() + " - Aluno: " + item.getAluno().getNome());
@@ -55,7 +58,7 @@ public class PagamentoService {
         pagamento.setStatus("criando_preference");
 
 
-        Usuario usuario = usuarioService.findUserByUuid(SecurityUtils.getUsuarioLogado().getUuid());
+        Usuario usuario = usuarioService.findByUuid(SecurityUtils.getUsuarioLogado().getUuid());
         pagamento.setUsuarioPagante(usuario);
         this.repository.save(pagamento);
 
