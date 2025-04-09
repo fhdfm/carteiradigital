@@ -27,14 +27,17 @@ import com.example.demo.dto.EscolaEnderecoRequest;
 import com.example.demo.dto.EscolaParametrosRequest;
 import com.example.demo.dto.EscolaRequest;
 import com.example.demo.dto.EscolaUsuariosView;
+import com.example.demo.dto.UsuarioRequest;
 import com.example.demo.dto.projection.escola.EscolaIdAndName;
 import com.example.demo.dto.projection.escola.EscolaView;
+import com.example.demo.dto.projection.usuario.UsuarioFull;
 import com.example.demo.repository.specification.EscolaSpecification;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
 import com.example.demo.security.accesscontrol.EntityNames;
 import com.example.demo.security.accesscontrol.annotation.CheckAccess;
 import com.example.demo.service.EscolaEnderecoService;
+import com.example.demo.service.EscolaResponsavelService;
 import com.example.demo.service.EscolaService;
 import com.example.demo.util.ApiReturn;
 
@@ -49,10 +52,13 @@ public class EscolaController {
 
     private final EscolaService service;
     private final EscolaEnderecoService escolaEnderecoService;
+    private final EscolaResponsavelService escolaResponsavelService;
 
-    public EscolaController(EscolaService service, EscolaEnderecoService escolaEnderecoService) {
+    public EscolaController(EscolaService service, EscolaEnderecoService escolaEnderecoService, 
+        EscolaResponsavelService escolaResponsavelService) {
         this.service = service;
         this.escolaEnderecoService = escolaEnderecoService;
+        this.escolaResponsavelService = escolaResponsavelService;
     }
 
     /**
@@ -264,5 +270,23 @@ public class EscolaController {
         EscolaEndereco endereco = this.escolaEnderecoService.findByEscola(uuid);
         
         return ResponseEntity.ok(ApiReturn.of(endereco));
+    }
+
+    @PutMapping("/{uuid}/responsavel")
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
+    public ResponseEntity<ApiReturn<Void>> saveResponsavel(@PathVariable("uuid") UUID uuid, @ModelAttribute UsuarioRequest request) {
+        
+        this.escolaResponsavelService.criarOuAtualizarResponsavel(uuid, request);
+        
+        return ResponseEntity.ok(ApiReturn.of(null));
+    }
+
+    @GetMapping("/{uuid}/responsavel")
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
+    public ResponseEntity<ApiReturn<UsuarioFull>> getResponsavel(@PathVariable("uuid") UUID uuid) {
+        
+        UsuarioFull responsavel = this.escolaResponsavelService.findResponsavelByEscolaId(uuid);
+        
+        return ResponseEntity.ok(ApiReturn.of(responsavel));
     }
 }

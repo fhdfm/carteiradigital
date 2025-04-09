@@ -31,7 +31,7 @@ public class UsuarioLogado implements UserDetails {
 
         Perfil perfil = this.usuario.getPerfil();
 
-        if (perfil == Perfil.ADMIN)
+        if (perfil == Perfil.ADMIN || perfil == Perfil.RESPONSAVEL_CONTRATUAL)
             return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"),
                     new SimpleGrantedAuthority("ROLE_FUNCIONARIO"),
                     new SimpleGrantedAuthority("ROLE_PDV"));

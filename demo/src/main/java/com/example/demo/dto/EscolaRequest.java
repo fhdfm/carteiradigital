@@ -3,7 +3,6 @@ package com.example.demo.dto;
 import com.example.demo.validation.annotation.CNPJ;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -14,8 +13,7 @@ public record EscolaRequest(
         String nome,
         @Schema(description = "CNPJ da escola", example = "00.000.000/0001-00")
         @NotBlank(message = "CNPJ deve ser preenchido")
-        @CNPJ String cnpj,
-        @Valid UsuarioRequest responsavel
+        @CNPJ String cnpj
 ) {
     
 }

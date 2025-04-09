@@ -26,22 +26,13 @@ public class EscolaService {
 
     private final EscolaRepository escolaRepository;
     private final UsuarioRepository usuarioRepository;
-    private final EscolaResponsavelService escolaResponsavelService;
 
-    public EscolaService(
-            EscolaRepository escolaRepository,
-            UsuarioRepository usuarioRepository,
-            EscolaResponsavelService escolaResponsavelService
-    ) {
+    public EscolaService(EscolaRepository escolaRepository, UsuarioRepository usuarioRepository   ) {
         this.escolaRepository = escolaRepository;
         this.usuarioRepository = usuarioRepository;
-        this.escolaResponsavelService = escolaResponsavelService;
     }
 
     public UUID salvar(EscolaRequest request) {
-
-        if (Objects.isNull(request.responsavel()))
-            throw EurekaException.ofValidation("É necessário informar o responsável da escola.");
 
         String nome = request.nome();
         String cnpj = request.cnpj();
@@ -58,8 +49,6 @@ public class EscolaService {
         escola.setStatus(Status.ATIVO);
 
         escolaRepository.save(escola);
-
-        this.escolaResponsavelService.criarOuAtualizarResponsavel(escola, request.responsavel());
 
         return escola.getUuid();
     }
@@ -79,9 +68,6 @@ public class EscolaService {
         escola.setCnpj(cnpj);
 
         escolaRepository.save(escola);
-
-        if (Objects.nonNull(request.responsavel()))
-            this.escolaResponsavelService.criarOuAtualizarResponsavel(escola, request.responsavel());
     }
 
     public EscolaView buscarPorUuid(UUID uuid) {

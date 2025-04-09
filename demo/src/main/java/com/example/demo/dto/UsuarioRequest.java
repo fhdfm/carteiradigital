@@ -33,7 +33,7 @@ public record UsuarioRequest(
     Perfil perfil
 
 ) {
-    public UsuarioRequest withEscolaId(UUID escolaId) {
+    public UsuarioRequest withEscolaIdAndPerfil(UUID escolaId, Perfil perfil) {
         return new UsuarioRequest(escolaId, nome, email, cpf, telefone, perfil);
     }
 }

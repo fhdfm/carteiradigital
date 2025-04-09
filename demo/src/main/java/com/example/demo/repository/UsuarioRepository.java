@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.model.Usuario;
 import com.example.demo.dto.UsuarioView;
+import com.example.demo.dto.projection.usuario.UsuarioFull;
 
 @Repository
 public interface UsuarioRepository extends BaseRepository<Usuario, Long> {
@@ -37,8 +38,15 @@ public interface UsuarioRepository extends BaseRepository<Usuario, Long> {
     boolean existsByCpf(String cpf);
 
     boolean existsByCpfAndUuidNot(String cpf, UUID uuid);
+
     Page<UsuarioView> findAllByEscolaUuid(UUID escolaId, Pageable pageable);
 
-    Optional<Usuario> findByEscolaIdAndPerfil(UUID escolaId, Perfil admin);
+    @Query("""
+        SELECT u FROM Usuario u
+        WHERE u.escola.uuid = :escolaId
+        AND u.perfil = :perfil
+    """)
+    Optional<UsuarioFull> findByEscolaIdAndPerfil(@Param("escolaId") UUID escolaId, @Param("perfil") Perfil perfil);
+
 
 }

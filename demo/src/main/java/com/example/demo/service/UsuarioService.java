@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -14,8 +15,10 @@ import com.example.demo.domain.model.Escola;
 import com.example.demo.domain.model.Usuario;
 import com.example.demo.dto.TrocarSenhaRequest;
 import com.example.demo.dto.UsuarioRequest;
+import com.example.demo.dto.projection.usuario.UsuarioFull;
 import com.example.demo.dto.projection.usuario.UsuarioSummary;
 import com.example.demo.exception.eureka.EurekaException;
+import com.example.demo.repository.EscolaRepository;
 import com.example.demo.repository.UsuarioRepository;
 import com.example.demo.repository.specification.UsuarioSpecification;
 import com.example.demo.security.SecurityUtils;
@@ -27,12 +30,19 @@ public class UsuarioService {
     
     private final PasswordEncoder passwordEncoder;
     private final UsuarioRepository usuarioRepository;
+    private final EscolaRepository escolaRepository;
 
     public UsuarioService(UsuarioRepository usuarioRepository, 
-        PasswordEncoder passwordEncoder) {
+        PasswordEncoder passwordEncoder, EscolaRepository escolaRepository) {
         
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.escolaRepository = escolaRepository;
+    }
+
+    private Escola getEscola(UUID escolaId) {
+        return this.escolaRepository.findByUuid(escolaId).orElseThrow(
+                () -> EurekaException.ofNotFound("Escola não encontrada."));
     }
 
     public UUID createUser(UsuarioRequest request) {
@@ -51,8 +61,7 @@ public class UsuarioService {
 
         String senha = Util.gerarSenhaTemporaria();
 
-        Escola escola = new Escola();
-        escola.setUuid(request.escolaId());
+        Escola escola = getEscola(request.escolaId());
 
         Usuario user = new Usuario();
         user.setEscola(escola);
@@ -91,8 +100,7 @@ public class UsuarioService {
         if (this.usuarioRepository.existsByCpfAndUuidNot(cpf, uuid))
             throw EurekaException.ofValidation(cpf + " já está cadastrado");
 
-        Escola escola = new Escola();
-        escola.setUuid(request.escolaId());
+        Escola escola = getEscola(request.escolaId());
         
         user.setEscola(escola);
         user.setNome(request.nome());
@@ -150,6 +158,10 @@ public class UsuarioService {
 
         return clazz.cast(usuario);
     }
+
+    public Optional<UsuarioFull> findByEscolaIdAndPerfil(UUID escolaId, Perfil perfil) {
+        return this.usuarioRepository.findByEscolaIdAndPerfil(escolaId, perfil);
+    }
     
     /**
      * 
@@ -188,6 +200,17 @@ public class UsuarioService {
         if (currentUser.possuiPerfil(Perfil.FUNCIONARIO) && requestedPerfil == Perfil.ADMIN) {
             throw EurekaException.ofValidation("Operação não permitida");
         }
+    }
+
+    public void save(Usuario user) {
+        this.usuarioRepository.save(user);
+    }
+
+    public void trocarResponsavelDaEscola(UUID uuid) {
+        Usuario user = this.usuarioRepository.findByUuid(uuid).orElseThrow(
+                () -> EurekaException.ofNotFound("Usuário não encontrado."));
+        user.setPerfil(Perfil.ADMIN);
+        this.usuarioRepository.save(user);
     }
 
 }
