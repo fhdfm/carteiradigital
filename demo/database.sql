@@ -222,3 +222,10 @@ CREATE TABLE escola_endereco (
         ON DELETE CASCADE
 );
 
+CREATE TABLE escola_financeiro (
+    id SERIAL PRIMARY KEY,
+    escola_id INT NOT NULL UNIQUE REFERENCES escola(id) ON DELETE CASCADE,
+    dia_pagamento INT NOT NULL,
+    dia_recebimento INT NOT NULL,
+    version INT NOT NULL DEFAULT 0
+);
