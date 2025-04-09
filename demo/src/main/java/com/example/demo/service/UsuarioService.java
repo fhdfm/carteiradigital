@@ -160,6 +160,7 @@ public class UsuarioService {
         UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
         
         if (currentUser.possuiPerfil(Perfil.ALUNO)) {
+            // TODO - AQUI VERIFICAR SE O ALUNO TEM PERMISSÃO DE TROCAR A SENHA.
             Boolean alunoPodeTrocarSenha =
                 this.usuarioRepository.isPrimeiroAcessoResponsavel(currentUser.getUuid());
             if (alunoPodeTrocarSenha != null && !alunoPodeTrocarSenha)

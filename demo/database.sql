@@ -203,3 +203,22 @@ CREATE TABLE categoria_produto
 
 -- Índice para busca rápida pelo pedido
 CREATE INDEX idx_item_pedido_pedido_id ON item_pedido(pedido_id);
+
+CREATE TABLE escola_endereco (
+    id BIGSERIAL PRIMARY KEY,
+    escola_id BIGINT NOT NULL,
+    telefone VARCHAR(20) NOT NULL,
+    cep VARCHAR(10) NOT NULL,
+    endereco VARCHAR(100) NOT NULL,
+    numero VARCHAR(10) NOT NULL,
+    bairro VARCHAR(50) NOT NULL,
+    complemento VARCHAR(50) NOT NULL,
+    cidade VARCHAR(50) NOT NULL,
+    estado VARCHAR(2) NOT NULL,
+    version INT NOT NULL DEFAULT 0,
+    CONSTRAINT fk_escola_info_escola
+        FOREIGN KEY (escola_id)
+        REFERENCES escola(id)
+        ON DELETE CASCADE
+);
+

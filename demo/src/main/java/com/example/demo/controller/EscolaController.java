@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,8 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.controller.doc.EurekaApiOperation;
+import com.example.demo.domain.EscolaEndereco;
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.model.Escola;
+import com.example.demo.dto.EscolaEnderecoRequest;
 import com.example.demo.dto.EscolaParametrosRequest;
 import com.example.demo.dto.EscolaRequest;
 import com.example.demo.dto.EscolaUsuariosView;
@@ -31,6 +34,7 @@ import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
 import com.example.demo.security.accesscontrol.EntityNames;
 import com.example.demo.security.accesscontrol.annotation.CheckAccess;
+import com.example.demo.service.EscolaEnderecoService;
 import com.example.demo.service.EscolaService;
 import com.example.demo.util.ApiReturn;
 
@@ -44,9 +48,11 @@ import jakarta.validation.Valid;
 public class EscolaController {
 
     private final EscolaService service;
+    private final EscolaEnderecoService escolaEnderecoService;
 
-    public EscolaController(EscolaService service) {
+    public EscolaController(EscolaService service, EscolaEnderecoService escolaEnderecoService) {
         this.service = service;
+        this.escolaEnderecoService = escolaEnderecoService;
     }
 
     /**
@@ -242,4 +248,21 @@ public class EscolaController {
         return ResponseEntity.ok(ApiReturn.of("Escola atualizada com sucesso."));
     }
 
+    @PutMapping("/{uuid}/endereco")
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
+    public ResponseEntity<ApiReturn<String>> saveEndereco(@PathVariable("uuid") UUID uuid, @ModelAttribute EscolaEnderecoRequest request) {
+        
+        this.escolaEnderecoService.save(uuid, request);
+        
+        return ResponseEntity.ok(ApiReturn.of("Atualizado com sucesso."));
+    }
+
+    @GetMapping("/{uuid}/endereco")
+    @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
+    public ResponseEntity<ApiReturn<EscolaEndereco>> getEndereco(@PathVariable("uuid") UUID uuid) {
+        
+        EscolaEndereco endereco = this.escolaEnderecoService.findByEscola(uuid);
+        
+        return ResponseEntity.ok(ApiReturn.of(endereco));
+    }
 }
