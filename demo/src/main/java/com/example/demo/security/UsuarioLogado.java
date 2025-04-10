@@ -26,6 +26,10 @@ public class UsuarioLogado implements UserDetails {
         return this.usuario.getUuid();
     }
 
+    public Long getId() {
+        return this.usuario.getId();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 

@@ -229,3 +229,11 @@ CREATE TABLE escola_financeiro (
     dia_recebimento INT NOT NULL,
     version INT NOT NULL DEFAULT 0
 );
+
+CREATE TABLE revinfo (
+    id SERIAL PRIMARY KEY,
+    timestamp BIGINT NOT NULL,
+    nome VARCHAR(255) NOT NULL,
+    usuario_id BIGINT,
+    escola_id BIGINT
+);

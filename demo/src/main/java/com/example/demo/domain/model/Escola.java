@@ -2,6 +2,8 @@ package com.example.demo.domain.model;
 
 import java.util.UUID;
 
+import org.hibernate.envers.Audited;
+
 import com.example.demo.domain.converter.CnpjConverter;
 import com.example.demo.domain.enums.Status;
 
@@ -17,6 +19,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
 @Entity
+@Audited
 @Table(name = "escola")
 public class Escola extends BaseEntity {
     
