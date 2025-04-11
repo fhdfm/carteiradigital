@@ -12,7 +12,6 @@ import jakarta.validation.constraints.Size;
 
 public record UsuarioRequest(
     
-    @NotNull(message = "Escola ID é obrigatório")
     UUID escolaId,
     
     @NotBlank(message = "O nome é obrigatório")
@@ -33,4 +32,8 @@ public record UsuarioRequest(
     @NotNull(message = "O perfil é obrigatório")
     Perfil perfil
 
-) { }
+) {
+    public UsuarioRequest withEscolaIdAndPerfil(UUID escolaId, Perfil perfil) {
+        return new UsuarioRequest(escolaId, nome, email, cpf, telefone, perfil);
+    }
+}

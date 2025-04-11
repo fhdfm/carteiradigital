@@ -1,6 +1,14 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.enums.Perfil;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.example.demo.domain.enums.Status;
 import com.example.demo.domain.model.Escola;
 import com.example.demo.dto.*;
@@ -22,24 +30,21 @@ import java.util.UUID;
 @Service
 public class EscolaService {
 
-    private final EscolaRepository repository;
+    private final EscolaRepository escolaRepository;
     private final UsuarioService usuarioService;
 
-    public EscolaService(
-            EscolaRepository repository,
-            UsuarioService usuarioService
-    ) {
-        this.repository = repository;
+    public EscolaService(EscolaRepository escolaRepository, UsuarioService usuarioService   ) {
+        this.escolaRepository = escolaRepository;
         this.usuarioService = usuarioService;
     }
 
     @Transactional
-    public void salvar(EscolaCreationRequest request) {
+    public UUID salvar(EscolaCreationRequest request) {
 
         String nome = request.nome();
         String cnpj = request.cnpj();
 
-        Escola escola = repository.findByCnpj(
+        Escola escola = escolaRepository.findByCnpj(
                 cnpj).orElse(null);
 
         if (Objects.nonNull(escola))
@@ -50,7 +55,7 @@ public class EscolaService {
         escola.setCnpj(cnpj);
         escola.setStatus(Status.ATIVO);
 
-        repository.save(escola);
+        escolaRepository.save(escola);
 
         usuarioService.createUser(
                 new UsuarioRequest(
@@ -63,6 +68,8 @@ public class EscolaService {
                 )
         );
 
+        return escola.getUuid();
+
     }
 
     public void salvar(UUID uuid, EscolaRequest request) {
@@ -70,7 +77,7 @@ public class EscolaService {
         String cnpj = request.cnpj();
         String nome = request.nome();
 
-        Escola escola = repository.findByCnpj(
+        Escola escola = escolaRepository.findByCnpj(
                 cnpj).orElse(null);
 
         if (Objects.nonNull(escola) && !uuid.equals(escola.getUuid()))
@@ -79,17 +86,17 @@ public class EscolaService {
         escola.setNome(nome);
         escola.setCnpj(cnpj);
 
-        repository.save(escola);
+        escolaRepository.save(escola);
     }
 
     public EscolaView buscarPorUuid(UUID uuid) {
 
-        return repository.findByUuid(uuid, EscolaView.class)
+        return escolaRepository.findByUuid(uuid, EscolaView.class)
                 .orElseThrow(() -> EurekaException.ofNotFound("Escola não encontrada."));
     }
 
     public Page<EscolaView> listar(EscolaSpecification specification, Pageable pageable) {
-        Page<EscolaView> page = repository.findAllProjected(specification, pageable, EscolaView.class);
+        Page<EscolaView> page = escolaRepository.findAllProjected(specification, pageable, EscolaView.class);
 
         if (page.isEmpty()) {
             throw EurekaException.ofNoContent("Consulta com filtro informado não possui dados para retorno");
@@ -104,7 +111,7 @@ public class EscolaService {
 
         escola.setStatus(Status.INATIVO);
 
-        repository.save(escola);
+        escolaRepository.save(escola);
     }
 
     public void ativar(UUID uuid) {
@@ -113,15 +120,15 @@ public class EscolaService {
 
         escola.setStatus(Status.ATIVO);
 
-        repository.save(escola);
+        escolaRepository.save(escola);
     }
 
     public Escola findByUuid(UUID uuid) {
-        return repository.findByUuid(uuid)
+        return escolaRepository.findByUuid(uuid)
                 .orElseThrow(() -> EurekaException.ofNotFound("Escola não encontrada."));
     }
 
     public List<EscolaIdAndName> getCombobox() {
-        return repository.findAllProjected();
+        return escolaRepository.findAllProjected();
     }
 }

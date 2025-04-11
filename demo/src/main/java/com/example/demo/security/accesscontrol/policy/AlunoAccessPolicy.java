@@ -9,15 +9,15 @@ import com.example.demo.domain.model.Aluno;
 import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.security.UsuarioLogado;
 import com.example.demo.security.accesscontrol.EntityNames;
-import com.example.demo.service.UsuarioService;
+import com.example.demo.service.AlunoService;
 
 @Component
 public class AlunoAccessPolicy implements AccessPolicy {
 
-    private final UsuarioService usuarioService;
+    private final AlunoService alunoService;
 
-    public AlunoAccessPolicy(UsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
+    public AlunoAccessPolicy(AlunoService alunoService) {
+        this.alunoService = alunoService;
     }
 
     @Override
@@ -29,7 +29,7 @@ public class AlunoAccessPolicy implements AccessPolicy {
     public boolean hasAccess(UsuarioLogado currentUser, String httpMethod, boolean isStatusUpdate, Object resourceId) {
         
         UUID targetUuid = parseResourceId(resourceId);
-        Aluno userEntity = this.usuarioService.findStudentWithResponsavelByUuid(targetUuid);
+        Aluno userEntity = this.alunoService.findStudentWithResponsavelByUuid(targetUuid);
 
         if (userEntity == null) {
             throw EurekaException.ofNotFound("Aluno (" + targetUuid + ") não encontrado.");
@@ -54,11 +54,12 @@ public class AlunoAccessPolicy implements AccessPolicy {
                 return true;
             }
 
+            // TODO - Revisar
             // RESPONSAVEL só pode mudar se o aluno estiver sob sua responsabilidade
-            if (currentUser.possuiPerfil(Perfil.RESPONSAVEL) 
-                && currentUser.getUuid().equals(userEntity.getResponsavel().getUuid())) {
-                return true;
-            }
+            // if (currentUser.possuiPerfil(Perfil.RESPONSAVEL) 
+            //     && currentUser.getUuid().equals(userEntity.getResponsavel().getUuid())) {
+            //     return true;
+            // }
 
             // ALUNO pode editar a si mesmo.
             if (currentUser.possuiPerfil(Perfil.ALUNO) && mesmoUsuario) {

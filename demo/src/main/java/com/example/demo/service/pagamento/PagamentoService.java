@@ -1,5 +1,12 @@
 package com.example.demo.service.pagamento;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.example.demo.domain.model.Aluno;
 import com.example.demo.domain.model.Pagamento;
 import com.example.demo.domain.model.PagamentoItem;
@@ -8,6 +15,7 @@ import com.example.demo.dto.CriarPagamentoRequest;
 import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.PagamentoRepository;
 import com.example.demo.security.SecurityUtils;
+import com.example.demo.service.AlunoService;
 import com.example.demo.service.UsuarioService;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +31,13 @@ public class PagamentoService {
     private final PagamentoRepository repository;
     private final UsuarioService usuarioService;
     private final PagamentoProcessorFactory processorFactory;
+    private final AlunoService alunoService;
 
-    public PagamentoService(PagamentoRepository repository, UsuarioService usuarioService, PagamentoProcessorFactory processorFactory) {
+    public PagamentoService(PagamentoRepository repository, UsuarioService usuarioService, PagamentoProcessorFactory processorFactory, AlunoService alunoService) {
         this.repository = repository;
         this.usuarioService = usuarioService;
         this.processorFactory = processorFactory;
+        this.alunoService = alunoService;
     }
 
     public String registrarPreCompra(List<CriarPagamentoRequest> pagamentoRequestList) {
@@ -37,7 +47,7 @@ public class PagamentoService {
         List<PagamentoItem> itens = new ArrayList<>();
         for (CriarPagamentoRequest pagamentoRequest : pagamentoRequestList) {
             PagamentoItem item = new PagamentoItem();
-            Aluno aluno = usuarioService.findStudentByUuid(pagamentoRequest.alunoUUID());
+            Aluno aluno = alunoService.findByUuid(pagamentoRequest.alunoUUID());
             item.setAluno(aluno);
             item.setTipo(pagamentoRequest.tipo());
             item.setTitulo(pagamentoRequest.tipo().getDescricao() + " - Aluno: " + item.getAluno().getNome());
@@ -52,7 +62,7 @@ public class PagamentoService {
         pagamento.setStatus("criando_preference");
 
 
-        Usuario usuario = usuarioService.findUserByUuid(SecurityUtils.getUsuarioLogado().getUuid());
+        Usuario usuario = usuarioService.findByUuid(SecurityUtils.getUsuarioLogado().getUuid());
         pagamento.setUsuarioPagante(usuario);
         repository.save(pagamento);
 

@@ -2,14 +2,13 @@ package com.example.demo.controller;
 
 import java.util.Arrays;
 
-import com.example.demo.controller.doc.EurekaApiOperation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.controller.doc.EurekaApiOperation;
 import com.example.demo.domain.enums.Departamento;
 import com.example.demo.domain.enums.MetodoAutenticacao;
 import com.example.demo.domain.enums.Perfil;
@@ -17,6 +16,8 @@ import com.example.demo.domain.enums.Status;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
 import com.example.demo.util.ApiReturn;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/enums")
@@ -40,6 +41,10 @@ public class DominioController {
 
     private boolean podeVisualizar(Perfil perfil) {
         
+        if (perfil == Perfil.RESPONSAVEL_CONTRATUAL) {
+            return false;
+        }
+
         UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
 
         boolean isMaster = currentUser.possuiPerfil(Perfil.MASTER);

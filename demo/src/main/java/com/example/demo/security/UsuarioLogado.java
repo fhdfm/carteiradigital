@@ -26,12 +26,16 @@ public class UsuarioLogado implements UserDetails {
         return this.usuario.getUuid();
     }
 
+    public Long getId() {
+        return this.usuario.getId();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
         Perfil perfil = this.usuario.getPerfil();
 
-        if (perfil == Perfil.ADMIN)
+        if (perfil == Perfil.ADMIN || perfil == Perfil.RESPONSAVEL_CONTRATUAL)
             return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"),
                     new SimpleGrantedAuthority("ROLE_FUNCIONARIO"),
                     new SimpleGrantedAuthority("ROLE_PDV"));

@@ -1,15 +1,13 @@
 package com.example.demo.service;
 
-import java.security.SecureRandom;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.example.demo.domain.model.Cartao;
 import com.example.demo.domain.model.carteira.Carteira;
 import com.example.demo.dto.email.EmailDto;
-import com.example.demo.repository.CarteiraRepository;
-import com.example.demo.repository.EscolaRepository;
+import com.example.demo.repository.*;
 import com.example.demo.util.SenhaUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,11 +23,10 @@ import com.example.demo.domain.model.Usuario;
 import com.example.demo.dto.AlunoRequest;
 import com.example.demo.dto.TrocarSenhaRequest;
 import com.example.demo.dto.UsuarioRequest;
-import com.example.demo.dto.projection.aluno.AlunoSummary;
+import com.example.demo.dto.projection.usuario.UsuarioFull;
 import com.example.demo.dto.projection.usuario.UsuarioSummary;
 import com.example.demo.exception.eureka.EurekaException;
-import com.example.demo.repository.AlunoRepository;
-import com.example.demo.repository.UsuarioRepository;
+import com.example.demo.repository.EscolaRepository;
 import com.example.demo.repository.specification.AlunoSpecification;
 import com.example.demo.repository.specification.UsuarioSpecification;
 import com.example.demo.security.SecurityUtils;
@@ -37,6 +34,7 @@ import com.example.demo.security.UsuarioLogado;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.demo.util.Util;
 
 @Service
 public class UsuarioService {
@@ -44,23 +42,17 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final EscolaRepository escolaRepository;
     private final UsuarioRepository usuarioRepository;
-    private final AlunoRepository alunoRepository;
-    private final CarteiraRepository carteiraRepository;
     private final EmailService emailService;
 
     public UsuarioService(
             PasswordEncoder passwordEncoder,
             EscolaRepository escolaRepository,
             UsuarioRepository usuarioRepository,
-            AlunoRepository alunoRepository,
-            CarteiraRepository carteiraRepository,
             EmailService emailService
     ) {
         this.passwordEncoder = passwordEncoder;
         this.escolaRepository = escolaRepository;
         this.usuarioRepository = usuarioRepository;
-        this.alunoRepository = alunoRepository;
-        this.carteiraRepository = carteiraRepository;
         this.emailService = emailService;
     }
 
@@ -79,9 +71,9 @@ public class UsuarioService {
         if (this.usuarioRepository.existsByCpf(cpf))
             throw EurekaException.ofValidation(cpf + " já está cadastrado");
 
-        String senha = SenhaUtil.gerarSenhaTemporaria();
+        String senha = Util.gerarSenhaTemporaria();
 
-        Escola escola = this.getEscola(request.escolaId());
+        Escola escola = getEscola(request.escolaId());
 
         Usuario user = new Usuario();
         user.setEscola(escola);
@@ -99,14 +91,14 @@ public class UsuarioService {
 
         enviaEmailNovoUsuario(user.getNome(), user.getEmail(), senha);
 
-        Usuario newUser = this.usuarioRepository.findByEmail(email).orElseThrow(() 
+        Usuario newUser = this.usuarioRepository.findByEmail(email).orElseThrow(()
                         -> EurekaException.ofNotFound("Usuário não encontrado."));
         return newUser.getUuid();
     }
 
     public void updateUser(UUID uuid, UsuarioRequest request) {
 
-        Usuario user = this.findUserByUuid(uuid);
+        Usuario user = this.findByUuid(uuid);
 
         UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
         Perfil perfil = request.perfil();
@@ -120,7 +112,7 @@ public class UsuarioService {
         if (this.usuarioRepository.existsByCpfAndUuidNot(cpf, uuid))
             throw EurekaException.ofValidation(cpf + " já está cadastrado");
 
-        Escola escola = this.getEscola(request.escolaId());
+        Escola escola = getEscola(request.escolaId());
         
         user.setEscola(escola);
         user.setNome(request.nome());
@@ -130,23 +122,23 @@ public class UsuarioService {
         user.setTelefone(request.telefone());
 
         usuarioRepository.save(user);
-    }    
+    }
 
-    public Usuario findUserByUuid(UUID uuid) {
+    public Usuario findByUuid(UUID uuid) {
         return this.usuarioRepository.findByUuid(uuid).orElseThrow(
                 () -> EurekaException.ofNotFound("Usuário não encontrado."));
     }
 
     public void changeUserStatus(UUID uuid, Status status) {
         
-        Usuario user = this.findUserByUuid(uuid);
+        Usuario user = this.findByUuid(uuid);
 
         if (user.getStatus() != status) {
             
             if (status == Status.INATIVO) {
                 // Verificar se possui dependentes...
-                if (alunoRepository.existsByResponsavelId(user.getUuid()))
-                    throw EurekaException.ofConflict("Não é possível inativar o Reponsável, pois possui Alunos vinculados.");
+                // if (alunoRepository.existsByResponsavelId(user.getUuid()))
+                //     throw EurekaException.ofConflict("Não é possível inativar o Reponsável, pois possui Alunos vinculados.");
 
             }
 
@@ -160,7 +152,7 @@ public class UsuarioService {
                 () -> EurekaException.ofNotFound("Usuário não encontrado."));
     }
 
-    public Page<UsuarioSummary> findAllUsers(UsuarioSpecification specification, Pageable pageable) {
+    public Page<UsuarioSummary> findAll(UsuarioSpecification specification, Pageable pageable) {
         return this.usuarioRepository.findAllProjected(specification, pageable, UsuarioSummary.class);
     }
 
@@ -171,7 +163,7 @@ public class UsuarioService {
      * @param clazz
      * @return
      */
-    public <T> T findUserByUuid(UUID uuid, Class<T> clazz) {
+    public <T> T findByUuid(UUID uuid, Class<T> clazz) {
 
         Object usuario = this.usuarioRepository.findByUuid(uuid).orElseThrow(
                 () -> EurekaException.ofNotFound("Usuario não encontrado."));
@@ -179,123 +171,8 @@ public class UsuarioService {
         return clazz.cast(usuario);
     }
 
-    public Aluno findStudentByUuid(UUID alunoId) {
-        return this.alunoRepository.findByUuid(alunoId).orElseThrow(
-                () -> EurekaException.ofNotFound("Aluno não encontrado."));
-    }
-
-    public Aluno findStudentWithResponsavelByUuid(UUID alunoId) {
-        return this.alunoRepository.findWithResponsavelByUuid(alunoId).orElseThrow(
-                () -> EurekaException.ofNotFound("Aluno não encontrado."));
-    }
-
-    @Transactional
-    public UUID createStudent(AlunoRequest request) {
-        
-        String email = request.email().trim();
-        if (this.alunoRepository.existsByEmail(email))
-            throw EurekaException.ofValidation(email + " já está cadastrado");
-
-        String cpf = request.cpf().trim().replaceAll("\\D", "");
-        if (this.alunoRepository.existsByCpf(cpf))
-            throw EurekaException.ofValidation(cpf + " já está cadastrado");
-
-        String senha = SenhaUtil.gerarSenhaTemporaria();
-
-        Escola escola = this.getEscola(request.escolaId());
-        Usuario responsavel = this.findUserByUuid(request.responsavelId());
-
-        Aluno student = new Aluno();
-        student.setEscola(escola);
-        student.setResponsavel(responsavel);
-        student.setNome(request.nome());
-        student.setEmail(email);
-        student.setPerfil(Perfil.ALUNO);
-        student.setMetodoAutenticacao(MetodoAutenticacao.SENHA);
-        student.setCpf(cpf);
-        student.setMatricula(request.matricula());
-        student.setStatus(Status.ATIVO);
-        student.setTelefone(request.telefone());
-        student.setPrimeiroAcesso(true);
-        student.setSenha(passwordEncoder.encode(senha));
-        // TODO: integrar com o s3
-        //student.setFoto(senha);
-
-        alunoRepository.save(student);
-
-        Carteira carteira = new Carteira();
-        carteira.setAluno(student);
-
-        String senhaCartao = SenhaUtil.gerarSenhaTemporariaPin();
-
-        Cartao novoCartao = new Cartao();
-        novoCartao.setCarteira(carteira);
-        novoCartao.setNumero(request.numeroCartao());
-        novoCartao.setSenha(passwordEncoder.encode(senhaCartao));
-        novoCartao.setStatus(Status.ATIVO);
-
-        carteira.getCartoes().add(novoCartao);
-
-        carteiraRepository.save(carteira);
-
-        Aluno newStudent = this.alunoRepository.findByEmail(email).orElseThrow(() 
-                        -> EurekaException.ofNotFound("Aluno não encontrado."));
-
-        enviaEmailNovoUsuario(student.getNome(), student.getEmail(), senha);
-
-        if (request.numeroCartao() != null) {
-            enviaEmailNovoCartao(student.getNome(), student.getEmail(), student.getResponsavel().getEmail(), request.numeroCartao(), senhaCartao);
-        }
-
-        return newStudent.getUuid();
-    }
-
-    public void updateStudent(UUID uuid, AlunoRequest request) {
-        
-        Aluno student = this.findStudentByUuid(uuid);
-
-        String email = request.email().trim();
-        if (this.alunoRepository.existsByEmailAndUuidNot(email, uuid))
-            throw EurekaException.ofValidation(email + " já está cadastrado");
-
-        String cpf = request.cpf().trim().replaceAll("\\D", "");
-        if (this.alunoRepository.existsByCpfAndUuidNot(cpf, uuid))
-            throw EurekaException.ofValidation(cpf + " já está cadastrado");
-
-        Usuario responsavel = this.findUserByUuid(request.responsavelId());
-        
-        student.setResponsavel(responsavel);
-        student.setNome(request.nome());
-        student.setEmail(email);
-        student.setCpf(cpf);
-        student.setTelefone(request.telefone());
-        student.setMatricula(request.matricula());
-
-        // TODO - integrar com o s3
-        //student.setFoto(request.foto());
-
-        this.alunoRepository.save(student);        
-    }
-
-    public Page<AlunoSummary> findAllStudents(AlunoSpecification specification, Pageable pageable) {
-        return this.alunoRepository.findAllProjected(specification, pageable, AlunoSummary.class);
-    }
-
-    public <T> T findStudentByUuid(UUID uuid, Class<T> clazz) {
-        Object usuario = this.alunoRepository.findByUuid(uuid).orElseThrow(
-            () -> new EntityNotFoundException("Aluno não encontrado"));
-
-        return clazz.cast(usuario);
-    }
-
-    public void changeStudentStatus(UUID uuid, Status status) {
-        
-        Aluno student = this.findStudentByUuid(uuid);
-
-        if (student.getStatus() != status) {
-            student.setStatus(status);
-            this.alunoRepository.save(student);
-        }
+    public Optional<UsuarioFull> findByEscolaIdAndPerfil(UUID escolaId, Perfil perfil) {
+        return this.usuarioRepository.findByEscolaIdAndPerfil(escolaId, perfil);
     }
 
     /**
@@ -307,6 +184,7 @@ public class UsuarioService {
         UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
         
         if (currentUser.possuiPerfil(Perfil.ALUNO)) {
+            // TODO - AQUI VERIFICAR SE O ALUNO TEM PERMISSÃO DE TROCAR A SENHA.
             Boolean alunoPodeTrocarSenha =
                 this.usuarioRepository.isPrimeiroAcessoResponsavel(currentUser.getUuid());
             if (alunoPodeTrocarSenha != null && !alunoPodeTrocarSenha)
@@ -319,7 +197,7 @@ public class UsuarioService {
         if (!request.novaSenha().equals(request.confirmarNovaSenha()))
             EurekaException.ofValidation("Senha e confirmação não conferem.");
 
-        Usuario usuario = this.findUserByUuid(currentUser.getUuid());
+        Usuario usuario = this.findByUuid(currentUser.getUuid());
         usuario.setPrimeiroAcesso(false);
         usuario.setSenha(passwordEncoder.encode(request.novaSenha()));
 
@@ -334,10 +212,21 @@ public class UsuarioService {
         if (currentUser.possuiPerfil(Perfil.FUNCIONARIO) && requestedPerfil == Perfil.ADMIN) {
             throw EurekaException.ofValidation("Operação não permitida");
         }
-    }    
+    }
+
+    public void save(Usuario user) {
+        this.usuarioRepository.save(user);
+    }
 
     private Escola getEscola(UUID uuid) {
         return this.escolaRepository.findByUuid(uuid).orElseThrow(() -> EurekaException.ofNotFound("Escola não encontrada."));
+    }
+
+    public void trocarResponsavelDaEscola(UUID uuid) {
+        Usuario user = this.usuarioRepository.findByUuid(uuid).orElseThrow(
+                () -> EurekaException.ofNotFound("Usuário não encontrado."));
+        user.setPerfil(Perfil.ADMIN);
+        this.usuarioRepository.save(user);
     }
 
     private void enviaEmailNovoUsuario(String nome, String email, String senha) {
@@ -354,22 +243,4 @@ public class UsuarioService {
                 )
         );
     }
-
-    private void enviaEmailNovoCartao(String nome, String email, String emailResponsavel, String numero, String senha) {
-        String body = String.format("Olá, %s! A senha do seu cartão (%s) é:%n%s", nome, numero, senha);
-        emailService.sendEmail(
-                new EmailDto(
-                        body,
-                        List.of(email, emailResponsavel),
-                        List.of(),
-                        List.of(),
-                        "Seu cartão foi cadastrado!",
-                        List.of(),
-                        null
-                )
-        );
-    }
-
-
-
 }

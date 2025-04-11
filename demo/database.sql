@@ -33,7 +33,7 @@ CREATE TABLE usuario (
     metodo_autenticacao VARCHAR(50) CHECK (metodo_autenticacao IN ('SENHA', 'MFA')) DEFAULT 'SENHA',
     senha VARCHAR(100),
     cpf VARCHAR(11) UNIQUE NOT NULL,
-    perfil VARCHAR(50) CHECK (perfil IN ('MASTER', 'ADMIN', 'RESPONSAVEL', 'ALUNO', 'FUNCIONARIO', 'PDV')) NOT NULL,
+    perfil VARCHAR(50) CHECK (perfil IN ('MASTER', 'ADMIN', 'RESPONSAVEL', 'ALUNO', 'FUNCIONARIO', 'PDV', 'RESPONSAVEL_CONTRATUAL')) NOT NULL,
     status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO',
     primeiro_acesso BOOLEAN DEFAULT TRUE NOT NULL,
     version INT NOT NULL DEFAULT 0,
@@ -55,7 +55,6 @@ CREATE INDEX idx_usuario_cpf ON usuario(cpf);
 -- ==========================
 CREATE TABLE aluno (
     id BIGINT PRIMARY KEY,
-    responsavel_id BIGINT NOT NULL,
     matricula VARCHAR(255),
     foto VARCHAR(255),
     criado_em TIMESTAMP DEFAULT NOW(),
@@ -63,17 +62,24 @@ CREATE TABLE aluno (
     version INT NOT NULL DEFAULT 0,
     CONSTRAINT fk_aluno_id
         FOREIGN KEY (id) REFERENCES usuario(id)
-        ON DELETE NO ACTION,
-    CONSTRAINT fk_aluno_responsavel
-        FOREIGN KEY (responsavel_id) REFERENCES usuario(id)
         ON DELETE NO ACTION
 );
 
--- ÍNDICES (opcionais, conforme suas necessidades de consulta)
-CREATE INDEX idx_aluno_responsavel ON aluno(responsavel_id);
-
 -- Se quiser indexar 'matricula'
 CREATE INDEX idx_aluno_matricula ON aluno(matricula);
+
+CREATE TABLE responsavel_aluno (
+    id SERIAL PRIMARY KEY,
+    responsavel_id BIGINT NOT NULL,
+    aluno_id BIGINT NOT NULL,
+    grau_parentesco VARCHAR(30) NOT NULL,
+    version INT NOT NULL DEFAULT 0,
+    criado_em TIMESTAMP DEFAULT NOW(),
+
+    CONSTRAINT fk_responsavel_usuario FOREIGN KEY (responsavel_id) REFERENCES usuario(id) ON DELETE CASCADE,
+    CONSTRAINT fk_aluno_usuario FOREIGN KEY (aluno_id) REFERENCES usuario(id) ON DELETE CASCADE,
+    CONSTRAINT uq_responsavel_aluno UNIQUE (responsavel_id, aluno_id)
+);
 
 -- ==========================
 -- TABELA Carteira
@@ -304,3 +310,37 @@ CREATE TABLE categoria_produto
 
 -- Índice para busca rápida pelo pedido
 CREATE INDEX idx_item_pedido_pedido_id ON item_pedido(pedido_id);
+
+CREATE TABLE escola_endereco (
+    id BIGSERIAL PRIMARY KEY,
+    escola_id BIGINT NOT NULL,
+    telefone VARCHAR(20) NOT NULL,
+    cep VARCHAR(10) NOT NULL,
+    endereco VARCHAR(100) NOT NULL,
+    numero VARCHAR(10) NOT NULL,
+    bairro VARCHAR(50) NOT NULL,
+    complemento VARCHAR(50) NOT NULL,
+    cidade VARCHAR(50) NOT NULL,
+    estado VARCHAR(2) NOT NULL,
+    version INT NOT NULL DEFAULT 0,
+    CONSTRAINT fk_escola_info_escola
+        FOREIGN KEY (escola_id)
+        REFERENCES escola(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE escola_financeiro (
+    id SERIAL PRIMARY KEY,
+    escola_id INT NOT NULL UNIQUE REFERENCES escola(id) ON DELETE CASCADE,
+    dia_pagamento INT NOT NULL,
+    dia_recebimento INT NOT NULL,
+    version INT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE revinfo (
+    id SERIAL PRIMARY KEY,
+    timestamp BIGINT NOT NULL,
+    nome VARCHAR(255) NOT NULL,
+    usuario_id BIGINT,
+    escola_id BIGINT
+);

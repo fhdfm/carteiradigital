@@ -1,13 +1,12 @@
 package com.example.demo.domain.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
@@ -16,10 +15,6 @@ import jakarta.persistence.Table;
 @Table(name = "aluno")
 @PrimaryKeyJoinColumn(name = "id")
 public class Aluno extends Usuario {
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "responsavel_id", nullable = false)
-    private Usuario responsavel;
 
     @Column(name = "matricula")
     private String matricula;
@@ -27,15 +22,10 @@ public class Aluno extends Usuario {
     @Column(name = "foto")
     private String foto;
 
+    @OneToMany(mappedBy = "aluno", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ResponsavelAluno> responsaveis = new ArrayList<>();
+
     public Aluno() {
-    }
-
-    public Usuario getResponsavel() {
-        return responsavel;
-    }
-
-    public void setResponsavel(Usuario responsavel) {
-        this.responsavel = responsavel;
     }
 
     public void setMatricula(String matricula) {
@@ -54,4 +44,11 @@ public class Aluno extends Usuario {
         this.foto = foto;
     }
 
+    public List<ResponsavelAluno> getResponsaveis() {
+        return responsaveis;
+    }
+
+    public void setResponsaveis(List<ResponsavelAluno> responsaveis) {
+        this.responsaveis = responsaveis;
+    }
 }

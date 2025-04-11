@@ -2,9 +2,6 @@ package com.example.demo.controller;
 
 import java.util.UUID;
 
-import com.example.demo.controller.doc.EurekaApiOperation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.controller.doc.EurekaApiOperation;
 import com.example.demo.domain.enums.Status;
 import com.example.demo.dto.CurrentUserView;
 import com.example.demo.dto.TrocarSenhaRequest;
@@ -33,6 +31,8 @@ import com.example.demo.security.accesscontrol.annotation.CheckAccess;
 import com.example.demo.service.UsuarioService;
 import com.example.demo.util.ApiReturn;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
@@ -93,7 +93,7 @@ public class UsuarioController {
     public ResponseEntity<ApiReturn<Page<UsuarioSummary>>> findAll(
             @ParameterObject UsuarioSpecification specification,
             @ParameterObject Pageable pageable) {
-        return ResponseEntity.ok(ApiReturn.of(service.findAllUsers(specification, pageable)));
+        return ResponseEntity.ok(ApiReturn.of(service.findAll(specification, pageable)));
     }
 
     @GetMapping("/{uuid}")
@@ -107,7 +107,7 @@ public class UsuarioController {
             @Parameter(description = "UUID do usuário a ser buscado", required = true)
             @PathVariable("uuid") UUID uuid
     ) {
-        return ResponseEntity.ok(ApiReturn.of(service.findUserByUuid(uuid, UsuarioFull.class)));
+        return ResponseEntity.ok(ApiReturn.of(service.findByUuid(uuid, UsuarioFull.class)));
     }
 
     @GetMapping("/current")
