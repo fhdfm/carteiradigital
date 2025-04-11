@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.example.demo.domain.model.*;
-import com.example.demo.domain.model.carteira.Carteira;
-import com.example.demo.dto.email.EmailDto;
-import com.example.demo.repository.CarteiraRepository;
-import com.example.demo.util.SenhaUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,11 +12,20 @@ import org.springframework.stereotype.Service;
 import com.example.demo.domain.enums.MetodoAutenticacao;
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.enums.Status;
+import com.example.demo.domain.model.Aluno;
+import com.example.demo.domain.model.Cartao;
+import com.example.demo.domain.model.Escola;
+import com.example.demo.domain.model.ResponsavelAluno;
+import com.example.demo.domain.model.Usuario;
+import com.example.demo.domain.model.carteira.Carteira;
 import com.example.demo.dto.AlunoRequest;
+import com.example.demo.dto.email.EmailDto;
 import com.example.demo.dto.projection.aluno.AlunoSummary;
 import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.AlunoRepository;
+import com.example.demo.repository.CarteiraRepository;
 import com.example.demo.repository.specification.AlunoSpecification;
+import com.example.demo.util.SenhaUtil;
 import com.example.demo.util.Util;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -47,8 +51,8 @@ public class AlunoService {
                 () -> EurekaException.ofNotFound("Aluno não encontrado."));
     }
 
-    public Aluno findStudentWithResponsavelByUuid(UUID alunoId) {
-        return this.alunoRepository.findWithResponsavelByUuid(alunoId).orElseThrow(
+    public Aluno findStudentWithResponsaveisByUuid(UUID alunoId) {
+        return this.alunoRepository.findWithResponsaveisByUuid(alunoId).orElseThrow(
                 () -> EurekaException.ofNotFound("Aluno não encontrado."));
     }
 

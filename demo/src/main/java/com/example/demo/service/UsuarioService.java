@@ -4,36 +4,29 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.example.demo.domain.model.Cartao;
-import com.example.demo.domain.model.carteira.Carteira;
-import com.example.demo.dto.email.EmailDto;
-import com.example.demo.repository.*;
-import com.example.demo.util.SenhaUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.domain.enums.MetodoAutenticacao;
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.enums.Status;
-import com.example.demo.domain.model.Aluno;
 import com.example.demo.domain.model.Escola;
 import com.example.demo.domain.model.Usuario;
-import com.example.demo.dto.AlunoRequest;
 import com.example.demo.dto.TrocarSenhaRequest;
 import com.example.demo.dto.UsuarioRequest;
+import com.example.demo.dto.email.EmailDto;
 import com.example.demo.dto.projection.usuario.UsuarioFull;
 import com.example.demo.dto.projection.usuario.UsuarioSummary;
 import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.EscolaRepository;
-import com.example.demo.repository.specification.AlunoSpecification;
+import com.example.demo.repository.ResponsavelAlunoRepository;
+import com.example.demo.repository.UsuarioRepository;
 import com.example.demo.repository.specification.UsuarioSpecification;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
-
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.util.Util;
 
 @Service
@@ -42,17 +35,20 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final EscolaRepository escolaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ResponsavelAlunoRepository responsavelAlunoRepository;
     private final EmailService emailService;
 
     public UsuarioService(
             PasswordEncoder passwordEncoder,
             EscolaRepository escolaRepository,
             UsuarioRepository usuarioRepository,
+            ResponsavelAlunoRepository responsavelAlunoRepository,
             EmailService emailService
     ) {
         this.passwordEncoder = passwordEncoder;
         this.escolaRepository = escolaRepository;
         this.usuarioRepository = usuarioRepository;
+        this.responsavelAlunoRepository = responsavelAlunoRepository;
         this.emailService = emailService;
     }
 
@@ -186,7 +182,7 @@ public class UsuarioService {
         if (currentUser.possuiPerfil(Perfil.ALUNO)) {
             // TODO - AQUI VERIFICAR SE O ALUNO TEM PERMISSÃO DE TROCAR A SENHA.
             Boolean alunoPodeTrocarSenha =
-                this.usuarioRepository.isPrimeiroAcessoResponsavel(currentUser.getUuid());
+                this.responsavelAlunoRepository.existsPeloMenosUmResponsavelComPrimeiroAcesso(currentUser.getUuid());
             if (alunoPodeTrocarSenha != null && !alunoPodeTrocarSenha)
                 EurekaException.ofValidation("O responsável ainda não habilitou sua conta.");
         }

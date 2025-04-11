@@ -26,11 +26,6 @@ public interface UsuarioRepository extends BaseRepository<Usuario, Long> {
     @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.escola WHERE u.uuid = :uuid")
     Optional<Usuario> findByUuid(@Param("uuid") UUID uuid);
 
-    @Query("SELECT u.primeiroAcesso FROM Usuario u " +
-           "JOIN Aluno a ON u.id = a.responsavel.id " +
-           "WHERE a.uuid = :alunoId")
-    Boolean isPrimeiroAcessoResponsavel(@Param("alunoId") UUID alunoId);
-
     boolean existsByEmail(String email);
 
     boolean existsByEmailAndUuidNot(String email, UUID uuid);

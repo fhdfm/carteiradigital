@@ -29,7 +29,7 @@ public class AlunoAccessPolicy implements AccessPolicy {
     public boolean hasAccess(UsuarioLogado currentUser, String httpMethod, boolean isStatusUpdate, Object resourceId) {
         
         UUID targetUuid = parseResourceId(resourceId);
-        Aluno userEntity = this.alunoService.findStudentWithResponsavelByUuid(targetUuid);
+        Aluno userEntity = this.alunoService.findStudentWithResponsaveisByUuid(targetUuid);
 
         if (userEntity == null) {
             throw EurekaException.ofNotFound("Aluno (" + targetUuid + ") não encontrado.");

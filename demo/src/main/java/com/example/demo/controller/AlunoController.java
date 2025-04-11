@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -143,10 +144,10 @@ public class AlunoController {
         return ResponseEntity.ok(ApiReturn.of("Aluno inativado com sucesso."));
     }
     
-    @PostMapping("/{uuid}/responsavel")
+    @PutMapping("/{uuid}/responsavel")
     @CheckAccess(entity = EntityNames.ALUNO)
     @PreAuthorize("hasAnyRole('MASTER','ADMIN','FUNCIONARIO')")
-    public ResponseEntity<ApiReturn<Long>> addResponsavel(
+    public ResponseEntity<ApiReturn<Void>> addResponsavel(
             @Parameter(description = "UUID do aluno", required = true)
             @PathVariable("uuid") UUID uuid,
             
@@ -154,9 +155,9 @@ public class AlunoController {
                     description = "Corpo da requisição com os dados do responsável",
                     required = true
             )
-            @RequestBody @Valid ResponsavelAlunoRequest request
+            @ModelAttribute @Valid ResponsavelAlunoRequest request
     ) {
-        Long responsavelId = this.responsavelAlunoService.create(request, uuid);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiReturn.of(responsavelId));
+        this.responsavelAlunoService.create(request, uuid);
+        return ResponseEntity.ok(ApiReturn.of(null));
     }
 }

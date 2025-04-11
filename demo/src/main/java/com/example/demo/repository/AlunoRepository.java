@@ -12,23 +12,24 @@ import com.example.demo.domain.model.Aluno;
 @Repository
 public interface AlunoRepository extends BaseRepository<Aluno, Long> {
 
-    @Query(value = """
-    SELECT EXISTS(
-        SELECT 1
-        FROM aluno a
-        WHERE a.responsavel_id = :responsavelId
-    )
-    """, nativeQuery = true)
-    boolean existsByResponsavelId(@Param("responsavelId") UUID responsavelId);
+    // @Query(value = """
+    // SELECT EXISTS(
+    //     SELECT 1
+    //     FROM aluno a
+    //     WHERE a.responsavel_id = :responsavelId
+    // )
+    // """, nativeQuery = true)
+    // boolean existsByResponsavelId(@Param("responsavelId") UUID responsavelId);
 
     Optional<Aluno> findByUuid(UUID uuid);
 
     @Query("""
         SELECT a FROM Aluno a
-        JOIN FETCH a.responsavel
+        LEFT JOIN FETCH a.responsaveis ra
+        LEFT JOIN FETCH ra.responsavel
         WHERE a.uuid = :uuid
     """)
-    Optional<Aluno> findWithResponsavelByUuid(@Param("uuid") UUID uuid);
+    Optional<Aluno> findWithResponsaveisByUuid(@Param("uuid") UUID uuid);    
 
     boolean existsByEmail(String email);
 
