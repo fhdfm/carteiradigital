@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.demo.dto.EscolaCreationRequest;
+import com.example.demo.dto.EscolaUsuariosView;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,7 +60,7 @@ public class EscolaController {
     private final EscolaResponsavelService escolaResponsavelService;
     private final EscolaFinanceiroService escolaFinanceiroService;
 
-    public EscolaController(EscolaService service, EscolaEnderecoService escolaEnderecoService, 
+    public EscolaController(EscolaService service, EscolaEnderecoService escolaEnderecoService,
         EscolaResponsavelService escolaResponsavelService, EscolaFinanceiroService escolaFinanceiroService) {
         this.service = service;
         this.escolaEnderecoService = escolaEnderecoService;
@@ -87,7 +89,7 @@ public class EscolaController {
                     description = "Corpo da requisição com os dados de uma escola",
                     required = true
             )
-            @RequestBody @Valid EscolaRequest request
+            @RequestBody @Valid EscolaCreationRequest request
     ) {
         
         service.salvar(request);
@@ -143,21 +145,6 @@ public class EscolaController {
             @PathVariable("uuid") UUID uuid
     ) {
         return ResponseEntity.ok(ApiReturn.of(service.buscarPorUuid(uuid)));
-    }
-
-    @GetMapping("/{uuid}/usuarios")
-    @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
-    @CheckAccess(entity = EntityNames.ESCOLA)
-    @EurekaApiOperation(
-            summary = "Busca usuarios de uma escola",
-            description = "Busca usuarios a partir do seu UUID, uma escola persistida."
-    )
-    public ResponseEntity<ApiReturn<EscolaUsuariosView>> buscarUsuariosEscolaPorUuid(
-            @Parameter(description = "UUID da escola a ser buscada", required = true)
-            @PathVariable("uuid") UUID uuid,
-            Pageable pageable
-    ) {
-        return ResponseEntity.ok(ApiReturn.of(service.buscarUsuariosEscolaPorUuid(uuid,pageable)));
     }
 
     @GetMapping("/combobox")
@@ -235,81 +222,81 @@ public class EscolaController {
         return ResponseEntity.ok(ApiReturn.of("Escola ativada com sucesso."));
     }
 
-    /**
-     * Atualiza os parametros de uma escola existente identificada pelo UUID.
-     * Exemplo de requisição: PUT /api/escolas/params/{uuid}
-     */
-    @PutMapping("params/{uuid}")
-    @EurekaApiOperation(
-            summary = "Atualizar os parametros de uma escola",
-            description = "Atualiza, a partir do seu UUID, os parametros de uma escola persistida com as informações especificadas na requisião."
-    )
-    public ResponseEntity<ApiReturn<String>> atualizarParametrosEscola(
-            @Parameter(description = "UUID da escola a ser buscada", required = true)
-            @PathVariable("uuid") UUID uuid,
-
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Corpo da requisição com os parâmetros a serem salvos da escola",
-                    required = true
-            )
-            @RequestBody @Valid EscolaParametrosRequest request
-    ) {
-        service.atualizarParametrosEscola(uuid, request);
-
-        return ResponseEntity.ok(ApiReturn.of("Escola atualizada com sucesso."));
-    }
+//    /**
+//     * Atualiza os parametros de uma escola existente identificada pelo UUID.
+//     * Exemplo de requisição: PUT /api/escolas/params/{uuid}
+//     */
+//    @PutMapping("params/{uuid}")
+//    @EurekaApiOperation(
+//            summary = "Atualizar os parametros de uma escola",
+//            description = "Atualiza, a partir do seu UUID, os parametros de uma escola persistida com as informações especificadas na requisião."
+//    )
+//    public ResponseEntity<ApiReturn<String>> atualizarParametrosEscola(
+//            @Parameter(description = "UUID da escola a ser buscada", required = true)
+//            @PathVariable("uuid") UUID uuid,
+//
+//            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+//                    description = "Corpo da requisição com os parâmetros a serem salvos da escola",
+//                    required = true
+//            )
+//            @RequestBody @Valid EscolaParametrosRequest request
+//    ) {
+//        service.atualizarParametrosEscola(uuid, request);
+//
+//        return ResponseEntity.ok(ApiReturn.of("Escola atualizada com sucesso."));
+//    }
 
     @PutMapping("/{uuid}/endereco")
     @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
     public ResponseEntity<ApiReturn<String>> saveEndereco(@PathVariable("uuid") UUID uuid, @ModelAttribute EscolaEnderecoRequest request) {
-        
+
         this.escolaEnderecoService.save(uuid, request);
-        
+
         return ResponseEntity.ok(ApiReturn.of("Atualizado com sucesso."));
     }
 
     @GetMapping("/{uuid}/endereco")
     @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
     public ResponseEntity<ApiReturn<EscolaEndereco>> getEndereco(@PathVariable("uuid") UUID uuid) {
-        
+
         EscolaEndereco endereco = this.escolaEnderecoService.findByEscola(uuid);
-        
+
         return ResponseEntity.ok(ApiReturn.of(endereco));
     }
 
     @PutMapping("/{uuid}/responsavel")
     @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
     public ResponseEntity<ApiReturn<Void>> saveResponsavel(@PathVariable("uuid") UUID uuid, @ModelAttribute UsuarioRequest request) {
-        
+
         this.escolaResponsavelService.criarOuAtualizarResponsavel(uuid, request);
-        
+
         return ResponseEntity.ok(ApiReturn.of(null));
     }
 
     @GetMapping("/{uuid}/responsavel")
     @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
     public ResponseEntity<ApiReturn<UsuarioFull>> getResponsavel(@PathVariable("uuid") UUID uuid) {
-        
+
         UsuarioFull responsavel = this.escolaResponsavelService.findResponsavelByEscolaId(uuid);
-        
+
         return ResponseEntity.ok(ApiReturn.of(responsavel));
     }
 
     @PutMapping("/{uuid}/financeiro")
     @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
     public ResponseEntity<ApiReturn<Void>> saveFinanceiro(@PathVariable("uuid") UUID uuid, @ModelAttribute EscolaFinanceiroRequest request) {
-        
+
         this.escolaFinanceiroService.save(uuid, request);
-        
+
         return ResponseEntity.ok(ApiReturn.of(null));
     }
 
     @GetMapping("/{uuid}/financeiro")
     @PreAuthorize("hasAnyRole('MASTER','ADMIN')")
     public ResponseEntity<ApiReturn<EscolaFinanceiro>> getFinanceiro(@PathVariable("uuid") UUID uuid) {
-        
+
         EscolaFinanceiro financeiro = this.escolaFinanceiroService.findByEscolaId(uuid);
-        
+
         return ResponseEntity.ok(ApiReturn.of(financeiro));
     }
 }

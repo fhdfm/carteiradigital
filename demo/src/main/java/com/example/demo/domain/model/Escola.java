@@ -1,5 +1,6 @@
 package com.example.demo.domain.model;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hibernate.envers.Audited;
@@ -33,9 +34,6 @@ public class Escola extends BaseEntity {
     @Convert(converter = CnpjConverter.class)
     @Column(name = "cnpj", nullable = false, unique = true)
     private String cnpj;
-
-    @Column(name = "payment_secret", unique = true)
-    private String paymentSecret;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -79,14 +77,6 @@ public class Escola extends BaseEntity {
     public void setCnpj(String cnpj) {
         this.cnpj = cnpj;
     }
-
-    public String getPaymentSecret() {
-        return paymentSecret;
-    }
-
-    public void setPaymentSecret(String paymentSecret) {
-        this.paymentSecret = paymentSecret;
-    }
     @Override
     public UUID getUuid() {
        return super.uuid;
@@ -95,6 +85,26 @@ public class Escola extends BaseEntity {
     @Override
     public void setUuid(UUID uuid) {
         super.uuid = uuid;
+    }
+
+    @Override
+    protected LocalDateTime getCriadoEm() {
+        return super.criadoEm;
+    }
+
+    @Override
+    protected void setCriadoEm(LocalDateTime criadoEm) {
+        super.criadoEm = criadoEm;
+    }
+
+    @Override
+    protected LocalDateTime getAtualizadoEm() {
+        return super.atualizadoEm;
+    }
+
+    @Override
+    protected void setAtualizadoEm(LocalDateTime atualizadoEm) {
+        super.atualizadoEm = atualizadoEm;
     }
 
 }

@@ -14,7 +14,8 @@ CREATE TABLE escola (
     status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO',
     payment_secret VARCHAR(255) UNIQUE,
     version INT NOT NULL DEFAULT 0,
-    criado_em TIMESTAMP DEFAULT NOW()
+    criado_em TIMESTAMP DEFAULT NOW(),
+    atualizado_em TIMESTAMP DEFAULT NOW()
 );
 
 CREATE UNIQUE INDEX idx_escola_uuid ON escola(uuid);
@@ -37,6 +38,7 @@ CREATE TABLE usuario (
     primeiro_acesso BOOLEAN DEFAULT TRUE NOT NULL,
     version INT NOT NULL DEFAULT 0,
     criado_em TIMESTAMP DEFAULT NOW(),
+    atualizado_em TIMESTAMP DEFAULT NOW()
 
     CONSTRAINT chk_usuario_perfil_escola CHECK (
         (perfil = 'MASTER' AND escola_id IS NULL) OR (perfil <> 'MASTER' AND escola_id IS NOT NULL)
@@ -55,6 +57,9 @@ CREATE TABLE aluno (
     id BIGINT PRIMARY KEY,
     matricula VARCHAR(255),
     foto VARCHAR(255),
+    criado_em TIMESTAMP DEFAULT NOW(),
+    atualizado_em TIMESTAMP DEFAULT NOW(),
+    version INT NOT NULL DEFAULT 0,
     CONSTRAINT fk_aluno_id
         FOREIGN KEY (id) REFERENCES usuario(id)
         ON DELETE NO ACTION
@@ -77,32 +82,130 @@ CREATE TABLE responsavel_aluno (
 );
 
 -- ==========================
--- TABELA CARTÃO_ALUNO
+-- TABELA Carteira
 -- ==========================
-CREATE TABLE cartao_aluno (
-    id BIGSERIAL PRIMARY KEY,
-    uuid UUID NOT NULL,
-    aluno_id BIGINT NOT NULL,
-    numero VARCHAR(255) NOT NULL,
-    senha VARCHAR(255) NOT NULL, 
-    status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO' NOT NULL,
-    version INT NOT NULL DEFAULT 0,
-    criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
-
-    -- Chave estrangeira para a tabela aluno
-    CONSTRAINT fk_cartao_aluno 
-        FOREIGN KEY (aluno_id) REFERENCES aluno(id) ON DELETE CASCADE,
-    
-    -- Constraint de unicidade para o campo uuid
-    CONSTRAINT uq_cartao_aluno_uuid UNIQUE (uuid)
+CREATE TABLE carteira (
+                          id BIGSERIAL PRIMARY KEY,
+                          uuid UUID UNIQUE DEFAULT uuid_generate_v4(),
+                          aluno_id BIGINT NOT NULL,
+                          saldo DECIMAL(19, 2) NOT NULL DEFAULT 0,
+                          version INT NOT NULL DEFAULT 0,
+                          criado_em TIMESTAMP DEFAULT NOW(),
+                          atualizado_em TIMESTAMP DEFAULT NOW(),
+                          CONSTRAINT fk_carteira_aluno
+                              FOREIGN KEY (aluno_id) REFERENCES aluno(id)
+                                  ON DELETE NO ACTION,
+                          CONSTRAINT uq_carteira_uuid UNIQUE (uuid)
 );
 
--- Índices (além dos UNIQUE, que geram índices implícitos, 
+-- Índices (além dos UNIQUE, que geram índices implícitos,
 -- podemos criar índices adicionais para buscas específicas)
-CREATE INDEX idx_cartao_aluno_id     ON cartao_aluno(id);
-CREATE INDEX idx_cartao_aluno_uuid   ON cartao_aluno(uuid);
-CREATE INDEX idx_cartao_aluno_aluno  ON cartao_aluno(aluno_id);
-CREATE INDEX idx_cartao_aluno_numero ON cartao_aluno (numero);
+CREATE INDEX idx_carteira_id        ON carteira(id);
+CREATE INDEX idx_carteira_uuid      ON carteira(uuid);
+CREATE INDEX idx_carteira_aluno     ON carteira(aluno_id);
+
+
+-- ==========================
+-- TABELA CARTÃO_CARTEIRA
+-- ==========================
+CREATE TABLE cartao_carteira (
+                                 id BIGSERIAL PRIMARY KEY,
+                                 uuid UUID UNIQUE DEFAULT uuid_generate_v4(),
+                                 carteira_id BIGINT NOT NULL,
+                                 numero VARCHAR(255) NOT NULL,
+                                 senha VARCHAR(255) NOT NULL,
+                                 status VARCHAR(20) CHECK (status IN ('ATIVO', 'INATIVO')) DEFAULT 'ATIVO' NOT NULL,
+                                 version INT NOT NULL DEFAULT 0,
+                                 criado_em TIMESTAMP DEFAULT NOW(),
+                                 atualizado_em TIMESTAMP DEFAULT NOW(),
+
+    -- Chave estrangeira para a tabela aluno
+                                 CONSTRAINT fk_cartao_carteira
+                                     FOREIGN KEY (carteira_id) REFERENCES carteira(id) ON DELETE NO ACTION,
+
+    -- Constraint de unicidade para o campo uuid
+                                 CONSTRAINT uq_cartao_carteira_uuid UNIQUE (uuid)
+);
+
+-- Índices (além dos UNIQUE, que geram índices implícitos,
+-- podemos criar índices adicionais para buscas específicas)
+CREATE INDEX idx_cartao_carteira_id        ON cartao_carteira(id);
+CREATE INDEX idx_cartao_carteira_uuid      ON cartao_carteira(uuid);
+CREATE INDEX idx_cartao_carteira_carteira  ON cartao_carteira(carteira_id);
+CREATE INDEX idx_cartao_carteira_numero    ON cartao_carteira (numero);
+
+
+-- ==========================
+-- TABELA TRANSAÇÃO
+-- ==========================
+CREATE TABLE transacao (
+                           id BIGSERIAL PRIMARY KEY,
+                           uuid UUID UNIQUE DEFAULT uuid_generate_v4(),
+                           carteira_id BIGINT NOT NULL,
+                           valor DECIMAL(19, 2) NOT NULL DEFAULT 0,
+                           tipo_transacao VARCHAR NOT NULL,
+                           usuario_id BIGINT,
+                           pedido_id BIGINT,
+                           version INT NOT NULL DEFAULT 0,
+                           criado_em TIMESTAMP DEFAULT NOW(),
+                           atualizado_em TIMESTAMP DEFAULT NOW(),
+                           CONSTRAINT fk_transacao_carteira
+                               FOREIGN KEY (carteira_id) REFERENCES carteira(id)
+                                   ON DELETE NO ACTION,
+                           CONSTRAINT fk_transacao_usuario
+                               FOREIGN KEY (usuario_id) REFERENCES usuario(id)
+                                   ON DELETE NO ACTION,
+                           CONSTRAINT fk_transacao_pedido
+                               FOREIGN KEY (pedido_id) REFERENCES pedido(id)
+                                   ON DELETE NO ACTION,
+                           CONSTRAINT uq_transacao_uuid UNIQUE (uuid)
+);
+
+-- Índices (além dos UNIQUE, que geram índices implícitos,
+-- podemos criar índices adicionais para buscas específicas)
+CREATE INDEX idx_transacao_id        ON transacao(id);
+CREATE INDEX idx_transacao_uuid      ON transacao(uuid);
+CREATE INDEX idx_transacao_carteira     ON transacao(carteira_id);
+
+
+-- ==========================
+-- TRIGGER CARTEIRA TRANSAÇÃO
+-- ==========================
+CREATE OR REPLACE FUNCTION atualizar_saldo_carteira()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- INSERT
+  IF TG_OP = 'INSERT' THEN
+    IF NEW.tipo_transacao = 'CREDITO' THEN
+UPDATE carteira SET saldo = saldo + NEW.valor WHERE id = NEW.carteira_id;
+ELSIF NEW.tipo_transacao = 'DEBITO' THEN
+UPDATE carteira SET saldo = saldo - NEW.valor WHERE id = NEW.carteira_id;
+END IF;
+
+  -- UPDATE
+  ELSIF TG_OP = 'UPDATE' THEN
+    IF OLD.tipo_transacao = 'CREDITO' THEN
+UPDATE carteira SET saldo = saldo - OLD.valor WHERE id = OLD.carteira_id;
+ELSIF OLD.tipo_transacao = 'DEBITO' THEN
+UPDATE carteira SET saldo = saldo + OLD.valor WHERE id = OLD.carteira_id;
+END IF;
+
+    IF NEW.tipo_transacao = 'CREDITO' THEN
+UPDATE carteira SET saldo = saldo + NEW.valor WHERE id = NEW.carteira_id;
+ELSIF NEW.tipo_transacao = 'DEBITO' THEN
+UPDATE carteira SET saldo = saldo - NEW.valor WHERE id = NEW.carteira_id;
+END IF;
+END IF;
+
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_atualizar_saldo_carteira
+    AFTER INSERT OR UPDATE ON transacao
+                        FOR EACH ROW
+                        EXECUTE FUNCTION atualizar_saldo_carteira();
+
 
 -- ==========================
 -- TABELA PRODUTO
@@ -117,7 +220,8 @@ CREATE TABLE produto (
     departamento VARCHAR(50) NOT NULL,
     quantidade_vendida BIGINT NOT NULL,
     version INT NOT NULL DEFAULT 0,
-    criado_em TIMESTAMP NOT NULL DEFAULT NOW(),
+    criado_em TIMESTAMP DEFAULT NOW(),
+    atualizado_em TIMESTAMP DEFAULT NOW()
 
     CONSTRAINT fk_produto_escola FOREIGN KEY (escola_id) REFERENCES escola(id) ON DELETE CASCADE,
     CONSTRAINT uq_produto_uuid UNIQUE (uuid)
@@ -140,8 +244,8 @@ CREATE TABLE pedido (
     vendedor_id INT NOT NULL REFERENCES usuario(id),
     valor_total NUMERIC(15,2) NOT NULL DEFAULT 0.00,
     status VARCHAR(20) CHECK (status IN ('ABERTO', 'CONCLUIDO', 'CANCELADO')) DEFAULT 'ABERTO' NOT NULL,
-    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    atualizado_em TIMESTAMP NULL,
+    criado_em TIMESTAMP DEFAULT NOW(),
+    atualizado_em TIMESTAMP DEFAULT NOW(),
     version INT NOT NULL DEFAULT 0
 );
 
@@ -173,7 +277,8 @@ CREATE TABLE item_pedido (
     valor_unitario NUMERIC(15,2) NOT NULL,
     valor_total NUMERIC(15,2) NOT NULL,
     version INT NOT NULL DEFAULT 0,
-    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    criado_em TIMESTAMP DEFAULT NOW(),
+    atualizado_em TIMESTAMP DEFAULT NOW(),
 
     -- Chave estrangeira com o pedido
     CONSTRAINT fk_item_pedido_pedido FOREIGN KEY (pedido_id) REFERENCES pedido(id) ON DELETE CASCADE,
@@ -192,7 +297,9 @@ CREATE TABLE categoria_produto
     nome      VARCHAR(255) NOT NULL UNIQUE,
     status    VARCHAR(50)  NOT NULL,
     escola_id INT          NOT NULL REFERENCES escola (id),
-    version   INT          NOT NULL DEFAULT 0
+    version   INT          NOT NULL DEFAULT 0,
+    criado_em TIMESTAMP DEFAULT NOW(),
+    atualizado_em TIMESTAMP DEFAULT NOW(),
 );
 
 

@@ -1,8 +1,14 @@
 package com.example.demo.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.example.demo.domain.model.Cartao;
+import com.example.demo.domain.model.carteira.Carteira;
+import com.example.demo.dto.email.EmailDto;
+import com.example.demo.repository.*;
+import com.example.demo.util.SenhaUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,40 +17,46 @@ import org.springframework.stereotype.Service;
 import com.example.demo.domain.enums.MetodoAutenticacao;
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.enums.Status;
+import com.example.demo.domain.model.Aluno;
 import com.example.demo.domain.model.Escola;
 import com.example.demo.domain.model.Usuario;
+import com.example.demo.dto.AlunoRequest;
 import com.example.demo.dto.TrocarSenhaRequest;
 import com.example.demo.dto.UsuarioRequest;
 import com.example.demo.dto.projection.usuario.UsuarioFull;
 import com.example.demo.dto.projection.usuario.UsuarioSummary;
 import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.EscolaRepository;
-import com.example.demo.repository.UsuarioRepository;
+import com.example.demo.repository.specification.AlunoSpecification;
 import com.example.demo.repository.specification.UsuarioSpecification;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
+
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.util.Util;
 
 @Service
 public class UsuarioService {
     
     private final PasswordEncoder passwordEncoder;
-    private final UsuarioRepository usuarioRepository;
     private final EscolaRepository escolaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final EmailService emailService;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, 
-        PasswordEncoder passwordEncoder, EscolaRepository escolaRepository) {
-        
-        this.usuarioRepository = usuarioRepository;
+    public UsuarioService(
+            PasswordEncoder passwordEncoder,
+            EscolaRepository escolaRepository,
+            UsuarioRepository usuarioRepository,
+            EmailService emailService
+    ) {
         this.passwordEncoder = passwordEncoder;
         this.escolaRepository = escolaRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.emailService = emailService;
     }
 
-    private Escola getEscola(UUID escolaId) {
-        return this.escolaRepository.findByUuid(escolaId).orElseThrow(
-                () -> EurekaException.ofNotFound("Escola não encontrada."));
-    }
-
+    @Transactional
     public UUID createUser(UsuarioRequest request) {
 
         UsuarioLogado currentUser = SecurityUtils.getUsuarioLogado();
@@ -75,11 +87,11 @@ public class UsuarioService {
         user.setPrimeiroAcesso(true);
         user.setSenha(passwordEncoder.encode(senha));
 
-        // TODO - Envia e-mail para o usuário.
-
         usuarioRepository.save(user);
 
-        Usuario newUser = this.usuarioRepository.findByEmail(email).orElseThrow(() 
+        enviaEmailNovoUsuario(user.getNome(), user.getEmail(), senha);
+
+        Usuario newUser = this.usuarioRepository.findByEmail(email).orElseThrow(()
                         -> EurekaException.ofNotFound("Usuário não encontrado."));
         return newUser.getUuid();
     }
@@ -162,7 +174,7 @@ public class UsuarioService {
     public Optional<UsuarioFull> findByEscolaIdAndPerfil(UUID escolaId, Perfil perfil) {
         return this.usuarioRepository.findByEscolaIdAndPerfil(escolaId, perfil);
     }
-    
+
     /**
      * 
      * @param request
@@ -206,6 +218,10 @@ public class UsuarioService {
         this.usuarioRepository.save(user);
     }
 
+    private Escola getEscola(UUID uuid) {
+        return this.escolaRepository.findByUuid(uuid).orElseThrow(() -> EurekaException.ofNotFound("Escola não encontrada."));
+    }
+
     public void trocarResponsavelDaEscola(UUID uuid) {
         Usuario user = this.usuarioRepository.findByUuid(uuid).orElseThrow(
                 () -> EurekaException.ofNotFound("Usuário não encontrado."));
@@ -213,4 +229,18 @@ public class UsuarioService {
         this.usuarioRepository.save(user);
     }
 
+    private void enviaEmailNovoUsuario(String nome, String email, String senha) {
+        String body = String.format("Olá, %s! Sua senha temporária é:%n%s", nome, senha);
+        emailService.sendEmail(
+                new EmailDto(
+                        body,
+                        List.of(email),
+                        List.of(),
+                        List.of(),
+                        "Suas credenciais chegaram!",
+                        List.of(),
+                        null
+                )
+        );
+    }
 }

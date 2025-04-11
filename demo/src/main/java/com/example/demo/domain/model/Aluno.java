@@ -22,9 +22,6 @@ public class Aluno extends Usuario {
     @Column(name = "foto")
     private String foto;
 
-    @OneToMany(mappedBy = "aluno", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<Cartao> cartoes = new ArrayList<>();
-
     @OneToMany(mappedBy = "aluno", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ResponsavelAluno> responsaveis = new ArrayList<>();
 
@@ -47,18 +44,10 @@ public class Aluno extends Usuario {
         this.foto = foto;
     }
 
-    public void setCartoes(List<Cartao> cartoes) {
-        this.cartoes = cartoes;
-    }
-
-    public List<Cartao> getCartoes() {
-        return cartoes;
-    }
-
     public List<ResponsavelAluno> getResponsaveis() {
         return responsaveis;
     }
-    
+
     public void setResponsaveis(List<ResponsavelAluno> responsaveis) {
         this.responsaveis = responsaveis;
     }

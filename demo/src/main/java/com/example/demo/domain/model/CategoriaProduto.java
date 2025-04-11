@@ -3,6 +3,7 @@ package com.example.demo.domain.model;
 import com.example.demo.domain.enums.Status;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -67,5 +68,25 @@ public class CategoriaProduto extends BaseEntity {
 
     public void setEscola(Escola escola) {
         this.escola = escola;
+    }
+
+    @Override
+    protected LocalDateTime getCriadoEm() {
+        return super.criadoEm;
+    }
+
+    @Override
+    protected void setCriadoEm(LocalDateTime criadoEm) {
+        super.criadoEm = criadoEm;
+    }
+
+    @Override
+    protected LocalDateTime getAtualizadoEm() {
+        return super.atualizadoEm;
+    }
+
+    @Override
+    protected void setAtualizadoEm(LocalDateTime atualizadoEm) {
+        super.atualizadoEm = atualizadoEm;
     }
 }

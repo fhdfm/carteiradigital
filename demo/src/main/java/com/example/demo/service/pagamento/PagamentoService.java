@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.pagamento;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,26 +15,30 @@ import com.example.demo.dto.CriarPagamentoRequest;
 import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.PagamentoRepository;
 import com.example.demo.security.SecurityUtils;
-import com.mercadopago.MercadoPagoConfig;
-import com.mercadopago.client.preference.PreferenceClient;
-import com.mercadopago.client.preference.PreferenceItemRequest;
-import com.mercadopago.client.preference.PreferencePayerRequest;
-import com.mercadopago.client.preference.PreferenceRequest;
-import com.mercadopago.resources.preference.Preference;
+import com.example.demo.service.AlunoService;
+import com.example.demo.service.UsuarioService;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PagamentoService {
 //
     private final PagamentoRepository repository;
     private final UsuarioService usuarioService;
+    private final PagamentoProcessorFactory processorFactory;
     private final AlunoService alunoService;
 
-    public PagamentoService(PagamentoRepository repository, UsuarioService usuarioService, AlunoService alunoService) {
+    public PagamentoService(PagamentoRepository repository, UsuarioService usuarioService, PagamentoProcessorFactory processorFactory, AlunoService alunoService) {
         this.repository = repository;
         this.usuarioService = usuarioService;
+        this.processorFactory = processorFactory;
         this.alunoService = alunoService;
     }
-
 
     public String registrarPreCompra(List<CriarPagamentoRequest> pagamentoRequestList) {
         Pagamento pagamento = new Pagamento();
@@ -60,11 +64,28 @@ public class PagamentoService {
 
         Usuario usuario = usuarioService.findByUuid(SecurityUtils.getUsuarioLogado().getUuid());
         pagamento.setUsuarioPagante(usuario);
-        this.repository.save(pagamento);
+        repository.save(pagamento);
 
-        Preference preference = createPayment(pagamento);
+//        Preference preference = createPayment(pagamento);
 
-        return preference.getInitPoint();
+        return "OK";
+    }
+
+    public String confirmarCompra(UUID pagamentoId) {
+        Pagamento pagamento = repository
+                .findByUuid(pagamentoId)
+                .orElseThrow(() -> EurekaException.ofNotFound("Pagamento não encontrado."));
+
+        pagamento.setStatus("Concluido");
+        repository.save(pagamento);
+
+        for (PagamentoItem item : pagamento.getItens()) {
+            processorFactory
+                    .getProcessor(item.getTipo())
+                    .processaPagamento(pagamento.getUsuarioPagante(), item);
+        }
+
+        return "OK";
     }
 //
 //    @Transactional
@@ -97,45 +118,44 @@ public class PagamentoService {
 //        }
 //    }
 //
-    private Preference createPayment(Pagamento pagamento) {
-        try {
-            MercadoPagoConfig.setAccessToken(pagamento.getItens().getFirst().getAluno().getEscola().getPaymentSecret());
-            PreferenceClient client = new PreferenceClient();
-
-            // CASO PRECISE ---------------------------------------
-//            PreferenceReceiverAddressRequest addressRequest = PreferenceReceiverAddressRequest.builder()
-//                    .streetName("")
-//                    .cityName("")
-//                    .streetNumber("")
+//    private Preference createPayment(Pagamento pagamento) {
+//        try {
+//            PreferenceClient client = new PreferenceClient();
+//
+//            // CASO PRECISE ---------------------------------------
+////            PreferenceReceiverAddressRequest addressRequest = PreferenceReceiverAddressRequest.builder()
+////                    .streetName("")
+////                    .cityName("")
+////                    .streetNumber("")
+////                    .build();
+////            PreferenceShipmentsRequest preferenceShipmentsRequest =  PreferenceShipmentsRequest.builder()
+////                    .receiverAddress(addressRequest)
+////                    .build();
+//            // CASO PRECISE ---------------------------------------
+//
+//            List<PreferenceItemRequest> itens = pagamento.getItens().stream()
+//                    .map(pagamentoItem -> PreferenceItemRequest.builder()
+//                            .title(pagamentoItem.getTitulo())
+//                            .quantity(1)
+//                            .unitPrice(pagamentoItem.getValorIndividual())
+//                            .build())
+//                    .toList();
+//
+//            PreferencePayerRequest payerRequest = PreferencePayerRequest.builder()
+//                    .email(pagamento.getUsuarioPagante().getEmail())
 //                    .build();
-//            PreferenceShipmentsRequest preferenceShipmentsRequest =  PreferenceShipmentsRequest.builder()
-//                    .receiverAddress(addressRequest)
+//
+//            PreferenceRequest preferenceRequest = PreferenceRequest.builder()
+//                    .items(itens)
+//                    .payer(payerRequest)
+//                    .externalReference(pagamento.getUuid().toString())
 //                    .build();
-            // CASO PRECISE ---------------------------------------
-
-            List<PreferenceItemRequest> itens = pagamento.getItens().stream()
-                    .map(pagamentoItem -> PreferenceItemRequest.builder()
-                            .title(pagamentoItem.getTitulo())
-                            .quantity(1)
-                            .unitPrice(pagamentoItem.getValorIndividual())
-                            .build())
-                    .toList();
-
-            PreferencePayerRequest payerRequest = PreferencePayerRequest.builder()
-                    .email(pagamento.getUsuarioPagante().getEmail())
-                    .build();
-
-            PreferenceRequest preferenceRequest = PreferenceRequest.builder()
-                    .items(itens)
-                    .payer(payerRequest)
-                    .externalReference(pagamento.getUuid().toString())
-                    .build();
-
-            return client.create(preferenceRequest);
-
-        } catch (Exception e) {
-            throw EurekaException.ofException("Erro ao criar pagamento, tente novamente mais tarde");
-        }
-    }
+//
+//            return client.create(preferenceRequest);
+//
+//        } catch (Exception e) {
+//            throw EurekaException.ofException("Erro ao criar pagamento, tente novamente mais tarde");
+//        }
+//    }
 
 }

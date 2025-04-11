@@ -21,20 +21,20 @@ public class LogUtil {
      * @param type    o tipo de log (INFO, WARN, ERROR, DEBUG)
      * @param message a mensagem a ser logada
      */
-    public static void log(Class<?> clazz, LogType type, String message) {
+    public static void log(Class<?> clazz, LogType type, String message, Object... args) {
         Logger logger = LoggerFactory.getLogger(clazz);
         switch (type) {
             case WARN:
-                logger.warn(message);
+                logger.warn(message, args);
                 break;
             case ERROR:
-                logger.error(message);
+                logger.error(message, args);
                 break;
             case DEBUG:
-                logger.debug(message);
+                logger.debug(message, args);
                 break;
             default:
-                logger.info(message);
+                logger.info(message, args);
                 break;
         }
     }
@@ -63,4 +63,37 @@ public class LogUtil {
                 break;
         }
     }
+    public static void info(String message, Object... args) {
+        log(getCallerClass(), LogType.INFO, message, args);
+    }
+
+    /**
+     * Realiza log com uma mensagem simples.
+     *
+     * @param message a mensagem a ser logada
+     */
+    public static void error(String message, Object... args) {
+        log(getCallerClass(), LogType.ERROR, message, args);
+    }
+
+
+    /**
+     * Pega a classe que chamou o info.
+     */
+    private static Class<?> getCallerClass() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        for (int i = 3; i < stackTrace.length; i++) {
+            String className = stackTrace[i].getClassName();
+            if (!className.equals(LogUtil.class.getName())) {
+                try {
+                    return Class.forName(className);
+                } catch (ClassNotFoundException e) {
+                    // Em último caso, volta pro LogUtil mesmo
+                    return LogUtil.class;
+                }
+            }
+        }
+        return LogUtil.class;
+    }
+
 }

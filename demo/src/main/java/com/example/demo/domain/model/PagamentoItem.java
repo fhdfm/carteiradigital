@@ -1,6 +1,7 @@
 package com.example.demo.domain.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.example.demo.domain.enums.TipoPagamento;
@@ -63,6 +64,26 @@ public class PagamentoItem extends BaseEntity {
     @Override
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
+    }
+
+    @Override
+    protected LocalDateTime getCriadoEm() {
+        return super.criadoEm;
+    }
+
+    @Override
+    protected void setCriadoEm(LocalDateTime criadoEm) {
+        super.criadoEm = criadoEm;
+    }
+
+    @Override
+    protected LocalDateTime getAtualizadoEm() {
+        return super.atualizadoEm;
+    }
+
+    @Override
+    protected void setAtualizadoEm(LocalDateTime atualizadoEm) {
+        super.atualizadoEm = atualizadoEm;
     }
 
     public Pagamento getPagamento() {
