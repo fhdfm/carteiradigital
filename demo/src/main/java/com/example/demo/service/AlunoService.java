@@ -1,22 +1,9 @@
 package com.example.demo.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.example.demo.domain.enums.MetodoAutenticacao;
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.enums.Status;
-import com.example.demo.domain.model.Aluno;
-import com.example.demo.domain.model.Cartao;
-import com.example.demo.domain.model.Escola;
-import com.example.demo.domain.model.ResponsavelAluno;
-import com.example.demo.domain.model.Usuario;
+import com.example.demo.domain.model.*;
 import com.example.demo.domain.model.carteira.Carteira;
 import com.example.demo.dto.AlunoRequest;
 import com.example.demo.dto.email.EmailDto;
@@ -25,14 +12,23 @@ import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.AlunoRepository;
 import com.example.demo.repository.CarteiraRepository;
 import com.example.demo.repository.specification.AlunoSpecification;
+import com.example.demo.security.SecurityUtils;
+import com.example.demo.security.UsuarioLogado;
 import com.example.demo.util.SenhaUtil;
 import com.example.demo.util.Util;
-
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AlunoService {
-    
+
     private final AlunoRepository alunoRepository;
     private final PasswordEncoder passwordEncoder;
     private final CarteiraRepository carteiraRepository;
@@ -57,10 +53,14 @@ public class AlunoService {
     }
 
     public UUID create(AlunoRequest request) {
-        
-        String email = request.email().trim();
-        if (this.alunoRepository.existsByEmail(email))
-            throw EurekaException.ofValidation(email + " já está cadastrado");
+        UsuarioLogado usuarioLogado = SecurityUtils.getUsuarioLogado();
+
+        String email = null;
+        if (request.email() != null) {
+            email = request.email().trim();
+            if (this.alunoRepository.existsByEmail(email))
+                throw EurekaException.ofValidation(email + " já está cadastrado");
+        }
 
         String cpf = request.cpf().trim().replaceAll("\\D", "");
         if (this.alunoRepository.existsByCpf(cpf))
@@ -68,8 +68,9 @@ public class AlunoService {
 
         String senha = Util.gerarSenhaTemporaria();
 
-        Escola escola = new Escola();
-        escola.setUuid(request.escolaId());
+        Escola escola = usuarioLogado.getEscola();
+//        escola.setUuid(.getUuid());
+//        escola.setId(usuarioLogado.getEscola().getId());
 
         Aluno student = new Aluno();
         student.setEscola(escola);
@@ -117,7 +118,7 @@ public class AlunoService {
     }
 
     public void update(UUID uuid, AlunoRequest request) {
-        
+
         Aluno student = this.findByUuid(uuid);
 
         String email = request.email().trim();
@@ -127,7 +128,7 @@ public class AlunoService {
         String cpf = request.cpf().trim().replaceAll("\\D", "");
         if (this.alunoRepository.existsByCpfAndUuidNot(cpf, uuid))
             throw EurekaException.ofValidation(cpf + " já está cadastrado");
-        
+
         student.setNome(request.nome());
         student.setEmail(email);
         student.setCpf(cpf);
@@ -137,7 +138,7 @@ public class AlunoService {
         // TODO - integrar com o s3
         //student.setFoto(request.foto());
 
-        this.alunoRepository.save(student);        
+        this.alunoRepository.save(student);
     }
 
     public Page<AlunoSummary> findAll(AlunoSpecification specification, Pageable pageable) {
@@ -146,13 +147,13 @@ public class AlunoService {
 
     public <T> T findByUuid(UUID uuid, Class<T> clazz) {
         Object usuario = this.alunoRepository.findByUuid(uuid).orElseThrow(
-            () -> new EntityNotFoundException("Aluno não encontrado"));
+                () -> new EntityNotFoundException("Aluno não encontrado"));
 
         return clazz.cast(usuario);
     }
 
     public void changeStudentStatus(UUID uuid, Status status) {
-        
+
         Aluno student = this.findByUuid(uuid);
 
         if (student.getStatus() != status) {

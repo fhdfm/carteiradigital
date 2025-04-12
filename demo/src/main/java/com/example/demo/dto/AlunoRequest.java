@@ -11,9 +11,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record AlunoRequest(
-    @Schema(description = "Identificador da escola", example = "00000000-0000-0000-0000-000000000000")
-    @NotNull(message = "Escola ID é obrigatório")
-    UUID escolaId,
+//    @Schema(description = "Identificador da escola", example = "00000000-0000-0000-0000-000000000000")
+//    @NotNull(message = "Escola ID é obrigatório")
+//    UUID escolaId,
 
     @Schema(description = "Nome completo do aluno", example = "João da Silva")
     @NotBlank(message = "O nome é obrigatório")
@@ -21,7 +21,7 @@ public record AlunoRequest(
     String nome,
 
     @Schema(description = "Email do aluno", example = "email@email.com")
-    @NotBlank(message = "O email é obrigatório")
+//    @NotBlank(message = "O email é obrigatório")
     @Email(message = "Informe um email válido")
     String email,
 
@@ -31,12 +31,12 @@ public record AlunoRequest(
     String cpf,
 
     @Schema(description = "Telefone do aluno", example = "00000000000")
-    @NotBlank(message = "O telefone é obrigatório")
+//    @NotBlank(message = "O telefone é obrigatório")
     String telefone,
 
-    @Schema(description = "Identificador do responsável pelo aluno", example = "00000000-0000-0000-0000-000000000000")
-    @NotNull(message = "Responsável ID é obrigatório")
-    UUID responsavelId,
+//    @Schema(description = "Identificador do responsável pelo aluno", example = "00000000-0000-0000-0000-000000000000")
+//    @NotNull(message = "Responsável ID é obrigatório")
+//    UUID responsavelId,
 
     @Schema(description = "Número de matrícula do aluno", example = "00000000")
     @NotBlank(message = "A matrícula é obrigatória")

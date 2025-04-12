@@ -60,10 +60,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             
             UsuarioLogado user = (UsuarioLogado) userDetailsService.loadUserByUsername(username);
 
-            if (user.isPrimeiroAcesso()) {
-                response.sendRedirect("/trocar-senha");
-                return;
-            }
+//            if (user.isPrimeiroAcesso()) {
+//                response.sendRedirect("/trocar-senha");
+//                return;
+//            }
             
             var authToken =
                 new UsernamePasswordAuthenticationToken(
