@@ -2,6 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.controller.doc.EurekaApiOperation;
 import com.example.demo.domain.model.CategoriaProduto;
+import com.example.demo.dto.CategoriaRequest;
+import com.example.demo.dto.projection.produto.CategoriaSummary;
+import com.example.demo.repository.specification.CategoriaProdutoSpecification;
 import com.example.demo.service.CategoriaService;
 import com.example.demo.util.ApiReturn;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,9 +42,9 @@ public class CategoriaController {
                     description = "Corpo da requisição com os dados da categoria a ser criada",
                     required = true
             )
-            @RequestBody @Valid CategoriaProduto categoria
+            @RequestBody @Valid CategoriaRequest categoria
     ) {
-        service.salvar(null, categoria.getNome());
+        service.salvar(null, categoria);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiReturn.of("Categoria criado com sucesso."));
     }
 
@@ -59,9 +62,9 @@ public class CategoriaController {
                     description = "Nome da categoria atualizado",
                     required = true
             )
-            @RequestBody @Valid String nome
+            @RequestBody @Valid CategoriaRequest categoria
     ) {
-        service.salvar(uuid, nome);
+        service.salvar(uuid, categoria);
         return ResponseEntity.ok(ApiReturn.of("Categoria atualizado com sucesso."));
     }
 
@@ -84,13 +87,11 @@ public class CategoriaController {
             summary = "Lista as categorias",
             description = "Retorna um page contendo categorias de acordo com os filtros especificados."
     )
-    public ResponseEntity<ApiReturn<Page<CategoriaProduto>>> listarCategorias(
-            @Parameter(description = "Nome para filtrar categorias", required = true)
-            String nome,
-
+    public ResponseEntity<ApiReturn<Page<CategoriaSummary>>> listarCategorias(
+            @ParameterObject CategoriaProdutoSpecification specification,
             @ParameterObject Pageable pageable
     ) {
-        return ResponseEntity.ok(ApiReturn.of(service.listar(nome, pageable)));
+        return ResponseEntity.ok(ApiReturn.of(service.listar(specification, pageable)));
     }
 
     @PutMapping("/{uuid}/inativar")

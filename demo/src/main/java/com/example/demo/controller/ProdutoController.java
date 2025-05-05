@@ -31,7 +31,7 @@ public class ProdutoController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('MASTER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @EurekaApiOperation(
             summary = "Criar um produto",
             description = "Cria e persiste um novo produto contendo as informações especificadas na requisião."
@@ -48,7 +48,7 @@ public class ProdutoController {
     }
 
     @PutMapping("/{uuid}")
-    @PreAuthorize("hasRole('MASTER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @EurekaApiOperation(
             summary = "Atualizar um produto",
             description = "Atualiza, a partir do seu UUID, um produto persistido com as informações especificadas na requisião."
@@ -108,7 +108,7 @@ public class ProdutoController {
     }
 
     @PutMapping("/{uuid}/ativar")
-    @PreAuthorize("hasRole('MASTER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @EurekaApiOperation(
             summary = "Ativa um produto",
             description = "Ativa, a partir do seu UUID, um produto persistido."
