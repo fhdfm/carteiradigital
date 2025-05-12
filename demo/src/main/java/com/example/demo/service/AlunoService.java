@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +53,7 @@ public class AlunoService {
                 () -> EurekaException.ofNotFound("Aluno não encontrado."));
     }
 
+    @Transactional
     public UUID create(AlunoRequest request) {
         UsuarioLogado usuarioLogado = SecurityUtils.getUsuarioLogado();
 
@@ -93,14 +95,16 @@ public class AlunoService {
         carteira.setAluno(student);
 
         String senhaCartao = SenhaUtil.gerarSenhaTemporariaPin();
-
         Cartao novoCartao = new Cartao();
-        novoCartao.setCarteira(carteira);
-        novoCartao.setNumero(request.numeroCartao());
-        novoCartao.setSenha(passwordEncoder.encode(senhaCartao));
-        novoCartao.setStatus(Status.ATIVO);
+        if (request.numeroCartao() != null) {
 
-        carteira.getCartoes().add(novoCartao);
+            novoCartao.setCarteira(carteira);
+            novoCartao.setNumero(request.numeroCartao());
+            novoCartao.setSenha(passwordEncoder.encode(senhaCartao));
+            novoCartao.setStatus(Status.ATIVO);
+
+            carteira.getCartoes().add(novoCartao);
+        }
 
         carteiraRepository.save(carteira);
 
@@ -109,10 +113,12 @@ public class AlunoService {
 
         enviaEmailNovoUsuario(student.getNome(), student.getEmail(), senha);
 
-        List<String> emails = new ArrayList<>();
-        emails.add(student.getEmail());
-        emails.addAll(student.getResponsaveis().stream().map(ResponsavelAluno::getResponsavel).map(Usuario::getEmail).toList());
-        enviaEmailNovoCartao(student.getNome(), emails, novoCartao.getNumero(), senhaCartao);
+        if (request.numeroCartao() != null) {
+            List<String> emails = new ArrayList<>();
+            emails.add(student.getEmail());
+            emails.addAll(student.getResponsaveis().stream().map(ResponsavelAluno::getResponsavel).map(Usuario::getEmail).toList());
+            enviaEmailNovoCartao(student.getNome(), emails, novoCartao.getNumero(), senhaCartao);
+        }
 
         return newStudent.getUuid();
     }

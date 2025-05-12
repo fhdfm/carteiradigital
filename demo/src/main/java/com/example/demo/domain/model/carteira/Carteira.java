@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +28,7 @@ public class Carteira extends BaseEntity {
     private BigDecimal saldo = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "carteira", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<Cartao> cartoes;
+    private List<Cartao> cartoes = new ArrayList<>();
 
     @Version
     private int version;
