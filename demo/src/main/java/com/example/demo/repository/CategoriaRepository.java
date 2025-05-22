@@ -13,5 +13,4 @@ public interface CategoriaRepository extends BaseRepository<CategoriaProduto, Lo
 
     Optional<CategoriaProduto> findByUuid(UUID uuid);
     Page<CategoriaProduto> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
-
 }

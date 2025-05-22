@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.domain.enums.Status;
 import com.example.demo.domain.enums.TipoTransacao;
+import com.example.demo.domain.model.Aluno;
 import com.example.demo.domain.model.Cartao;
 import com.example.demo.domain.model.Pedido;
 import com.example.demo.domain.model.Usuario;
@@ -12,6 +13,7 @@ import com.example.demo.dto.CartaoCadastroRequest;
 import com.example.demo.dto.email.EmailDto;
 import com.example.demo.dto.projection.carteira.CarteiraView;
 import com.example.demo.exception.eureka.EurekaException;
+import com.example.demo.repository.AlunoRepository;
 import com.example.demo.repository.CartaoRepository;
 import com.example.demo.repository.CarteiraRepository;
 import com.example.demo.repository.TransacaoRepository;
@@ -32,13 +34,17 @@ public class CarteiraService {
     private final TransacaoRepository transacaoRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final AlunoRepository alunoRepository;
+    private final CarteiraRepository carteiraRepository;
 
-    public CarteiraService(CarteiraRepository repository, CartaoRepository cartaoRepository, TransacaoRepository transacaoRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
+    public CarteiraService(CarteiraRepository repository, CartaoRepository cartaoRepository, TransacaoRepository transacaoRepository, PasswordEncoder passwordEncoder, EmailService emailService, AlunoRepository alunoRepository, CarteiraRepository carteiraRepository) {
         this.repository = repository;
         this.cartaoRepository = cartaoRepository;
         this.transacaoRepository = transacaoRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.alunoRepository = alunoRepository;
+        this.carteiraRepository = carteiraRepository;
     }
 
     /**
@@ -192,4 +198,7 @@ public class CarteiraService {
     }
 
 
+    public Aluno buscarCartaoPorNumero(String numero) {
+        return carteiraRepository.buscarAlunoPorNumeroCartao(numero);
+    }
 }

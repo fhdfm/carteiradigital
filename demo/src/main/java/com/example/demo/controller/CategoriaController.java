@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.controller.doc.EurekaApiOperation;
 import com.example.demo.domain.model.CategoriaProduto;
 import com.example.demo.dto.CategoriaRequest;
+import com.example.demo.dto.projection.ProdutoView;
 import com.example.demo.dto.projection.produto.CategoriaSummary;
 import com.example.demo.repository.specification.CategoriaProdutoSpecification;
 import com.example.demo.service.CategoriaService;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -79,6 +81,19 @@ public class CategoriaController {
             @PathVariable("uuid") UUID uuid
     ) {
         return ResponseEntity.ok(ApiReturn.of(service.buscarPorUuid(uuid)));
+    }
+
+    @GetMapping("/buscar-produtos/{uuid}")
+    @PreAuthorize("!hasRole('ALUNO')")
+    @EurekaApiOperation(
+            summary = "Busca uma lista de produtos",
+            description = "Busca produtos a partir do UUID de uma categoria persistida."
+    )
+    public ResponseEntity<ApiReturn<List<ProdutoView>>> buscarProdudosPorCategoriaUuid(
+            @Parameter(description = "UUID da categoria a ser buscada", required = true)
+            @PathVariable("uuid") UUID uuid
+    ) {
+        return ResponseEntity.ok(ApiReturn.of(service.buscarListaDeProdutosPorCategoriaUuid(uuid)));
     }
 
     @GetMapping

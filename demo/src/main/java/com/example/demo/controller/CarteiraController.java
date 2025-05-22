@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.controller.doc.EurekaApiOperation;
+import com.example.demo.domain.model.Aluno;
 import com.example.demo.dto.*;
 import com.example.demo.dto.projection.carteira.CarteiraView;
 import com.example.demo.service.CarteiraService;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(path = "/api/aluno/carteira")
+@RequestMapping(path = "/api/carteira")
 @Tag(name = "Carteira", description = "Endpoints para carteira")
 public class CarteiraController {
 
@@ -51,6 +52,19 @@ public class CarteiraController {
             @RequestBody RecargaManualRequest request
     ) {
         return ResponseEntity.ok(ApiReturn.of(service.realizarRecargaManual(uuid, request.valor())));
+    }
+
+    @GetMapping("/buscar-aluno/{numero}")
+    @PreAuthorize("!hasAnyRole('ALUNO', 'RESPONSAVEL')")
+    @EurekaApiOperation(
+            summary = "Consulta o cartão usaurio na carteira",
+            description = "Retorna o cartão do aluno."
+    )
+    public ResponseEntity<ApiReturn<Aluno>> consultarCartao(
+            @Parameter(description = "Numero do cartão do dono da carteira a ser buscado", required = true)
+            @PathVariable("numero") String numero
+    ) {
+        return ResponseEntity.ok(ApiReturn.of(service.buscarCartaoPorNumero(numero)));
     }
 
     @PostMapping("/cartao")
