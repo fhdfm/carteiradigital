@@ -33,3 +33,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Arquivos de sistema do macOS
+.DS_Store
+*/.DS_Store
+
+# Configuração do IntelliJ IDEA / WebStorm / etc
+.idea/
+
+# Se quiser ignorar arquivos temporários de sistema fora do repo atual
+../.DS_Store
+../.idea/
