@@ -46,7 +46,7 @@ public class Pedido extends BaseEntity {
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ItemPedido> itens = new ArrayList<>();
 
-    @Column(name = "valor_total", nullable = false)
+    @Column(name = "valor_total", nullable = false, insertable = false, updatable = false)
     private BigDecimal total;
 
     @Enumerated(EnumType.STRING)

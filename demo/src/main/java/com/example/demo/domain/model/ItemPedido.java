@@ -38,7 +38,7 @@ public class ItemPedido {
     @Column(name = "valor_unitario", nullable = false)
     private BigDecimal valorUnitario;
 
-    @Column(name = "valor_total", nullable = false)
+    @Column(name = "valor_total", nullable = false, insertable = false, updatable = false)
     private BigDecimal valorTotal;
 
     @Version

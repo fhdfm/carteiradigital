@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 interface ItemPedidoView {
-    UUID getProdutoUuid();      // produto.uuid
-
     String getDescricao();
 
     Integer getQuantidade();

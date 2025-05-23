@@ -142,7 +142,6 @@ public class PedidoService {
         pedido.setComprador(comprador);
         pedido.setStatus(StatusPedido.ABERTO);
 
-        BigDecimal total = BigDecimal.ZERO;
         for (ItemPedidoRequest itemDto : dto.itens()) {
 
             Produto produto = produtoRepository.findByUuid(itemDto.produtoId())
@@ -154,14 +153,10 @@ public class PedidoService {
             item.setQuantidade(itemDto.quantidade());
             item.setValorUnitario(itemDto.valorUnitario());
 
-            BigDecimal subtotal = itemDto.valorUnitario()
-                    .multiply(BigDecimal.valueOf(itemDto.quantidade()));
-            item.setValorTotal(subtotal);
+
 
             pedido.addItem(item);
-            total = total.add(subtotal);
         }
-        pedido.setTotal(total);
 
         return pedido;
     }
