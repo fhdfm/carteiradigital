@@ -59,8 +59,7 @@ public class UsuarioController {
             )
             @RequestBody @Valid UsuarioRequest request
     ) {
-        UUID uuid = service.createUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiReturn.of(uuid));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiReturn.of(service.createUser(request)));
     }
 
     @PutMapping("/{uuid}")

@@ -1,7 +1,7 @@
 package com.example.demo.repository;
 
-import com.example.demo.domain.model.Aluno;
 import com.example.demo.domain.model.carteira.Carteira;
+import com.example.demo.dto.AlunoUsuarioResponse;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,10 +16,17 @@ public interface CarteiraRepository extends BaseRepository<Carteira, Long> {
     Optional<Carteira> findByAluno_Uuid(UUID alunoUuid);
 
     @Query("""
-       select a from Aluno a
+         select new com.example.demo.dto.AlunoUsuarioResponse(
+               a.uuid,
+               u.nome,
+               a.matricula,
+               u.email,
+               a.foto
+           ) from Aluno a
+       join Usuario u on a.id = u.id
        join Carteira c on a.id = c.aluno.id
        join Cartao cc on c.id = cc.carteira.id
        where cc.numero = :numero
     """)
-    Aluno buscarAlunoPorNumeroCartao(@Param("numero") String numero);
+    AlunoUsuarioResponse buscarAlunoPorNumeroCartao(@Param("numero") String numero);
 }

@@ -31,7 +31,7 @@ public class ProdutoController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN', 'PDV')")
     @EurekaApiOperation(
             summary = "Criar um produto",
             description = "Cria e persiste um novo produto contendo as informações especificadas na requisião."
