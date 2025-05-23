@@ -14,7 +14,7 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea
+.ideaa
 *.iws
 *.iml
 *.ipr
@@ -28,6 +28,8 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
+/.ideaa
+/.ideaa
 
 ### VS Code ###
 .vscode/
