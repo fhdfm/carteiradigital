@@ -73,7 +73,7 @@ public class ProdutoController {
             summary = "Busca um produto",
             description = "Busca, a partir do seu UUID, um produto persistido."
     )
-    public ResponseEntity<ApiReturn<ProdutoView>> buscarProdutoPorUuid(
+    public ResponseEntity<ApiReturn<ProdutoRequest>> buscarProdutoPorUuid(
             @Parameter(description = "UUID do produto a ser buscado", required = true)
             @PathVariable("uuid") UUID uuid
     ) {

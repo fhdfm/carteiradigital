@@ -55,13 +55,13 @@ public class ProdutoService {
         produto.setNome(request.nome());
         produto.setPreco(request.preco());
         produto.getCategoria().setUuid(request.categoriaId());
+        produto.setDepartamento(request.departamento());
 
         repository.save(produto);
     }
 
-    public ProdutoView buscarPorUuid(UUID uuid) {
-        return repository.findByUuid(uuid, ProdutoView.class)
-                .orElseThrow(() -> EurekaException.ofNotFound("Produto não encontrado."));
+    public ProdutoRequest buscarPorUuid(UUID uuid) {
+        return repository.BuscarProdutoPorUuid(uuid);
     }
 
     public Page<ProdutoView> listar(ProdutoSpecification specification, Pageable pageable) {
@@ -76,7 +76,7 @@ public class ProdutoService {
 
     public void modificarStatus(UUID uuid) {
         Optional<Produto> produto = repository.findByUuid(uuid);
-        produto.get().setStatus(produto.get().getStatus() == Status.ATIVO ? Status.ATIVO : Status.INATIVO);
+        produto.get().setStatus(produto.get().getStatus() == Status.ATIVO ? Status.INATIVO : Status.ATIVO);
         repository.save(produto.get());
     }
 
