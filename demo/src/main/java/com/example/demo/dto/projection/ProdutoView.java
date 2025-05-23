@@ -1,10 +1,8 @@
 package com.example.demo.dto.projection;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
-import com.example.demo.domain.enums.Departamento;
 import com.example.demo.dto.projection.produto.CategoriaSummary;
+
+import java.util.UUID;
 
 public interface ProdutoView {
 
