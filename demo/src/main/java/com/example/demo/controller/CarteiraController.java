@@ -55,12 +55,12 @@ public class CarteiraController {
     }
 
     @GetMapping("/buscar-aluno/{numero}")
-    @PreAuthorize("!hasAnyRole('ALUNO', 'RESPONSAVEL')")
+    @PreAuthorize("hasAnyRole('PDV')")
     @EurekaApiOperation(
             summary = "Consulta o cartão usaurio na carteira",
             description = "Retorna o cartão do aluno."
     )
-    public ResponseEntity<ApiReturn<Aluno>> consultarCartao(
+    public ResponseEntity<ApiReturn<AlunoUsuarioResponse>> consultarCartao(
             @Parameter(description = "Numero do cartão do dono da carteira a ser buscado", required = true)
             @PathVariable("numero") String numero
     ) {

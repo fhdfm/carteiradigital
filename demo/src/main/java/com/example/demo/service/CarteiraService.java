@@ -2,13 +2,13 @@ package com.example.demo.service;
 
 import com.example.demo.domain.enums.Status;
 import com.example.demo.domain.enums.TipoTransacao;
-import com.example.demo.domain.model.Aluno;
 import com.example.demo.domain.model.Cartao;
 import com.example.demo.domain.model.Pedido;
 import com.example.demo.domain.model.Usuario;
 import com.example.demo.domain.model.carteira.Carteira;
 import com.example.demo.domain.model.carteira.Transacao;
 import com.example.demo.dto.AlteracaoPinRequest;
+import com.example.demo.dto.AlunoUsuarioResponse;
 import com.example.demo.dto.CartaoCadastroRequest;
 import com.example.demo.dto.email.EmailDto;
 import com.example.demo.dto.projection.carteira.CarteiraView;
@@ -198,7 +198,7 @@ public class CarteiraService {
     }
 
 
-    public Aluno buscarCartaoPorNumero(String numero) {
+    public AlunoUsuarioResponse buscarCartaoPorNumero(String numero) {
         return carteiraRepository.buscarAlunoPorNumeroCartao(numero);
     }
 }
