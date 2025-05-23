@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.domain.enums.Departamento;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -29,11 +30,6 @@ public record ProdutoRequest(
 
         @Schema(description = "Departamento do produto", example = "ELETRONICOS")
         @NotNull(message = "Departamento deve ser informado")
-        String departamento,
-
-        @Schema(description = "Quantidade de produtos vendidos", example = "100")
-        @NotNull(message = "Quantidade vendida deve ser informada")
-        @Positive(message = "Quantidade vendida deve ser um valor positivo")
-        Long quantidadeVendidas
+        Departamento departamento
 ) {
 }

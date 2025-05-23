@@ -7,6 +7,8 @@ import com.example.demo.dto.projection.ProdutoView;
 import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.ProdutoRepository;
 import com.example.demo.repository.specification.ProdutoSpecification;
+import com.example.demo.security.SecurityUtils;
+import com.example.demo.security.UsuarioLogado;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,9 +19,11 @@ import java.util.UUID;
 @Service
 public class ProdutoService {
 
+    private final CategoriaService categoriaService;
     private final ProdutoRepository repository;
 
-    public ProdutoService(ProdutoRepository repository) {
+    public ProdutoService(CategoriaService categoriaService, ProdutoRepository repository) {
+        this.categoriaService = categoriaService;
         this.repository = repository;
     }
 
@@ -27,8 +31,15 @@ public class ProdutoService {
         Produto produto = new Produto();
 
         produto.setNome(request.nome());
-        produto.getCategoria().setUuid(request.categoriaId());
+        produto.setFoto(request.foto());
+        produto.setPreco(request.preco());
+        produto.setDepartamento(request.departamento());
+        produto.setCategoria(categoriaService.buscarPorUuid(request.categoriaId()));
         produto.setStatus(Status.ATIVO);
+        produto.setQuantidadeVendida(0L);
+
+        UsuarioLogado usuarioLogado = SecurityUtils.getUsuarioLogado();
+        produto.setEscola(usuarioLogado.getEscola());
 
         repository.save(produto);
     }

@@ -45,8 +45,8 @@ public class Produto extends BaseEntity {
     @Column(name = "departamento", nullable = false)
     private Departamento departamento;
 
-    @Column(name = "quantidade_vendidas", nullable = false)
-    private Long quantidadeVendidas;
+    @Column(name = "quantidade_vendida", nullable = false)
+    private Long quantidadeVendida;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false)
@@ -142,12 +142,12 @@ public class Produto extends BaseEntity {
         this.departamento = departamento;
     }
 
-    public Long getQuantidadeVendidas() {
-        return quantidadeVendidas;
+    public Long getQuantidadeVendida() {
+        return quantidadeVendida;
     }
 
-    public void setQuantidadeVendidas(Long quantidadeVendidas) {
-        this.quantidadeVendidas = quantidadeVendidas;
+    public void setQuantidadeVendida(Long quantidadeVendida) {
+        this.quantidadeVendida = quantidadeVendida;
     }
 
     public CategoriaProduto getCategoria() {

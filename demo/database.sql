@@ -218,7 +218,7 @@ CREATE TABLE produto (
     foto VARCHAR(255),
     preco DECIMAL(10,2) NOT NULL,
     departamento VARCHAR(50) NOT NULL,
-    quantidade_vendida BIGINT NOT NULL,
+    quantidade_vendida BIGINT NOT NULL DEFAULT 0,
     version INT NOT NULL DEFAULT 0,
     criado_em TIMESTAMP DEFAULT NOW(),
     atualizado_em TIMESTAMP DEFAULT NOW()
@@ -232,6 +232,67 @@ CREATE INDEX idx_produto_uuid ON produto(uuid);
 CREATE INDEX idx_produto_escola ON produto(escola_id);
 CREATE INDEX idx_produto_departamento ON produto(departamento);
 CREATE INDEX idx_produto_escola_departamento ON produto(escola_id, departamento);
+
+-- ==========================
+-- TRIGGER PRODUTO
+-- ==========================
+CREATE OR REPLACE FUNCTION trg_item_pedido_quantidade_vendida()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+v_diff INTEGER;
+BEGIN
+
+    IF TG_OP = 'INSERT' THEN
+UPDATE produto
+SET quantidade_vendida = quantidade_vendida + NEW.quantidade
+WHERE id = NEW.produto_id;
+
+RETURN NEW;
+
+ELSIF TG_OP = 'UPDATE' THEN
+        IF OLD.produto_id <> NEW.produto_id THEN
+UPDATE produto
+SET quantidade_vendida = quantidade_vendida - OLD.quantidade
+WHERE id = OLD.produto_id;
+
+
+UPDATE produto
+SET quantidade_vendida = quantidade_vendida + NEW.quantidade
+WHERE id = NEW.produto_id;
+
+ELSE
+
+            v_diff := COALESCE(NEW.quantidade,0) - COALESCE(OLD.quantidade,0);
+
+            IF v_diff <> 0 THEN
+UPDATE produto
+SET quantidade_vendida = quantidade_vendida + v_diff
+WHERE id = NEW.produto_id;
+END IF;
+END IF;
+
+RETURN NEW;
+
+ELSIF TG_OP = 'DELETE' THEN
+UPDATE produto
+SET quantidade_vendida = quantidade_vendida - OLD.quantidade
+WHERE id = OLD.produto_id;
+
+RETURN OLD;
+END IF;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_item_pedido_quantidade_vendida
+    ON item_pedido;
+
+CREATE TRIGGER trg_item_pedido_quantidade_vendida
+    AFTER INSERT OR UPDATE OR DELETE        -- um único trigger cobre tudo
+                    ON item_pedido
+                        FOR EACH ROW
+                        EXECUTE FUNCTION trg_item_pedido_quantidade_vendida();
 
 -- ==========================
 -- TABELA PEDIDO (ATUALIZADA)
@@ -270,6 +331,7 @@ CREATE INDEX idx_pedido_escola_status_criado_em ON pedido (escola_id, status, cr
 -- ==========================
 CREATE TABLE item_pedido (
     id BIGSERIAL PRIMARY KEY,
+    uuid UUID DEFAULT uuid_generate_v4() UNIQUE NOT NULL,
     pedido_id BIGINT NOT NULL,
     produto_id BIGINT NULL, -- Produto opcional
     descricao_produto VARCHAR(255) NOT NULL, -- Descrição independente do produto
