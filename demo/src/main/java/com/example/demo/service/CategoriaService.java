@@ -3,9 +3,11 @@ package com.example.demo.service;
 import com.example.demo.domain.enums.Status;
 import com.example.demo.domain.model.CategoriaProduto;
 import com.example.demo.dto.CategoriaRequest;
+import com.example.demo.dto.projection.ProdutoView;
 import com.example.demo.dto.projection.produto.CategoriaSummary;
 import com.example.demo.exception.eureka.EurekaException;
 import com.example.demo.repository.CategoriaRepository;
+import com.example.demo.repository.ProdutoRepository;
 import com.example.demo.repository.specification.CategoriaProdutoSpecification;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,9 +23,12 @@ import java.util.UUID;
 public class CategoriaService {
 
     private final CategoriaRepository repository;
+    private final ProdutoRepository produtoRepository;
 
-    public CategoriaService(CategoriaRepository repository) {
+
+    public CategoriaService(CategoriaRepository repository, ProdutoRepository produtoRepository) {
         this.repository = repository;
+        this.produtoRepository = produtoRepository;
     }
 
     public void salvar(UUID uuid, CategoriaRequest categoriaRequest) {
@@ -58,4 +64,7 @@ public class CategoriaService {
         }
     }
 
+    public List<ProdutoView> buscarListaDeProdutosPorCategoriaUuid(UUID uuid) {
+        return produtoRepository.findByCategoria_Uuid(uuid, ProdutoView.class);
+    }
 }
