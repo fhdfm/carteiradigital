@@ -69,7 +69,7 @@ public class UsuarioService {
 
         String senha = Util.gerarSenhaTemporaria();
 
-        Escola escola = getEscola(request.escolaId());
+        Escola escola = getEscola(request.escolaId() != null ? request.escolaId() : currentUser.getEscola().getUuid());
 
         Usuario user = new Usuario();
         user.setEscola(escola);

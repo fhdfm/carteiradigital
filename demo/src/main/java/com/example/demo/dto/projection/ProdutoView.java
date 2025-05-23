@@ -10,16 +10,15 @@ public interface ProdutoView {
     UUID getUuid();
 
     String getNome();
-
-    String getFoto();
-
-    BigDecimal getPreco();
-
-    Departamento getDepartamento();
-
-    Long getQuantidadeVendidas();
-
-    String getCategoriaNome();
-
-    String getEscolaNome();
+//
+//    String getFoto();
+//
+//    BigDecimal getPreco();
+//
+//    Departamento getDepartamento();
+//
+//    Long getQuantidadeVendida();
+//
+//
+//    String getEscolaNome();
 }
