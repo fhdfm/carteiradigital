@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.domain.enums.Status;
 import com.example.demo.domain.enums.TipoTransacao;
+import com.example.demo.domain.model.Aluno;
 import com.example.demo.domain.model.Cartao;
 import com.example.demo.domain.model.Pedido;
 import com.example.demo.domain.model.Usuario;
@@ -195,6 +196,27 @@ public class CarteiraService {
                         null
                 )
         );
+    }
+    public boolean verificarSenhaCartao(UUID usuarioId, String senha) {
+        // Buscar o aluno com base no usuárioId
+        Aluno aluno = alunoRepository.findByUuid(usuarioId)
+                .orElseThrow(() -> EurekaException.ofNotFound("Aluno não encontrado"));
+
+        // Buscar carteira vinculada ao aluno
+        Carteira carteira = carteiraRepository.findByAluno_Id(aluno.getId())
+                .orElseThrow(() -> EurekaException.ofNotFound("Carteira não encontrada"));
+
+        // Buscar o cartão ativo da carteira
+        Cartao cartao = carteira.getCartoes().stream()
+                .filter(c -> c.getStatus() == Status.ATIVO) // ajuste conforme seu enum
+                .findFirst()
+                .orElseThrow(() -> EurekaException.ofNotFound("Cartão não encontrado ou inativo"));
+
+        if (!cartao.getSenha().equals(senha)) {
+            throw EurekaException.ofValidation("Senha inválida");
+        }
+
+        return true;
     }
 
 

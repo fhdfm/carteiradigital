@@ -14,6 +14,7 @@ public interface CarteiraRepository extends BaseRepository<Carteira, Long> {
     <T> Optional<T> findByAluno_Uuid(UUID alunoUuid, Class<T> projectionClass);
 
     Optional<Carteira> findByAluno_Uuid(UUID alunoUuid);
+    Optional<Carteira> findByAluno_Id(Long alunoUuid);
 
     @Query("""
          select new com.example.demo.dto.AlunoUsuarioResponse(

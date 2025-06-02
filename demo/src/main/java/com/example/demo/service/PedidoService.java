@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
@@ -167,4 +168,42 @@ public class PedidoService {
         pedido.setStatus(novoStatus);
         pedidoRepository.save(pedido);
     }
+
+    @Transactional
+    public void comprarAgora(PedidoRequest request) {
+        Aluno aluno = alunoRepository.findByUuid(request.compradorId())
+                .orElseThrow(() -> EurekaException.ofNotFound("Aluno não encontrado."));
+
+        Carteira carteira = carteiraRepository.findByAluno_Uuid(aluno.getUuid())
+                .orElseThrow(() -> EurekaException.ofNotFound("Carteira não encontrada."));
+
+        Usuario vendedor = usuarioService.findByUuid(SecurityUtils.getUsuarioLogado().getUuid());
+
+        BigDecimal total = request.itens().stream()
+                .map(item -> {
+                    Produto produto = produtoRepository.findByUuid(item.produtoId())
+                            .orElseThrow(() -> EurekaException.ofNotFound("Produto não encontrado."));
+                    return item.valorUnitario().multiply(BigDecimal.valueOf(item.quantidade()));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, BigDecimal.ROUND_HALF_UP);
+
+        if (carteira.getSaldo().compareTo(total) < 0) {
+            throw EurekaException.ofValidation("Saldo insuficiente para concluir a compra.");
+        }
+
+        carteira.setSaldo(carteira.getSaldo().subtract(total));
+        carteiraRepository.save(carteira);
+
+        Transacao transacao = new Transacao();
+        transacao.setTipoTransacao(TipoTransacao.DEBITO);
+        transacao.setValor(total);
+        transacao.setCarteira(carteira);
+        transacao.setUsuario(vendedor);
+
+        transacaoRepository.save(transacao);
+    }
+
+
+
 }

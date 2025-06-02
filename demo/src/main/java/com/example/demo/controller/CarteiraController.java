@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.controller.doc.EurekaApiOperation;
 import com.example.demo.domain.model.Aluno;
+import com.example.demo.domain.model.VerificacaoCartaoRequest;
 import com.example.demo.dto.*;
 import com.example.demo.dto.projection.carteira.CarteiraView;
 import com.example.demo.service.CarteiraService;
@@ -89,6 +90,11 @@ public class CarteiraController {
             @RequestBody @Valid AlteracaoPinRequest request
     ) {
         return ResponseEntity.ok(ApiReturn.of(service.alterarSenhaCartao(request)));
+    }
+    @PostMapping("/verificar-senha-cartao")
+    public ResponseEntity<Void> verificarSenha(@RequestBody VerificacaoCartaoRequest request) {
+        service.verificarSenhaCartao(request.usuarioId(), request.senha());
+        return ResponseEntity.ok().build();
     }
 
 }

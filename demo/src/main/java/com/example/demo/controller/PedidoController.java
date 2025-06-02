@@ -130,4 +130,13 @@ public class PedidoController {
         service.confirmar(uuid);
         return ResponseEntity.ok(ApiReturn.of("Pedido confirmado com sucesso."));
     }
+
+    @PostMapping("/comprar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PDV')")
+    public ResponseEntity<ApiReturn<String>> comprar(@RequestBody @Valid PedidoRequest request) {
+        service.comprarAgora(request);
+        return ResponseEntity.ok(ApiReturn.of("Compra realizada com sucesso."));
+    }
+
+
 }

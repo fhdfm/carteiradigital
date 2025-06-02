@@ -2,6 +2,7 @@ package com.example.demo.dto.projection;
 
 import com.example.demo.dto.projection.produto.CategoriaSummary;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public interface ProdutoView {
@@ -14,7 +15,7 @@ public interface ProdutoView {
 //
 //    String getFoto();
 //
-//    BigDecimal getPreco();
+    BigDecimal getPreco();
 //
 //    Departamento getDepartamento();
 //

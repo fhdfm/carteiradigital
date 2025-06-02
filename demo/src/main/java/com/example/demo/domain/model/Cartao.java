@@ -76,6 +76,10 @@ public class Cartao extends BaseEntity {
         this.senha = senha;
     }
 
+    public String getSenha() {
+        return senha;
+    }
+
     public Status getStatus() {
         return status;
     }

@@ -57,6 +57,10 @@ public class Carteira extends BaseEntity {
         return saldo;
     }
 
+    public void setSaldo(BigDecimal saldo) {
+        this.saldo = saldo;
+    }
+
     public void setCartoes(List<Cartao> cartoes) {
         this.cartoes = cartoes;
     }
