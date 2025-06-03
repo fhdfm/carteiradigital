@@ -7,7 +7,9 @@ public final class EntityNames {
     public static final String USUARIO = "usuario";
     
     public static final String ALUNO = "aluno";
-    
+
+    public static final String PROFESSOR = "professor";
+
     public static final String PRODUTO = "produto";
     
     public static final String CARTAO = "cartao";
