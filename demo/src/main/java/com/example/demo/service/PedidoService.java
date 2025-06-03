@@ -19,6 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -180,11 +183,7 @@ public class PedidoService {
         Usuario vendedor = usuarioService.findByUuid(SecurityUtils.getUsuarioLogado().getUuid());
 
         BigDecimal total = request.itens().stream()
-                .map(item -> {
-                    Produto produto = produtoRepository.findByUuid(item.produtoId())
-                            .orElseThrow(() -> EurekaException.ofNotFound("Produto não encontrado."));
-                    return item.valorUnitario().multiply(BigDecimal.valueOf(item.quantidade()));
-                })
+                .map(item -> item.valorUnitario().multiply(BigDecimal.valueOf(item.quantidade())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, BigDecimal.ROUND_HALF_UP);
 
@@ -195,15 +194,43 @@ public class PedidoService {
         carteira.setSaldo(carteira.getSaldo().subtract(total));
         carteiraRepository.save(carteira);
 
+        Pedido pedido = new Pedido();
+        pedido.setEscola(aluno.getEscola());
+        pedido.setComprador(aluno);
+        pedido.setVendedor(vendedor);
+        pedido.setStatus(StatusPedido.CONCLUIDO);
+        pedido.setCriadoEm(LocalDateTime.now());
+        pedido.setAtualizadoEm(LocalDateTime.now());
+
+        List<ItemPedido> itensPedido = new ArrayList<>();
+
+        for (ItemPedidoRequest item : request.itens()) {
+            Produto produto = produtoRepository.findByUuid(item.produtoId())
+                    .orElseThrow(() -> EurekaException.ofNotFound("Produto não encontrado."));
+
+            produto.setQuantidadeVendida(produto.getQuantidadeVendida() + item.quantidade());
+            produtoRepository.save(produto);
+
+            ItemPedido itemPedido = new ItemPedido();
+            itemPedido.setPedido(pedido);
+            itemPedido.setProduto(produto);
+            itemPedido.setDescricao(produto.getNome());
+            itemPedido.setQuantidade(item.quantidade());
+            itemPedido.setValorUnitario(item.valorUnitario());
+            itemPedido.setValorTotal(item.valorUnitario().multiply(BigDecimal.valueOf(item.quantidade())));
+
+            itensPedido.add(itemPedido);
+        }
+
+        pedido.setItens(itensPedido);
+        pedidoRepository.save(pedido);
+
         Transacao transacao = new Transacao();
         transacao.setTipoTransacao(TipoTransacao.DEBITO);
         transacao.setValor(total);
         transacao.setCarteira(carteira);
         transacao.setUsuario(vendedor);
-
         transacaoRepository.save(transacao);
     }
-
-
 
 }
