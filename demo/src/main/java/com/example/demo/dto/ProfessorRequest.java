@@ -1,4 +1,4 @@
-package com.example.demo.migracao_escola.dto;
+package com.example.demo.dto;
 
 import com.example.demo.validation.annotation.CPF;
 import io.swagger.v3.oas.annotations.media.Schema;

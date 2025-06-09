@@ -1,8 +1,8 @@
-package com.example.demo.migracao_escola.repository.specification;
+package com.example.demo.repository.specification;
 
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.enums.Status;
-import com.example.demo.migracao_escola.domain.Professor;
+import com.example.demo.domain.model.Professor;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
 import io.swagger.v3.oas.annotations.media.Schema;

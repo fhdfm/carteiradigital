@@ -1,7 +1,6 @@
-package com.example.demo.migracao_escola.repository;
+package com.example.demo.repository;
 
-import com.example.demo.migracao_escola.domain.Professor;
-import com.example.demo.repository.BaseRepository;
+import com.example.demo.domain.model.Professor;
 
 import java.util.Optional;
 import java.util.UUID;

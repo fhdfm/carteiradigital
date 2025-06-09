@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.example.demo.dto.EscolaCreationRequest;
-import com.example.demo.dto.EscolaUsuariosView;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,15 +21,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.controller.doc.EurekaApiOperation;
-import com.example.demo.domain.EscolaEndereco;
+import com.example.demo.domain.model.EscolaEndereco;
 import com.example.demo.domain.enums.Perfil;
 import com.example.demo.domain.model.Escola;
 import com.example.demo.domain.model.EscolaFinanceiro;
 import com.example.demo.dto.EscolaEnderecoRequest;
 import com.example.demo.dto.EscolaFinanceiroRequest;
-import com.example.demo.dto.EscolaParametrosRequest;
 import com.example.demo.dto.EscolaRequest;
-import com.example.demo.dto.EscolaUsuariosView;
 import com.example.demo.dto.UsuarioRequest;
 import com.example.demo.dto.projection.escola.EscolaIdAndName;
 import com.example.demo.dto.projection.escola.EscolaView;

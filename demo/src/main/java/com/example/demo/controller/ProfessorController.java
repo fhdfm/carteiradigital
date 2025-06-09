@@ -1,12 +1,12 @@
-package com.example.demo.migracao_escola.controller;
+package com.example.demo.controller;
 
 import com.example.demo.controller.doc.EurekaApiOperation;
 import com.example.demo.domain.enums.Status;
-import com.example.demo.migracao_escola.dto.ProfessorRequest;
-import com.example.demo.migracao_escola.dto.projection.professor.ProfessorFull;
-import com.example.demo.migracao_escola.dto.projection.professor.ProfessorSummary;
-import com.example.demo.migracao_escola.repository.specification.ProfessorSpecification;
-import com.example.demo.migracao_escola.service.ProfessorService;
+import com.example.demo.dto.ProfessorRequest;
+import com.example.demo.dto.projection.ProfessorFull;
+import com.example.demo.dto.projection.ProfessorSummary;
+import com.example.demo.repository.specification.ProfessorSpecification;
+import com.example.demo.service.ProfessorService;
 import com.example.demo.security.accesscontrol.EntityNames;
 import com.example.demo.security.accesscontrol.annotation.CheckAccess;
 import com.example.demo.util.ApiReturn;

@@ -1,6 +1,5 @@
-package com.example.demo.migracao_escola.domain;
+package com.example.demo.domain.model;
 
-import com.example.demo.domain.model.Usuario;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;

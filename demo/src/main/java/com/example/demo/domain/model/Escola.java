@@ -1,23 +1,14 @@
 package com.example.demo.domain.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
+import jakarta.persistence.*;
 import org.hibernate.envers.Audited;
 
 import com.example.demo.domain.converter.CnpjConverter;
 import com.example.demo.domain.enums.Status;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 
 @Entity
 @Audited
@@ -38,6 +29,10 @@ public class Escola extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
+
+    @OneToMany(mappedBy = "escola", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EscolaModulo> modulos;
+
 
     @Version
     private int version;
@@ -107,4 +102,11 @@ public class Escola extends BaseEntity {
         super.atualizadoEm = atualizadoEm;
     }
 
+    public List<EscolaModulo> getModulos() {
+        return modulos;
+    }
+
+    public void setModulos(List<EscolaModulo> modulos) {
+        this.modulos = modulos;
+    }
 }

@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.domain.EscolaEndereco;
+import com.example.demo.domain.model.EscolaEndereco;
 import com.example.demo.domain.model.Escola;
 import com.example.demo.dto.EscolaEnderecoRequest;
 import com.example.demo.exception.eureka.EurekaException;

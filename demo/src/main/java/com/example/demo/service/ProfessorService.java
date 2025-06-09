@@ -1,4 +1,4 @@
-package com.example.demo.migracao_escola.service;
+package com.example.demo.service;
 
 import com.example.demo.domain.enums.MetodoAutenticacao;
 import com.example.demo.domain.enums.Perfil;
@@ -6,14 +6,13 @@ import com.example.demo.domain.enums.Status;
 import com.example.demo.domain.model.Escola;
 import com.example.demo.dto.email.EmailDto;
 import com.example.demo.exception.eureka.EurekaException;
-import com.example.demo.migracao_escola.domain.Professor;
-import com.example.demo.migracao_escola.dto.ProfessorRequest;
-import com.example.demo.migracao_escola.dto.projection.professor.ProfessorSummary;
-import com.example.demo.migracao_escola.repository.ProfessorRepository;
-import com.example.demo.migracao_escola.repository.specification.ProfessorSpecification;
+import com.example.demo.domain.model.Professor;
+import com.example.demo.dto.ProfessorRequest;
+import com.example.demo.dto.projection.ProfessorSummary;
+import com.example.demo.repository.ProfessorRepository;
+import com.example.demo.repository.specification.ProfessorSpecification;
 import com.example.demo.security.SecurityUtils;
 import com.example.demo.security.UsuarioLogado;
-import com.example.demo.service.EmailService;
 import com.example.demo.util.Util;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;

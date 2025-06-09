@@ -1,7 +1,6 @@
-package com.example.demo.migracao_escola.domain;
+package com.example.demo.domain.model;
 
-import com.example.demo.domain.model.BaseEntity;
-import com.example.demo.migracao_escola.domain.enums.DiaSemana;
+import com.example.demo.domain.enums.DiaSemana;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -9,29 +8,21 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "grade_horario")
-public class GradeHorario extends BaseEntity {
+@Table(name = "horario_disponivel")
+public class HorarioDisponivel extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private DiaSemana dia;
+    private DiaSemana dia; // Enum: SEGUNDA, TERCA, ..., SEXTA
 
     private LocalTime inicio;
     private LocalTime fim;
 
     @ManyToOne
-    @JoinColumn(name = "serie_id")
-    private Serie serie;
-
-    @ManyToOne
     @JoinColumn(name = "professor_id")
     private Professor professor;
-
-    @ManyToOne
-    @JoinColumn(name = "disciplina_id")
-    private Disciplina disciplina;
 
     public Long getId() {
         return id;
@@ -65,28 +56,12 @@ public class GradeHorario extends BaseEntity {
         this.fim = fim;
     }
 
-    public Serie getSerie() {
-        return serie;
-    }
-
-    public void setSerie(Serie serie) {
-        this.serie = serie;
-    }
-
     public Professor getProfessor() {
         return professor;
     }
 
     public void setProfessor(Professor professor) {
         this.professor = professor;
-    }
-
-    public Disciplina getDisciplina() {
-        return disciplina;
-    }
-
-    public void setDisciplina(Disciplina disciplina) {
-        this.disciplina = disciplina;
     }
 
     @Override
