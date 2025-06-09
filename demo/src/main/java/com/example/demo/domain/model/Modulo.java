@@ -2,8 +2,11 @@ package com.example.demo.domain.model;
 
 import com.example.demo.domain.enums.NomeModulo;
 import jakarta.persistence.*;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 @Entity
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class Modulo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,10 +1,12 @@
 package com.example.demo.domain.model;
 
 import jakarta.persistence.*;
+import org.hibernate.envers.Audited;
 
 import java.time.LocalDate;
 
 @Entity
+@Audited
 public class EscolaModulo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
